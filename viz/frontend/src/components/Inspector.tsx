@@ -22,7 +22,8 @@ export function Inspector({
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      // Esc closes a dialog above the sheet first (the login), not the sheet
+      if (e.key === "Escape" && !document.querySelector("dialog[open]")) onClose();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -34,7 +35,7 @@ export function Inspector({
 
   if (!open) return null;
   return (
-    <aside ref={ref} className={`inspector field ${wide ? "wide" : ""}`} aria-label={label} tabIndex={-1}>
+    <aside ref={ref} className={`inspector glass ${wide ? "wide" : ""}`} aria-label={label} tabIndex={-1}>
       <button type="button" className="icon-btn inspector-close" onClick={onClose} aria-label="Close inspector">
         <X />
       </button>

@@ -10,7 +10,6 @@ import { flatten, showValue, stepChips } from "../lib/config";
 import { defFor, direction, formatDelta, formatInt, formatUsd, formatValue } from "../lib/format";
 import { useMedia } from "../lib/useMedia";
 import { useVersion } from "../state/version";
-import "./pipeline.css";
 
 // What the library's three fixed steps produce, for the funnel and their cards.
 const LIBRARY_UNIT: Record<string, string> = { ingest: "Documents", chunk: "Chunks", embed: "Vectors" };

@@ -1,6 +1,6 @@
 import { useEffect, useRef, type ReactNode } from "react";
 
-/** A feathered field under its anchor. Closes on Esc and on a click outside it and its anchor. */
+/** A glass panel under its anchor. Closes on Esc and on a click outside it and its anchor. */
 export function Popover({ open, onClose, anchor, children, label, className = "" }: {
   open: boolean;
   onClose: () => void;
@@ -35,7 +35,7 @@ export function Popover({ open, onClose, anchor, children, label, className = ""
 
   if (!open) return null;
   return (
-    <div ref={ref} className={`popover field appear ${className}`} role="dialog" aria-label={label}>
+    <div ref={ref} className={`popover glass appear ${className}`} role="dialog" aria-label={label}>
       {children}
     </div>
   );

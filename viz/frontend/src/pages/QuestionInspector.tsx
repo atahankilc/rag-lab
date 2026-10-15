@@ -195,7 +195,7 @@ function ContextList({ hits, cited, flash }: { hits: RetrievalHit[]; cited: Map<
                 <span className="ctx-head">
                   <i className={h.relevant ? "mark held" : "mark new"} title={h.relevant ? "Overlaps gold evidence" : "Not relevant"} />
                   <span className="ctx-doc">{h.document_title}</span>
-                  {marker ? <span className="cite static">{marker}</span> : null}
+                  {marker ? <span className="cite no-link">{marker}</span> : null}
                   <span className="ctx-score">{h.score != null ? h.score.toFixed(3) : ""}</span>
                 </span>
                 <span className="bar"><span style={{ width: `${Math.max(4, frac * 100)}%` }} /></span>

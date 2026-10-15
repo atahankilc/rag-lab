@@ -9,9 +9,9 @@ import { Segmented } from "../components/Segmented";
 import { flatten, showValue } from "../lib/config";
 import { clockTime, formatDuration, formatUsd, shortDate } from "../lib/format";
 import { useMedia } from "../lib/useMedia";
+import { LOCKED_HINT, useAuth } from "../state/auth";
 import { QueueRunForm } from "./QueueRunForm";
 import { RunInspector } from "./RunInspector";
-import "./runs.css";
 
 type StatusFilter = "all" | RunStatus;
 
@@ -48,6 +48,7 @@ export function Runs() {
   const [status, setStatus] = useState<StatusFilter>("all");
   const [versions, setVersions] = useState<Set<string>>(new Set());
   const [queueing, setQueueing] = useState(false);
+  const { canWrite } = useAuth();
   const md = useMedia("(min-width: 901px)");
 
   const selectedId = params.get("run") ? Number(params.get("run")) : null;
@@ -89,7 +90,8 @@ export function Runs() {
             <div>
               <div className="runs-title">
                 <h1 className="page-title">Runs</h1>
-                <button type="button" className="pill" aria-pressed={queueing} onClick={() => { select(null); setQueueing(true); }}>
+                <button type="button" className="pill" aria-pressed={queueing} disabled={!canWrite} title={canWrite ? undefined : LOCKED_HINT}
+                        onClick={() => { select(null); setQueueing(true); }}>
                   <Plus /> Queue run
                 </button>
               </div>
@@ -143,7 +145,7 @@ export function Runs() {
           </div>
         </header>
 
-        <div className="table" aria-label="Runs">
+        <div className="t-table" aria-label="Runs">
           {visible.length === 0 ? <p className="t-empty">No run matches these filters.</p> : null}
           {visible.map((r) => (
             <button key={r.id} type="button" className={`t-row run-row ${r.status}`} style={{ ["--cols" as string]: cols }}

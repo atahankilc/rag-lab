@@ -260,10 +260,11 @@ export const COLOR_CHOICES = ["--cat-1", "--cat-2", "--cat-3", "--cat-4", "--cat
 // Automatic order. The palette's blue comes last: on this page blue already means "retrieved".
 const AUTO_ORDER = ["--cat-2", "--cat-3", "--cat-4", "--cat-5", "--cat-6", "--cat-7", "--cat-8", "--cat-1"];
 export const OTHER_COLOR = "--ink-3";
-export const NONE_COLOR = "#3a3f47";
+export const NONE_COLOR = "--none";
 
-/** Sequential ramp for numbers and dates on black: dark (low, recedes) to light (high). One hue: violet. */
-export const RAMP = ["#4a3b80", "#6450ad", "#8169d4", "#a28be8", "#c9b8f7"];   // 2.2:1 to 11.7:1 on black
+/** Sequential ramp for numbers and dates: low values recede into the ground, high ones stand out. One hue: violet.
+ *  On black it runs dark to light (2.2:1 to 11.7:1), on white light to dark (--ramp-1 … --ramp-5, per theme). */
+const RAMP = ["--ramp-1", "--ramp-2", "--ramp-3", "--ramp-4", "--ramp-5"];
 
 export function resolveColor(token: string): string {
   if (!token.startsWith("--")) return token;
@@ -305,11 +306,11 @@ function hexToRgb(h: string): [number, number, number] {
   return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
 }
 
-export function rampColor(t: number): string {
-  const x = Math.min(1, Math.max(0, t)) * (RAMP.length - 1);
-  const i = Math.min(RAMP.length - 2, Math.floor(x));
+function rampColor(ramp: string[], t: number): string {
+  const x = Math.min(1, Math.max(0, t)) * (ramp.length - 1);
+  const i = Math.min(ramp.length - 2, Math.floor(x));
   const f = x - i;
-  const a = hexToRgb(RAMP[i]), b = hexToRgb(RAMP[i + 1]);
+  const a = hexToRgb(ramp[i]), b = hexToRgb(ramp[i + 1]);
   return `rgb(${a.map((v, k) => Math.round(v + (b[k] - v) * f)).join(",")})`;
 }
 
@@ -349,12 +350,14 @@ export function makeScale(field: Field | undefined, more: (Field | undefined)[] 
 export function applyScale(scale: Scale | undefined, field: Field | undefined, n: number): string[] {
   const plain = resolveColor("--ink-2");
   if (!scale || !field) return new Array(n).fill(plain);
+  const none = resolveColor(NONE_COLOR);
   if (scale.kind === "category") {
     const other = resolveColor(OTHER_COLOR);
-    return field.values.map((v) => (v == null ? NONE_COLOR : scale.map.get(String(v)) ?? other));
+    return field.values.map((v) => (v == null ? none : scale.map.get(String(v)) ?? other));
   }
   if (scale.kind === "number" || scale.kind === "date") {
-    return field.values.map((v) => (typeof v === "number" ? rampColor((v - scale.min) / (scale.max - scale.min || 1)) : NONE_COLOR));
+    const ramp = RAMP.map(resolveColor);
+    return field.values.map((v) => (typeof v === "number" ? rampColor(ramp, (v - scale.min) / (scale.max - scale.min || 1)) : none));
   }
   return new Array(n).fill(plain);
 }

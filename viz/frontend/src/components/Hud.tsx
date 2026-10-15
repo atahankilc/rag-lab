@@ -4,8 +4,10 @@ import { NavLink, Outlet, useLocation } from "react-router";
 import { useVersion, useWithSearch } from "../state/version";
 import { Dock } from "./Dock";
 import { Centered, ErrorNote, Loading } from "./Loading";
+import { LoginDialog } from "./LoginDialog";
 import { Logo } from "./Logo";
 import { Timeline } from "./Timeline";
+import { AccountMenu, ThemeMenu } from "./Utilities";
 
 interface Tab { path: string; label: string; subs?: { path: string; label: string }[] }
 
@@ -113,7 +115,11 @@ export function Hud() {
                  aria-current={pathname === "/log" ? "page" : undefined}>
           <ScrollText /> <span className="pill-text">Log</span>
         </NavLink>
+        <ThemeMenu />
+        <AccountMenu />
       </div>
+
+      <LoginDialog />
 
       {experiments.length ? (
         <>

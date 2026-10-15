@@ -1,6 +1,6 @@
 // A tiny PostgREST client. Paths are PostgREST URLs relative to /api, e.g.
 //   get<Experiment[]>("experiments?order=ord")
-// Writes go to /rpc/<function>; the dev server adds the write token (see vite.config.ts).
+// Writes go to /rpc/<function>; the dev server adds the write token for a logged-in session (see vite.auth.ts).
 
 export class ApiError extends Error {
   constructor(message: string, readonly status: number) {

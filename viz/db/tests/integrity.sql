@@ -240,5 +240,38 @@ select '-- relevance survives rechunking';
 select pg_temp.check('the question has a relevant chunk in both chunk sets',
   (select count(distinct chunk_set_id) from api.relevant_chunks where question_id = :q1) = 2);
 
+-- ---------- logging in ----------
+select '-- logging in: only the dev server''s web_auth role can, sessions last 30 days';
+select pg_temp.check('a user is added (names are lower-cased)', lab.set_web_user(' Tester ', 'correct horse') = 'tester');
+select pg_temp.must_fail('a password shorter than 8 characters', 'select lab.set_web_user(''tester'', ''short'')');
+select pg_temp.must_fail('web_anon logs in',          'set local role web_anon; select api.login(''tester'', ''correct horse'')');
+reset role;
+select pg_temp.must_fail('web_writer logs in',        'set local role web_writer; select api.login(''tester'', ''correct horse'')');
+reset role;
+select pg_temp.must_fail('web_anon reads the users',  'set local role web_anon; select * from lab.web_user');
+reset role;
+select pg_temp.must_fail('lab_backend reads the users', 'set local role lab_backend; select * from lab.web_user');
+reset role;
+set local role web_auth;
+select pg_temp.check('a wrong password gets nothing',  api.login('tester', 'wrong horse') is null);
+select pg_temp.check('an unknown user gets nothing',   api.login('nobody', 'correct horse') is null);
+select api.login('Tester', 'correct horse') ->> 'token' as session_token \gset
+select pg_temp.check('the session names the user and ends in 30 days',
+  (select (s ->> 'username') = 'tester'
+      and (s ->> 'expires_at')::timestamptz between now() + interval '29 days 23 hours' and now() + interval '30 days 1 hour'
+   from api.web_session(:'session_token') s));
+select pg_temp.check('an unknown token has no session', api.web_session('not-a-token') is null);
+select pg_temp.must_fail('web_auth queues a run', 'select api.queue_run(1, ''{}'')');
+reset role;
+select pg_temp.check('only a hash of the token is stored',
+  not exists (select 1 from lab.web_session where token_hash = :'session_token'));
+update lab.web_session set expires_at = now() - interval '1 second' where username = 'tester';
+set local role web_auth;
+select pg_temp.check('an expired session is gone', api.web_session(:'session_token') is null);
+select api.login('tester', 'correct horse') ->> 'token' as session_token \gset
+select pg_temp.must_pass('web_auth logs out', format('select api.logout(%L)', :'session_token'));
+select pg_temp.check('logging out ends the session', api.web_session(:'session_token') is null);
+reset role;
+
 rollback;
 select 'all integrity tests passed';

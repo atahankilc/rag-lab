@@ -5,18 +5,21 @@ field, white contacts, one blue for "the thing you are pointing at," and numeral
 reads like a radar or tracking console, not a SaaS dashboard.
 
 > The core idea: **numerals carry the information; words are labels, never paragraphs.**
-> No cards, no boxes, no shadows. Hairlines and type do the structuring.
+> No cards, no boxes. Hairlines and type do the structuring; only what rises above the page (sheets,
+> popovers, dialogs) is glass with a soft shadow (see Extensions › Glass).
 
-The tokens live in `frontend/src/styles/tokens.css` (verbatim from section 2). Additions are in
-`frontend/src/styles/extend.css` and listed under [Extensions](#extensions) at the end.
+The styles are Tailwind v4 (see Extensions › Styles). The tokens (section 2, plus the additions listed under
+[Extensions](#extensions)) live at the top of `frontend/src/styles/global.css`.
 
 ---
 
 ## 1. Principles
 
-1. **True black ground.** `#000`, not dark grey. Everything else floats on it. Only one theme: dark. No light mode.
-2. **Frameless.** No cards, borders around panels or drop shadows. Panels are a translucent black *field* whose edges
-   **feather** (mask-image gradient) into the background. Sections are split by 1px hairlines.
+1. **True black ground.** `#000`, not dark grey. Everything else floats on it. Dark is the reference theme; a light
+   theme was added later at the owner's request (see Extensions › Light theme).
+2. **Frameless.** No cards or borders around sections; sections are split by 1px hairlines. The corner instruments sit
+   on a translucent *field* whose edges **feather** (mask-image gradient) into the background. What rises above the
+   page (inspector, popovers, dialogs, the dock panel, hover cards) is **glass** (Extensions › Glass).
 3. **Numerals lead.** Every screen opens with a row of big, light, wide, tabular numbers with small labels above
    them and small deltas beside them. Prose is short and secondary.
 4. **Colour is semantic and rare.** Grey ink does almost everything. Blue = selection / active / "the sweep."
@@ -150,7 +153,7 @@ font 13px/600, letter-spacing .04em; color var(--ink-3)`. Hover: `--ink`, border
 `--ink`, border `--hair-2`, bg `rgba(255,255,255,.07)`. Icon (lucide, 14px) + text, gap 6px.
 
 **Filter chip** — 28px pill, 12px `--ink-2`, tiny coloured glyph before the label. When a value is set: border
-`rgba(77,148,255,.55)` (blue), shows `Label  value  ×`. Clicking opens a **popover list** on the feathered field:
+`rgba(77,148,255,.55)` (blue), shows `Label  value  ×`. Clicking opens a **popover list** on glass:
 rows of `name | 2px bar | count`, selected row's bar in `--sweep-hi`. A fold toggle (`⇉ «`) at the head of the row
 hides unused chips. Chips animate in with 3px slide + fade.
 
@@ -167,13 +170,13 @@ backdrop-filter: blur(10px);
            linear-gradient(to bottom, transparent, #000 12px, #000 calc(100% - 12px), transparent);
 mask-image: var(--feather); mask-composite: intersect;   /* + -webkit- variants, source-in */
 ```
-Used for: inspector, hover card, popovers, dock panel. Never a border, radius or shadow.
+Used for the timeline. Inspector, hover cards, popovers and the dock panel are glass now (Extensions › Glass).
 
 **Inspector sheet** — head: layer name (12px/600 with a coloured mark) + what-it-is line (12px `--ink-3`) + title
 (18px/500, `text-wrap: balance`); big figure (`.num` 34px + delta); then sections of hairline-railed items
 (`border-left: 1px solid var(--hair-2); padding-left: 12px`). Close = 30px ghost icon button top-right.
 
-**Hover card** — 320px, follows the pointer, feathered field, 13px text clamped to 3 lines + 11px meta row.
+**Hover card** — 320px, follows the pointer, glass, 13px text clamped to 3 lines + 11px meta row.
 
 **Inputs and selects** (RAG Lab extension) are pills like the buttons beside them: 30px, `border-radius 99px`,
 14px side padding, hairline border, `--field` fill. Selects draw their own 12px `--ink-3` chevron 12px from the
@@ -238,7 +241,7 @@ Selection: `rgba(77,148,255,.4)`.
 
 | Do | Don't |
 |---|---|
-| True black, hairlines, feathered fields | Grey cards, drop shadows, gradients as decoration |
+| True black, hairlines, feathered fields, glass for what rises | Grey cards, shadows on page content, gradients as decoration |
 | One blue accent for active/selected | Multiple accent colours, coloured buttons |
 | Green/red only for better/worse vs reference | Green = "success" toasts, red = generic "danger" buttons |
 | Big light wide numerals with deltas | Bold heavy KPI tiles with icons in circles |
@@ -252,7 +255,7 @@ Selection: `rgba(77,148,255,.4)`.
 
 Things RAG Lab needed that the language above doesn't cover, extended in the same spirit.
 
-### Tokens (`extend.css`)
+### Tokens (in `global.css`)
 
 - `--cat-1` … `--cat-8`: the categorical palette above as variables, in the listed order.
 - `--corner-w: 300px` (dock and timeline), `--inspector-w: 440px` (380px under 1100px wide),
@@ -515,3 +518,62 @@ notes above that name fixed stages.
   position numeral, and a left-out step is struck through and faded. Its settings sit under it.
 - **Empty states:** with no versions, the version pages show a centred `NO VERSIONS YET` heading and a lede that
   points at the contract. Runs, Providers and Log work without versions.
+
+### Light theme
+
+Added at the owner's request: "Instrument on white". Same rules, ground and ink swapped.
+
+- Picked from a sun/moon icon at the top right: `System | Light | Dark`. System follows the OS. The choice is kept in
+  this browser (`localStorage`); `index.html` applies it before the first paint. CSS reads `<html data-theme>`.
+- `:root` in `global.css` is the dark theme; `:root[data-theme="light"]` overrides tokens only. Every colour that
+  used to be a literal is a token (`--fill`, `--tint-1…4`, `--sel-*`, `--glow`, `--knob-on`, `--option-bg`, `--none`,
+  `--tag-bg`, `--hit-line`, `--ramp-1…5`, `--glass-*`).
+- The light ground is `#f6f7f9`, a hair off white, so white glass stands out from it. The active segment is a
+  raised white chip with a faint shadow.
+- Light values: ground `#f6f7f9` (a hair off white, so white glass stands out), ink `#0d1014 / #3c434e / #5c6370` (≥ 4.5:1), blue `#1a5fc8`, amber `#a85a00` (4.75:1, it is
+  used as text), and darker rise/fall so text keeps its contrast. Three pale categorical hues (gold, cyan, amber-gold)
+  are a step darker, so every one reaches 3:1 on the ground; amber-gold (`--cat-8`, `#9a8410`) also turns yellower,
+  because darkened it would match gold.
+- The violet ramp flips on white: low values are pale and recede into the ground, high values are dark, the same
+  meaning as on black.
+- The Space canvas reads tokens when it draws, and the Space page rebuilds its colours when the theme changes.
+
+### Logging in
+
+Without a login the UI is read-only. There is no sign-up: users are added with `make user NAME=...`.
+
+- On the first visit in a browser session a **login dialog** opens: glass, centred on a blurred backdrop. Just
+  `Log in`, the line "Log in to do more than view.", username, password, a `Log in` pill and a quiet `Just view`
+  link. Esc does the same as that link. It doesn't open again by itself in that browser session.
+- Top right: `Log in` (opens the dialog), or the username, whose popover says until when the login lasts and has a
+  `Log out` pill. A login lasts 30 days.
+- **Locked controls:** everything that changes data (provider switches and caps, `Queue run` and its whole form, the
+  Fields sheet's settings) is disabled at 0.42 opacity with a `not-allowed` cursor and a "Log in to make changes"
+  tooltip; where a sheet holds such controls, a one-line `Log in to …` note sits on top with `Log in` as a link.
+  Navigation, the timeline, view controls, filters and search stay enabled: they only change the view.
+
+### Glass
+
+Added at the owner's request, so panels read apart from the page behind them, in both themes.
+
+- **What:** the inspector sheet, popovers, the login dialog, the dock panel and hover cards (`.glass`). The
+  timeline keeps the feathered field: it is a corner instrument on the page, not something above it.
+- **How:** a translucent fill (`--glass-bg`, 62% near-black / 70% white), `backdrop-filter: blur(22px) saturate(150–160%)`,
+  a 1px `--glass-border` hairline, a 1px inset top shine, a soft two-layer shadow, and a 14px radius
+  (`rounded-panel`). The inspector now sits at `--edge` from the right, since glass has real edges.
+- **Phones:** the inspector bottom sheet uses the solid `--glass-solid`, without blur, because blur over scrolling
+  text was hard to read.
+- Dialog backdrop: `--backdrop` plus a 6px blur.
+
+### Styles: Tailwind v4
+
+- `frontend/src/styles/global.css` holds the tokens, Tailwind's `@theme` (built from the tokens, with Tailwind's
+  default palette switched off, so only these colours exist: `text-ink-3`, `border-hair`, `bg-glass`, ...), the base
+  rules, and imports the rest into the components layer: `components.css` (pill, chip, seg, toggle, input, glass,
+  marks, ...), `hud.css`, `page.css` and `pages/*.css`.
+- Markup keeps short semantic class names (`pill`, `kv-row`, `prov-row`); their styles are written with `@apply`, so
+  the TSX doesn't repeat utility lists. One-off tweaks may use utilities directly.
+- Theme variants: `dark:` and `light:` follow `<html data-theme>`.
+- **A class name must not also be a Tailwind utility** (`table`, `inline`, `ring`, `filter`, `static`, `hidden`,
+  ...): Tailwind would generate the utility from the markup and it would override the component rule. That is why
+  rows sit in `.t-table`, the loading ring is `.spin-ring`, filter chips are `.filter-chip`.

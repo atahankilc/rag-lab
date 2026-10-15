@@ -5,7 +5,6 @@ import { Centered, ErrorNote, Loading } from "../components/Loading";
 import { showValue } from "../lib/config";
 import { defFor, direction, formatDelta, formatValue } from "../lib/format";
 import { useVersion } from "../state/version";
-import "./compare.css";
 
 const GROUPS: { key: MetricDef["grp"] | "other"; label: string }[] = [
   { key: "generation", label: "Generation" },

@@ -1,0 +1,268 @@
+/* RAG Lab styles: Tailwind v4 + the "Instrument" design language (docs/DESIGN_LANGUAGE.md).
+
+   1. tokens      the design language's values, dark (default) and light (<html data-theme="light">)
+   2. @theme      the same tokens as Tailwind's theme, so utilities read them: text-ink-3, border-hair,
+                  bg-void, text-label, ease-instrument, rounded-pill ... (Tailwind's default palette is
+                  switched off: only these colours exist)
+   3. base        global element rules on top of Tailwind's preflight
+   4. components  the design language's building blocks (components.css: pill, chip, seg, toggle,
+                  input, glass, ...), then the HUD, full-screen pages and each page (the imports below).
+                  Markup keeps short semantic class names; their styles are written here with @apply,
+                  so the TSX doesn't repeat long utility lists. One-off tweaks can still use utilities.
+   A class name must not be a Tailwind utility (table, inline, ring, filter, static, hidden, ...): the
+   utility would be generated from the markup and override the component rule. */
+
+@import "tailwindcss";
+
+@import "./components.css" layer(components);
+@import "./hud.css" layer(components);
+@import "./page.css" layer(components);
+@import "./pages/pipeline.css" layer(components);
+@import "./pages/space.css" layer(components);
+@import "./pages/questions.css" layer(components);
+@import "./pages/compare.css" layer(components);
+@import "./pages/runs.css" layer(components);
+@import "./pages/providers.css" layer(components);
+@import "./pages/log.css" layer(components);
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+@custom-variant light (&:where([data-theme="light"], [data-theme="light"] *));
+
+/* ---------- 1. tokens ---------- */
+
+:root {
+  color-scheme: dark;
+
+  /* ground */
+  --void: #000000;                         /* page background */
+  --hair: rgba(255, 255, 255, 0.09);       /* default hairline / border */
+  --hair-2: rgba(255, 255, 255, 0.16);     /* hover / active border, rails */
+  --field: rgba(0, 0, 0, 0.86);            /* feathered field fill (+ blur 10px) */
+
+  /* ink */
+  --ink: #f2f4f7;      /* primary text, numerals */
+  --ink-2: #b4bac4;    /* secondary text, chip text */
+  --ink-3: #868d99;    /* labels, captions (≥ 4.5:1 on black) */
+
+  /* signal */
+  --sweep: #1c69d4;                        /* the one accent */
+  --sweep-hi: #4d94ff;                     /* links, focus ring, active dot */
+  --sweep-wash: rgba(28, 105, 212, 0.18);  /* halo around the active dot */
+  --lost: #f5a524;                         /* amber: attention / weakened / warning */
+
+  /* comparison vs reference (ONLY for better/worse, never data hues) */
+  --rise: #2fbf71;  --rise-hi: #5ee69a;  --rise-glow: rgba(47, 191, 113, 0.26);
+  --fall: #ff3b30;  --fall-hi: #ff6961;  --fall-glow: rgba(255, 59, 48, 0.34);
+
+  /* categorical data palette, for data types inside visualisations only */
+  --cat-1: #3987e5;  --cat-2: #d95926;  --cat-3: #199e70;  --cat-4: #c98500;
+  --cat-5: #d55181;  --cat-6: #2bb5c6;  --cat-7: #9b6ce0;  --cat-8: #e0a33b;
+
+  /* surfaces */
+  --row-divider: rgba(255, 255, 255, 0.05);
+  --fill: rgba(0, 0, 0, 0.6);              /* pill, chip and segmented fill */
+  --tint-1: rgba(255, 255, 255, 0.025);    /* row hover */
+  --tint-2: rgba(255, 255, 255, 0.06);     /* icon button hover */
+  --tint-3: rgba(255, 255, 255, 0.07);     /* active pill */
+  --tint-4: rgba(255, 255, 255, 0.09);     /* active segment */
+  --sel-row: rgba(77, 148, 255, 0.06);     /* selected row */
+  --sel-border: rgba(77, 148, 255, 0.55);  /* pressed chip, set filter, changed value */
+  --sel-text: rgba(77, 148, 255, 0.4);     /* text selection */
+  --glow: rgba(77, 148, 255, 0.6);         /* the underline's glow */
+  --rise-wash: rgba(47, 191, 113, 0.08);
+  --fall-wash: rgba(255, 59, 48, 0.08);
+  --knob-on: #000;                         /* toggle knob when on */
+  --option-bg: #0e1014;                    /* native <option> lists */
+
+  /* glass: everything that rises above the page (inspector, popovers, dialogs, dock panel, hover cards) */
+  --glass-bg: rgba(16, 18, 23, 0.62);
+  --glass-solid: #0d0f13;                  /* the same surface where blur would hurt reading (phone sheets) */
+  --glass-border: rgba(255, 255, 255, 0.09);
+  --glass-shine: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  --glass-shadow: 0 24px 60px -16px rgba(0, 0, 0, 0.75), 0 2px 10px rgba(0, 0, 0, 0.45);
+  --glass-blur: blur(22px) saturate(150%);
+  --backdrop: rgba(0, 0, 0, 0.5);          /* behind a dialog */
+
+  /* the Space canvas */
+  --none: #3a3f47;                         /* a point without a value */
+  --tag-bg: rgba(0, 0, 0, 0.7);            /* behind numerals drawn in the scene */
+  --hit-line: rgba(77, 148, 255, 0.45);    /* query -> retrieved chunk */
+  /* numbers and dates: violet, low values recede into the ground, high ones stand out */
+  --ramp-1: #4a3b80;  --ramp-2: #6450ad;  --ramp-3: #8169d4;  --ramp-4: #a28be8;  --ramp-5: #c9b8f7;
+
+  /* type, space, shape, motion */
+  --font: "Mona Sans Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --t-micro: 11px;  --t-label: 12px;  --t-body: 14px;  --t-read: 18px;
+  --edge: 24px;                            /* distance of every HUD element from the viewport edge */
+  --r: 10px;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --fast: 160ms;
+  --med: 240ms;
+  --sweep-ms: 2400ms;                      /* timeline transition */
+
+  /* HUD geometry */
+  --corner-w: 300px;                       /* dock and timeline width */
+  --nav-top: 10px;                         /* the menu, utilities and readout sit this close to the top */
+  --top-bar-h: 46px;                       /* the inspector starts at --nav-top + this */
+  --inspector-w: 440px;
+}
+
+/* The light theme: "Instrument on white". Same rules, ground and ink swapped. */
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --void: #f6f7f9;                         /* a hair off white, so white glass stands out from it */
+  --hair: rgba(15, 20, 30, 0.1);
+  --hair-2: rgba(15, 20, 30, 0.2);
+  --field: rgba(246, 247, 249, 0.88);
+
+  --ink: #0d1014;
+  --ink-2: #3c434e;
+  --ink-3: #5c6370;                        /* ≥ 4.5:1 on the ground */
+
+  --sweep: #1c69d4;
+  --sweep-hi: #1a5fc8;
+  --sweep-wash: rgba(28, 105, 212, 0.14);
+  --lost: #a85a00;                        /* 4.75:1 on the ground: it is used as text */
+
+  --rise: #1f9d5a;  --rise-hi: #137c45;  --rise-glow: rgba(31, 157, 90, 0.2);
+  --fall: #e5352b;  --fall-hi: #c2271e;  --fall-glow: rgba(229, 53, 43, 0.22);
+
+  /* the same hues; the three that were too pale on white are a step darker (all ≥ 3:1 on the ground).
+     --cat-8 also turns yellower: darkened, it would match --cat-4's amber */
+  --cat-4: #b37600;  --cat-6: #1a97a6;  --cat-8: #9a8410;
+
+  --row-divider: rgba(15, 20, 30, 0.06);
+  --fill: rgba(255, 255, 255, 0.75);
+  --tint-1: rgba(15, 20, 30, 0.025);
+  --tint-2: rgba(15, 20, 30, 0.05);
+  --tint-3: rgba(15, 20, 30, 0.06);
+  --tint-4: rgba(255, 255, 255, 1);       /* the active segment is a raised white chip */
+  --sel-row: rgba(26, 95, 200, 0.07);
+  --sel-border: rgba(26, 95, 200, 0.55);
+  --sel-text: rgba(26, 95, 200, 0.22);
+  --glow: rgba(26, 95, 200, 0.35);
+  --rise-wash: rgba(31, 157, 90, 0.08);
+  --fall-wash: rgba(229, 53, 43, 0.07);
+  --knob-on: #ffffff;
+  --option-bg: #ffffff;
+
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-solid: #ffffff;
+  --glass-border: rgba(15, 20, 30, 0.08);
+  --glass-shine: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  --glass-shadow: 0 24px 56px -18px rgba(16, 24, 40, 0.24), 0 2px 8px rgba(16, 24, 40, 0.07);
+  --glass-blur: blur(22px) saturate(160%);
+  --backdrop: rgba(226, 229, 234, 0.45);
+
+  --none: #c9cdd3;
+  --tag-bg: rgba(255, 255, 255, 0.85);
+  --hit-line: rgba(26, 95, 200, 0.4);
+  /* the ramp flips: low values are pale (they recede into the ground), high ones dark */
+  --ramp-1: #cfc3f5;  --ramp-2: #a28be8;  --ramp-3: #8169d4;  --ramp-4: #6450ad;  --ramp-5: #3f3170;
+}
+
+@media (max-width: 1100px) {
+  :root { --inspector-w: 380px; }
+}
+@media (max-width: 760px) {
+  :root { --edge: 16px; }
+}
+
+/* ---------- 2. Tailwind theme ---------- */
+
+@theme inline {
+  --color-*: initial;
+  --color-void: var(--void);
+  --color-hair: var(--hair);
+  --color-hair-2: var(--hair-2);
+  --color-field: var(--field);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-sweep: var(--sweep);
+  --color-sweep-hi: var(--sweep-hi);
+  --color-sweep-wash: var(--sweep-wash);
+  --color-lost: var(--lost);
+  --color-rise: var(--rise);
+  --color-rise-hi: var(--rise-hi);
+  --color-rise-glow: var(--rise-glow);
+  --color-rise-wash: var(--rise-wash);
+  --color-fall: var(--fall);
+  --color-fall-hi: var(--fall-hi);
+  --color-fall-glow: var(--fall-glow);
+  --color-fall-wash: var(--fall-wash);
+  --color-cat-1: var(--cat-1);
+  --color-cat-2: var(--cat-2);
+  --color-cat-3: var(--cat-3);
+  --color-cat-4: var(--cat-4);
+  --color-cat-5: var(--cat-5);
+  --color-cat-6: var(--cat-6);
+  --color-cat-7: var(--cat-7);
+  --color-cat-8: var(--cat-8);
+  --color-row-divider: var(--row-divider);
+  --color-fill: var(--fill);
+  --color-tint-1: var(--tint-1);
+  --color-tint-2: var(--tint-2);
+  --color-tint-3: var(--tint-3);
+  --color-tint-4: var(--tint-4);
+  --color-sel-row: var(--sel-row);
+  --color-sel-border: var(--sel-border);
+  --color-sel-text: var(--sel-text);
+  --color-glow: var(--glow);
+  --color-knob-on: var(--knob-on);
+  --color-option-bg: var(--option-bg);
+  --color-glass: var(--glass-bg);
+  --color-glass-solid: var(--glass-solid);
+  --color-glass-border: var(--glass-border);
+  --color-backdrop: var(--backdrop);
+
+  --font-sans: var(--font);
+
+  --text-micro: 11px;   /* captions, meta, column heads */
+  --text-label: 12px;   /* labels, chips, list rows */
+  --text-row: 13px;     /* table values, ledes, tabs */
+  --text-body: 14px;    /* body */
+  --text-read: 18px;    /* inspector titles */
+
+  --ease-instrument: cubic-bezier(0.16, 1, 0.3, 1);
+  --radius-pill: 99px;
+  --radius-panel: 14px;
+  --shadow-glass: var(--glass-shadow);
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes slide-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+@keyframes slide-in-x { from { opacity: 0; transform: translateX(6px); } to { opacity: 1; transform: none; } }
+
+/* ---------- 3. base ---------- */
+
+@layer base {
+  html, body, #root { @apply h-full; }
+
+  body {
+    @apply m-0 overflow-hidden bg-void font-sans text-body text-ink antialiased;
+    line-height: 1.45;
+    font-variant-numeric: tabular-nums;
+  }
+
+  ::selection { @apply bg-sel-text; }
+
+  :focus-visible { @apply rounded-[4px] outline-1 outline-offset-3 outline-sweep-hi outline-solid; }
+
+  * { scrollbar-width: thin; scrollbar-color: var(--hair-2) transparent; }
+
+  button { @apply cursor-pointer; }
+  a { @apply text-sweep-hi no-underline; }
+  /* icons sit in the text line; preflight would make them blocks */
+  svg { display: inline; vertical-align: baseline; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+  }
+  .loading .spin-ring { animation: spin 1.4s linear infinite !important; }
+}
