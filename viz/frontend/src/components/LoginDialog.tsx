@@ -35,30 +35,61 @@ export function LoginDialog() {
   };
 
   return (
-    <dialog ref={ref} className="login-dialog glass" aria-labelledby="login-title"
-            onCancel={(e) => { e.preventDefault(); dismiss(); }}>
+    <dialog
+      ref={ref}
+      className="login-dialog glass"
+      aria-labelledby="login-title"
+      onCancel={(e) => {
+        e.preventDefault();
+        dismiss();
+      }}
+    >
       <form className="login-form" onSubmit={submit}>
-        <h2 id="login-title" className="login-title">Log in</h2>
+        <h2 id="login-title" className="login-title">
+          Log in
+        </h2>
         <p className="lede">Log in to do more than view.</p>
 
         <label className="login-field">
           <span className="label">Username</span>
-          <input className="input" name="username" autoComplete="username" autoCapitalize="none" spellCheck={false}
-                 required autoFocus value={username} onChange={(e) => setUsername(e.target.value)} />
+          <input
+            className="input"
+            name="username"
+            autoComplete="username"
+            autoCapitalize="none"
+            spellCheck={false}
+            required
+            autoFocus
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
         </label>
         <label className="login-field">
           <span className="label">Password</span>
-          <input className="input" name="password" type="password" autoComplete="current-password" required
-                 value={password} onChange={(e) => setPassword(e.target.value)} />
+          <input
+            className="input"
+            name="password"
+            type="password"
+            autoComplete="current-password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
         </label>
 
-        {error ? <p className="login-error" role="alert">{error}</p> : null}
+        {error ? (
+          <p className="login-error" role="alert">
+            {error}
+          </p>
+        ) : null}
 
         <div className="login-actions">
           <button type="submit" className="pill" disabled={busy || !username.trim() || !password}>
             {busy ? "Logging in…" : "Log in"}
           </button>
-          <button type="button" className="link" onClick={dismiss}>Just view</button>
+          <button type="button" className="link" onClick={dismiss}>
+            Just view
+          </button>
         </div>
       </form>
     </dialog>

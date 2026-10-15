@@ -33,7 +33,9 @@ export function formatValue(v: number | null | undefined, format: string, digits
     case "pct":
       return { value: (v * 100).toFixed(digits ?? 0), unit: "%" };
     case "ms":
-      return v >= 10_000 ? { value: (v / 1000).toFixed(1), unit: "s" } : { value: Math.round(v).toLocaleString("en-US"), unit: "ms" };
+      return v >= 10_000
+        ? { value: (v / 1000).toFixed(1), unit: "s" }
+        : { value: Math.round(v).toLocaleString("en-US"), unit: "ms" };
     case "s":
       return { value: v.toFixed(1), unit: "s" };
     case "mb":
@@ -43,7 +45,9 @@ export function formatValue(v: number | null | undefined, format: string, digits
     case "int":
       return { value: Math.round(v).toLocaleString("en-US"), unit: "" };
     default:
-      return Math.abs(v) <= 1 ? { value: v.toFixed(digits ?? 2), unit: "" } : { value: Math.round(v).toLocaleString("en-US"), unit: "" };
+      return Math.abs(v) <= 1
+        ? { value: v.toFixed(digits ?? 2), unit: "" }
+        : { value: Math.round(v).toLocaleString("en-US"), unit: "" };
   }
 }
 

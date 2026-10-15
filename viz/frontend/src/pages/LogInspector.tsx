@@ -13,15 +13,29 @@ const ACTOR_TEXT: Record<string, string> = {
 };
 
 /** One log event: who, when, what changed (before → after), and its raw data. */
-export function LogInspector({ id, loaded, slugOf, onClose }: {
-  id: number; loaded: LogEvent | undefined; slugOf: (id: number) => string | undefined; onClose: () => void;
+export function LogInspector({
+  id,
+  loaded,
+  slugOf,
+  onClose,
+}: {
+  id: number;
+  loaded: LogEvent | undefined;
+  slugOf: (id: number) => string | undefined;
+  onClose: () => void;
 }) {
-  const fetched = useLogEvent(loaded ? null : id);   // only when opened from a link to an older event
+  const fetched = useLogEvent(loaded ? null : id); // only when opened from a link to an older event
   const e = loaded ?? fetched.data ?? undefined;
 
   if (!e) {
     return (
-      <Inspector open onClose={onClose} label="Log event" layer={`Event #${id}`} title={fetched.isLoading ? "Loading…" : "Not found"}>
+      <Inspector
+        open
+        onClose={onClose}
+        label="Log event"
+        layer={`Event #${id}`}
+        title={fetched.isLoading ? "Loading…" : "Not found"}
+      >
         {fetched.isError ? <p className="run-error">{(fetched.error as Error).message}</p> : null}
       </Inspector>
     );
@@ -30,7 +44,14 @@ export function LogInspector({ id, loaded, slugOf, onClose }: {
   const desc = describe(e, slugOf);
   const diff = changes(e);
   const isUpdate = e.before != null;
-  const markCls = desc.mark === "lost" ? "mark lost" : desc.mark === "weak" ? "mark weak" : desc.mark === "new" ? "mark new" : "mark held";
+  const markCls =
+    desc.mark === "lost"
+      ? "mark lost"
+      : desc.mark === "weak"
+        ? "mark weak"
+        : desc.mark === "new"
+          ? "mark new"
+          : "mark held";
 
   return (
     <Inspector
@@ -49,32 +70,63 @@ export function LogInspector({ id, loaded, slugOf, onClose }: {
       ) : null}
 
       <InspectorSection title={isUpdate ? "What changed" : "Recorded values"} count={diff.length || undefined}>
-        {diff.length === 0 ? <p className="muted">No values recorded.</p> : diff.map((c) => (
-          <div key={c.path} className={`kv-row ${isUpdate ? "changed" : ""}`}>
-            <span className="k">{c.path}</span>
-            <span className="v">
-              {showValue(c.after)}
-              {isUpdate ? <span className="was">was {showValue(c.before)}</span> : null}
-            </span>
-          </div>
-        ))}
+        {diff.length === 0 ? (
+          <p className="muted">No values recorded.</p>
+        ) : (
+          diff.map((c) => (
+            <div key={c.path} className={`kv-row ${isUpdate ? "changed" : ""}`}>
+              <span className="k">{c.path}</span>
+              <span className="v">
+                {showValue(c.after)}
+                {isUpdate ? <span className="was">was {showValue(c.before)}</span> : null}
+              </span>
+            </div>
+          ))
+        )}
       </InspectorSection>
 
       <InspectorSection title="Target">
-        <div className="kv-row"><span className="k">type</span><span className="v">{e.target_type ?? "—"}</span></div>
-        <div className="kv-row"><span className="k">id</span><span className="v">{e.target_id ?? "—"}</span></div>
+        <div className="kv-row">
+          <span className="k">type</span>
+          <span className="v">{e.target_type ?? "—"}</span>
+        </div>
+        <div className="kv-row">
+          <span className="k">id</span>
+          <span className="v">{e.target_id ?? "—"}</span>
+        </div>
         <div className="kv-row">
           <span className="k">version</span>
           <span className="v">
-            {e.slug ? <Link to={`/?v=${e.slug}`} className="log-link">{e.slug} in Pipeline →</Link>
-              : e.experiment_id ? `${slugOf(e.experiment_id) ?? `#${e.experiment_id}`} (no longer exists)` : "—"}
+            {e.slug ? (
+              <Link to={`/?v=${e.slug}`} className="log-link">
+                {e.slug} in Pipeline →
+              </Link>
+            ) : e.experiment_id ? (
+              `${slugOf(e.experiment_id) ?? `#${e.experiment_id}`} (no longer exists)`
+            ) : (
+              "—"
+            )}
           </span>
         </div>
         {e.target_type === "run" && e.target_id ? (
-          <div className="kv-row"><span className="k">run</span><span className="v"><Link to={`/runs?run=${e.target_id}`} className="log-link">Run #{e.target_id} →</Link></span></div>
+          <div className="kv-row">
+            <span className="k">run</span>
+            <span className="v">
+              <Link to={`/runs?run=${e.target_id}`} className="log-link">
+                Run #{e.target_id} →
+              </Link>
+            </span>
+          </div>
         ) : null}
         {e.target_type === "provider" && e.target_id ? (
-          <div className="kv-row"><span className="k">provider</span><span className="v"><Link to={`/providers?provider=${e.target_id}`} className="log-link">{e.target_id} →</Link></span></div>
+          <div className="kv-row">
+            <span className="k">provider</span>
+            <span className="v">
+              <Link to={`/providers?provider=${e.target_id}`} className="log-link">
+                {e.target_id} →
+              </Link>
+            </span>
+          </div>
         ) : null}
       </InspectorSection>
 

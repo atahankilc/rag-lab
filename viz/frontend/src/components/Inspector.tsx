@@ -3,7 +3,16 @@ import { useEffect, useRef, type ReactNode } from "react";
 
 /** The right-hand sheet that shows where a number came from. Esc closes it. */
 export function Inspector({
-  open, onClose, layer, layerMark, what, title, figure, children, label, wide,
+  open,
+  onClose,
+  layer,
+  layerMark,
+  what,
+  title,
+  figure,
+  children,
+  label,
+  wide,
 }: {
   open: boolean;
   onClose: () => void;
@@ -54,7 +63,15 @@ export function Inspector({
 }
 
 /** A titled group of hairline-railed items inside the inspector. */
-export function InspectorSection({ title, count, children }: { title: string; count?: ReactNode; children: ReactNode }) {
+export function InspectorSection({
+  title,
+  count,
+  children,
+}: {
+  title: string;
+  count?: ReactNode;
+  children: ReactNode;
+}) {
   return (
     <section className="inspector-section">
       <h3 className="section-head">

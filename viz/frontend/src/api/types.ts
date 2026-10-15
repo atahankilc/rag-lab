@@ -51,8 +51,15 @@ export interface ExperimentDetail {
   corpus: { id: number; name: string; hash: string; manifest: JsonObject; documents: number };
   chunk_set: { id: number; name: string; config: JsonObject; hash: string; chunks: number } | null;
   embedding_space: {
-    id: number; provider: string; model: string; dim: number; location: "local" | "cloud";
-    config: JsonObject; table: string | null; build_stats: JsonObject | null; hash: string;
+    id: number;
+    provider: string;
+    model: string;
+    dim: number;
+    location: "local" | "cloud";
+    config: JsonObject;
+    table: string | null;
+    build_stats: JsonObject | null;
+    hash: string;
   } | null;
   eval_set: { id: number; name: string; version: string; questions: number };
   notes: { id: number; body: string; actor: string; created_at: string }[];

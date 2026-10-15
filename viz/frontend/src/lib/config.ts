@@ -23,18 +23,39 @@ export function showValue(v: Json | undefined): string {
 
 // Short names for setting keys we know. Any other key still renders, as its own path.
 const KEY_LABEL: Record<string, string> = {
-  top_k: "k", dense_k: "dense k", sparse_k: "sparse k", top_n: "top n", candidates: "candidates",
-  size: "size", overlap: "overlap", dim: "dim", temperature: "temp", max_tokens: "max tok",
-  strategy: "", method: "", mode: "", template: "", "prompt.template": "", version: "v", "prompt.version": "prompt v",
-  model: "model", k: "k", n: "n", k1: "k1", b: "b", rubric: "rubric", name: "", inputs: "from",
+  top_k: "k",
+  dense_k: "dense k",
+  sparse_k: "sparse k",
+  top_n: "top n",
+  candidates: "candidates",
+  size: "size",
+  overlap: "overlap",
+  dim: "dim",
+  temperature: "temp",
+  max_tokens: "max tok",
+  strategy: "",
+  method: "",
+  mode: "",
+  template: "",
+  "prompt.template": "",
+  version: "v",
+  "prompt.version": "prompt v",
+  model: "model",
+  k: "k",
+  n: "n",
+  k1: "k1",
+  b: "b",
+  rubric: "rubric",
+  name: "",
+  inputs: "from",
 };
 
 // Keys shown elsewhere (as the LOCAL/CLOUD badge) or that are noise on a card.
 const HIDDEN = new Set(["provider", "location", "unit", "separators", "normalize", "hash"]);
 
 export interface ConfigChip {
-  path: string;      // full diff path, e.g. "steps.rerank.top_n"
-  label: string;     // short key, may be empty
+  path: string; // full diff path, e.g. "steps.rerank.top_n"
+  label: string; // short key, may be empty
   value: string;
   known: boolean;
 }

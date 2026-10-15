@@ -15,8 +15,18 @@ const STATUS_TEXT: Record<ProviderStatus, string> = {
 };
 
 /** One provider: on/off, the spend cap, its models, and which versions use it. */
-export function ProviderInspector({ provider: p, status, usage, defaultFor, onClose }: {
-  provider: Provider; status: ProviderStatus; usage: ProviderUsage[]; defaultFor: string[]; onClose: () => void;
+export function ProviderInspector({
+  provider: p,
+  status,
+  usage,
+  defaultFor,
+  onClose,
+}: {
+  provider: Provider;
+  status: ProviderStatus;
+  usage: ProviderUsage[];
+  defaultFor: string[];
+  onClose: () => void;
 }) {
   const toggle = useSetProviderEnabled();
   const setCap = useSetProviderCap();
@@ -48,7 +58,12 @@ export function ProviderInspector({ provider: p, status, usage, defaultFor, onCl
       title={`${p.models.length} model${p.models.length === 1 ? "" : "s"} · used by ${usage.length} version${usage.length === 1 ? "" : "s"}`}
       figure={
         <>
-          <Readout label="Spent" size={34} value={formatUsd(spent)} unit={cap != null ? `of ${formatUsd(cap)}` : undefined} />
+          <Readout
+            label="Spent"
+            size={34}
+            value={formatUsd(spent)}
+            unit={cap != null ? `of ${formatUsd(cap)}` : undefined}
+          />
           <Readout label="Questions" size={34} value={formatInt(p.queries)} />
         </>
       }
@@ -57,39 +72,71 @@ export function ProviderInspector({ provider: p, status, usage, defaultFor, onCl
         <div className="kv-row prov-switch">
           <span className="k">Enabled</span>
           <span className="v">
-            <button type="button" role="switch" className="toggle" aria-checked={p.enabled} disabled={toggle.isPending || !canWrite} title={hint}
-                    aria-label={`${p.name} ${p.enabled ? "on" : "off"}`}
-                    onClick={() => toggle.mutate({ provider_id: p.id, enabled: !p.enabled })} />
+            <button
+              type="button"
+              role="switch"
+              className="toggle"
+              aria-checked={p.enabled}
+              disabled={toggle.isPending || !canWrite}
+              title={hint}
+              aria-label={`${p.name} ${p.enabled ? "on" : "off"}`}
+              onClick={() => toggle.mutate({ provider_id: p.id, enabled: !p.enabled })}
+            />
           </span>
         </div>
         <LoginHint what="turn it on or off, or change its cap" />
         <p className={`prov-status-text ${status === "capped" ? "warn" : ""}`}>{STATUS_TEXT[status]}</p>
         <p className="muted prov-fine">
-          Status comes from the database only. RAG Lab never calls provider endpoints, so it can't tell whether a
-          server is actually up.
+          Status comes from the database only. RAG Lab never calls provider endpoints, so it can't tell whether a server
+          is actually up.
         </p>
       </InspectorSection>
 
-      <InspectorSection title="Spend cap" count={cap != null ? `${Math.round((spent / Math.max(cap, 1e-9)) * 100)}% used` : "none"}>
+      <InspectorSection
+        title="Spend cap"
+        count={cap != null ? `${Math.round((spent / Math.max(cap, 1e-9)) * 100)}% used` : "none"}
+      >
         <CapBar spent={spent} cap={cap} />
         <form className="cap-form" onSubmit={saveCap}>
-          <label className="sr-only" htmlFor="cap-input">Spend cap in US dollars</label>
+          <label className="sr-only" htmlFor="cap-input">
+            Spend cap in US dollars
+          </label>
           <span className="cap-dollar">$</span>
-          <input id="cap-input" className={`input ${capInvalid ? "invalid" : ""}`} inputMode="decimal" placeholder="no cap"
-                 disabled={!canWrite} title={hint} value={capText} onChange={(e) => setCapText(e.target.value)} />
-          <button type="submit" className="pill small" disabled={!capChanged || setCap.isPending || !canWrite} title={hint}>
+          <input
+            id="cap-input"
+            className={`input ${capInvalid ? "invalid" : ""}`}
+            inputMode="decimal"
+            placeholder="no cap"
+            disabled={!canWrite}
+            title={hint}
+            value={capText}
+            onChange={(e) => setCapText(e.target.value)}
+          />
+          <button
+            type="submit"
+            className="pill small"
+            disabled={!capChanged || setCap.isPending || !canWrite}
+            title={hint}
+          >
             {setCap.isPending ? "Saving…" : "Save cap"}
           </button>
           {cap != null ? (
-            <button type="button" className="chip" disabled={setCap.isPending || !canWrite} title={hint}
-                    onClick={() => setCap.mutate({ provider_id: p.id, cap_usd: null })}>
+            <button
+              type="button"
+              className="chip"
+              disabled={setCap.isPending || !canWrite}
+              title={hint}
+              onClick={() => setCap.mutate({ provider_id: p.id, cap_usd: null })}
+            >
               No cap <span className="x">×</span>
             </button>
           ) : null}
         </form>
         {capInvalid ? <p className="run-error">A cap is a positive number of dollars, or empty for no cap.</p> : null}
         {setCap.error ? <p className="run-error">{(setCap.error as Error).message}</p> : null}
-        <p className="muted prov-fine">The cap is advisory: a backend checks it before each call. All-time spend, judge included.</p>
+        <p className="muted prov-fine">
+          The cap is advisory: a backend checks it before each call. All-time spend, judge included.
+        </p>
       </InspectorSection>
 
       <InspectorSection title="Models" count={p.models.length}>
@@ -98,35 +145,52 @@ export function ProviderInspector({ provider: p, status, usage, defaultFor, onCl
             <div className="kv-row">
               <span className="k prov-model-name">{m.name}</span>
               <span className="v">
-                {m.price_in_per_1m == null && m.price_out_per_1m == null ? "free"
+                {m.price_in_per_1m == null && m.price_out_per_1m == null
+                  ? "free"
                   : `$${m.price_in_per_1m ?? 0} in${m.price_out_per_1m != null ? ` · $${m.price_out_per_1m} out` : ""}`}
               </span>
             </div>
-            <div className="t-meta">{(m.kinds ?? []).join(" · ")}{m.dim ? ` · ${m.dim} dims` : ""}{m.price_in_per_1m != null ? " · per 1M tokens" : ""}</div>
+            <div className="t-meta">
+              {(m.kinds ?? []).join(" · ")}
+              {m.dim ? ` · ${m.dim} dims` : ""}
+              {m.price_in_per_1m != null ? " · per 1M tokens" : ""}
+            </div>
           </div>
         ))}
       </InspectorSection>
 
       <InspectorSection title="Default for">
-        {defaultFor.length === 0 ? <p className="muted">No role uses it by default.</p>
-          : <p className="prov-roles">{defaultFor.join(" · ")}</p>}
+        {defaultFor.length === 0 ? (
+          <p className="muted">No role uses it by default.</p>
+        ) : (
+          <p className="prov-roles">{defaultFor.join(" · ")}</p>
+        )}
       </InspectorSection>
 
       <InspectorSection title="Used by" count={usage.length || undefined}>
-        {usage.length === 0 ? <p className="muted">No version names this provider in its config.</p>
-          : usage.map((u) => (
+        {usage.length === 0 ? (
+          <p className="muted">No version names this provider in its config.</p>
+        ) : (
+          usage.map((u) => (
             <div key={u.experiment_id} className="kv-row">
-              <span className="k"><span className="timeline-slug">{u.slug}</span> {u.step_ids.join(" · ")}</span>
+              <span className="k">
+                <span className="timeline-slug">{u.slug}</span> {u.step_ids.join(" · ")}
+              </span>
               <span className="v">{formatUsd(Number(u.spent_usd))}</span>
             </div>
-          ))}
+          ))
+        )}
       </InspectorSection>
 
       <InspectorSection title="Keys">
         <p className="muted prov-fine">
-          {p.key_env
-            ? <>The backend reads this provider's key from <code>{p.key_env}</code> in <code>.env</code>.</>
-            : <>No key: a local provider.</>}{" "}
+          {p.key_env ? (
+            <>
+              The backend reads this provider's key from <code>{p.key_env}</code> in <code>.env</code>.
+            </>
+          ) : (
+            <>No key: a local provider.</>
+          )}{" "}
           The database never stores keys, so neither does this page.
         </p>
       </InspectorSection>

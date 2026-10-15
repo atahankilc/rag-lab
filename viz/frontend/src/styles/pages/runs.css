@@ -1,14 +1,31 @@
 /* Runs: the run table, the run inspector and the queue form. */
 
-.runs-title { @apply flex items-center gap-4; }
+.runs-title {
+  @apply flex items-center gap-4;
+}
 
-.run-row.queued .main, .run-row.queued .t-val { @apply text-ink-2; }
-.run-overrides { @apply truncate; }
-.run-status { @apply grid gap-0.5; }
-.run-status-main { @apply inline-flex items-center gap-[7px] text-row font-medium; }
-.run-status .mark { @apply size-2; }
-.run-row.failed .run-status-main { @apply text-lost; }
-.run-status .t-meta { @apply overflow-hidden text-ellipsis; }
+.run-row.queued .main,
+.run-row.queued .t-val {
+  @apply text-ink-2;
+}
+.run-overrides {
+  @apply truncate;
+}
+.run-status {
+  @apply grid gap-0.5;
+}
+.run-status-main {
+  @apply inline-flex items-center gap-[7px] text-row font-medium;
+}
+.run-status .mark {
+  @apply size-2;
+}
+.run-row.failed .run-status-main {
+  @apply text-lost;
+}
+.run-status .t-meta {
+  @apply overflow-hidden text-ellipsis;
+}
 
 /* running: the loading mark, small */
 .run-spin {
@@ -18,55 +35,137 @@
 
 /* ---------- inspector ---------- */
 
-.run-note { @apply mb-1; }
-.run-note code, .lede code { @apply text-label text-ink-2; }
-.run-error { @apply text-row leading-[1.45] text-lost; }
+.run-note {
+  @apply mb-1;
+}
+.run-note code,
+.lede code {
+  @apply text-label text-ink-2;
+}
+.run-error {
+  @apply text-row leading-[1.45] text-lost;
+}
 
-.run-stages.big { @apply m-0 gap-2.5; }
-.run-stages.big .run-stage { @apply grid-cols-[80px_1fr_56px] text-row; }
-.run-stage.failed .run-stage-name, .run-stage.failed .run-stage-count { @apply text-lost; }
-.run-stage .run-stage-count { @apply text-right text-micro text-ink-3; }
+.run-stages.big {
+  @apply m-0 gap-2.5;
+}
+.run-stages.big .run-stage {
+  @apply grid-cols-[80px_1fr_56px] text-row;
+}
+.run-stage.failed .run-stage-name,
+.run-stage.failed .run-stage-count {
+  @apply text-lost;
+}
+.run-stage .run-stage-count {
+  @apply text-right text-micro text-ink-3;
+}
 
-.run-log { @apply grid gap-[5px]; }
-.run-log-row { @apply grid grid-cols-[64px_62px_1fr] gap-2 text-label leading-[1.4] text-ink-2; }
-.run-log-time { @apply text-ink-3 tabular-nums; }
-.run-log-stage { @apply pt-px text-[10px] tracking-[0.08em] text-ink-3 uppercase; }
-.run-log-row.warn .run-log-msg, .run-log-row.error .run-log-msg { @apply text-lost; }
-.run-log-row.error .run-log-msg { @apply font-semibold; }
+.run-log {
+  @apply grid gap-[5px];
+}
+.run-log-row {
+  @apply grid grid-cols-[64px_62px_1fr] gap-2 text-label leading-[1.4] text-ink-2;
+}
+.run-log-time {
+  @apply text-ink-3 tabular-nums;
+}
+.run-log-stage {
+  @apply pt-px text-[10px] tracking-[0.08em] text-ink-3 uppercase;
+}
+.run-log-row.warn .run-log-msg,
+.run-log-row.error .run-log-msg {
+  @apply text-lost;
+}
+.run-log-row.error .run-log-msg {
+  @apply font-semibold;
+}
 
 /* ---------- queue form ---------- */
 
-.queue-form { @apply grid gap-5.5; }
-.queue-form .select { @apply w-full; }
-.qf-row { @apply grid grid-cols-[minmax(0,1fr)_150px_30px] items-center gap-x-2 gap-y-0.5; }
-.qf-row .k { @apply text-label wrap-anywhere text-ink-3; }
-.qf-row .input { @apply h-7 w-full min-w-0 text-label; }
-.qf-row.changed .k { @apply text-ink; }
+.queue-form {
+  @apply grid gap-5.5;
+}
+.queue-form .select {
+  @apply w-full;
+}
+.qf-row {
+  @apply grid grid-cols-[minmax(0,1fr)_150px_30px] items-center gap-x-2 gap-y-0.5;
+}
+.qf-row .k {
+  @apply text-label wrap-anywhere text-ink-3;
+}
+.qf-row .input {
+  @apply h-7 w-full min-w-0 text-label;
+}
+.qf-row.changed .k {
+  @apply text-ink;
+}
 .qf-row.changed .k::before {
   @apply mr-1.5 inline-block size-1.5 rounded-full bg-sweep-hi align-[1px] content-[''];
 }
-.qf-row.changed .input { @apply border-sel-border; }
-.qf-row.invalid .input { @apply border-lost; }
-.qf-row .toggle { @apply justify-self-end; }
-.qf-was { @apply col-[2/3] text-micro text-ink-3; }
-.qf-bad { @apply text-lost; }
-.qf-new { @apply ml-1.5 text-[9px] tracking-[0.1em] text-sweep-hi uppercase; }
-.qf-add { @apply mt-1.5 grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] gap-2; }
-.qf-add .input { @apply h-7 min-w-0 text-label; }
+.qf-row.changed .input {
+  @apply border-sel-border;
+}
+.qf-row.invalid .input {
+  @apply border-lost;
+}
+.qf-row .toggle {
+  @apply justify-self-end;
+}
+.qf-was {
+  @apply col-[2/3] text-micro text-ink-3;
+}
+.qf-bad {
+  @apply text-lost;
+}
+.qf-new {
+  @apply ml-1.5 text-[9px] tracking-[0.1em] text-sweep-hi uppercase;
+}
+.qf-add {
+  @apply mt-1.5 grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] gap-2;
+}
+.qf-add .input {
+  @apply h-7 min-w-0 text-label;
+}
 .qf-json {
   @apply m-0 font-[ui-monospace,"SF_Mono",Menlo,monospace] text-micro whitespace-pre-wrap wrap-anywhere text-ink-2;
 }
-.qf-submit { @apply flex flex-wrap items-center gap-3; }
-.queue-form textarea.input { @apply w-full; }
+.qf-submit {
+  @apply flex flex-wrap items-center gap-3;
+}
+.queue-form textarea.input {
+  @apply w-full;
+}
 
 /* queue form: one block per step, in order */
-.qf-step { @apply grid gap-1.5 border-b border-row-divider pt-2 pb-2.5; }
-.qf-step.off .qf-step-name, .qf-step.off .qf-step-kind { @apply line-through opacity-42; }
-.qf-step-head { @apply flex items-center gap-2; }
-.qf-step-pos { @apply w-4.5 text-[15px] text-ink-3; }
-.qf-step-pos.moved { @apply text-sweep-hi; }
-.qf-step-name { @apply text-row font-semibold text-ink; }
-.qf-step-kind { @apply text-micro text-ink-3; }
-.qf-step-tools { @apply ml-auto flex items-center gap-0.5; }
-.qf-step-tools .icon-btn:disabled { @apply cursor-default opacity-30; }
-.qf-skip { @apply h-6 text-micro; }
+.qf-step {
+  @apply grid gap-1.5 border-b border-row-divider pt-2 pb-2.5;
+}
+.qf-step.off .qf-step-name,
+.qf-step.off .qf-step-kind {
+  @apply line-through opacity-42;
+}
+.qf-step-head {
+  @apply flex items-center gap-2;
+}
+.qf-step-pos {
+  @apply w-4.5 text-[15px] text-ink-3;
+}
+.qf-step-pos.moved {
+  @apply text-sweep-hi;
+}
+.qf-step-name {
+  @apply text-row font-semibold text-ink;
+}
+.qf-step-kind {
+  @apply text-micro text-ink-3;
+}
+.qf-step-tools {
+  @apply ml-auto flex items-center gap-0.5;
+}
+.qf-step-tools .icon-btn:disabled {
+  @apply cursor-default opacity-30;
+}
+.qf-skip {
+  @apply h-6 text-micro;
+}

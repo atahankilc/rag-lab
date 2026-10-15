@@ -8,7 +8,9 @@
       // the saved theme, before the first paint (src/state/theme.ts keeps it in sync afterwards)
       (function () {
         var pref = null;
-        try { pref = localStorage.getItem("rag-lab.theme"); } catch (e) {}
+        try {
+          pref = localStorage.getItem("rag-lab.theme");
+        } catch (e) {}
         var light = pref === "light" || (pref !== "dark" && matchMedia("(prefers-color-scheme: light)").matches);
         document.documentElement.dataset.theme = light ? "light" : "dark";
         document.documentElement.style.colorScheme = light ? "light" : "dark";

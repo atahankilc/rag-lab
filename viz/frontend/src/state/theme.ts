@@ -34,7 +34,9 @@ function apply() {
   listeners.forEach((l) => l());
 }
 
-media.addEventListener("change", () => { if (pref === "system") apply(); });
+media.addEventListener("change", () => {
+  if (pref === "system") apply();
+});
 apply();
 
 export function setThemePref(next: ThemePref) {

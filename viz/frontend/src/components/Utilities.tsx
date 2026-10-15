@@ -19,8 +19,15 @@ export function ThemeMenu() {
   const anchor = useRef<HTMLButtonElement>(null);
   return (
     <span className="util-wrap">
-      <button ref={anchor} type="button" className="nav-link" aria-label="Theme" aria-expanded={open}
-              aria-pressed={open} onClick={() => setOpen(!open)}>
+      <button
+        ref={anchor}
+        type="button"
+        className="nav-link"
+        aria-label="Theme"
+        aria-expanded={open}
+        aria-pressed={open}
+        onClick={() => setOpen(!open)}
+      >
         {theme === "light" ? <Sun /> : <Moon />}
       </button>
       <Popover open={open} onClose={() => setOpen(false)} anchor={anchor} label="Theme" className="util-pop">
@@ -47,15 +54,29 @@ export function AccountMenu() {
   }
   return (
     <span className="util-wrap">
-      <button ref={anchor} type="button" className="nav-link" aria-label={`Logged in as ${username}`}
-              aria-expanded={open} aria-pressed={open} onClick={() => setOpen(!open)}>
+      <button
+        ref={anchor}
+        type="button"
+        className="nav-link"
+        aria-label={`Logged in as ${username}`}
+        aria-expanded={open}
+        aria-pressed={open}
+        onClick={() => setOpen(!open)}
+      >
         <UserRound /> <span className="pill-text">{username}</span>
       </button>
       <Popover open={open} onClose={() => setOpen(false)} anchor={anchor} label="Account" className="util-pop">
         <p className="section-head">Logged in</p>
         <p className="util-user">{username}</p>
         {expiresAt ? <p className="label">Until {shortDate(expiresAt)}, then log in again.</p> : null}
-        <button type="button" className="pill small" onClick={() => { setOpen(false); logout(); }}>
+        <button
+          type="button"
+          className="pill small"
+          onClick={() => {
+            setOpen(false);
+            logout();
+          }}
+        >
           <LogOut /> Log out
         </button>
       </Popover>

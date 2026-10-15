@@ -7,7 +7,10 @@ import { ApiError } from "../api/client";
 // same rule for every write (vite.auth.ts), so the disabled controls are only the visible half.
 // There is no sign-up: users are added with `make user NAME=...`.
 
-export interface Session { username: string | null; expires_at?: string }
+export interface Session {
+  username: string | null;
+  expires_at?: string;
+}
 
 interface AuthState {
   username: string | null;
@@ -24,7 +27,7 @@ interface AuthState {
 }
 
 const AuthContext = createContext<AuthState | null>(null);
-const ASKED = "rag-lab.login-asked";   // the dialog opens by itself once per browser session
+const ASKED = "rag-lab.login-asked"; // the dialog opens by itself once per browser session
 
 async function authCall(method: "GET" | "POST", path: string, body?: unknown): Promise<Session> {
   const res = await fetch(`/auth/${path}`, {
@@ -56,7 +59,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     queryKey: ["session"],
     queryFn: () => authCall("GET", "session"),
     staleTime: 5 * 60_000,
-    refetchOnWindowFocus: true,   // a session that ended in another tab locks this one too
+    refetchOnWindowFocus: true, // a session that ended in another tab locks this one too
   });
   const username = session.data?.username ?? null;
   const [asking, setAsking] = useState(false);
@@ -88,18 +91,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const { mutateAsync: loginAsync } = loginM;
   const { mutate: logoutNow } = logoutM;
-  const login = useCallback(async (u: string, p: string) => { await loginAsync({ username: u, password: p }); }, [loginAsync]);
+  const login = useCallback(
+    async (u: string, p: string) => {
+      await loginAsync({ username: u, password: p });
+    },
+    [loginAsync],
+  );
   const logout = useCallback(() => logoutNow(), [logoutNow]);
   const ask = useCallback(() => setAsking(true), []);
   const dismiss = useCallback(() => setAsking(false), []);
 
-  const value = useMemo<AuthState>(() => ({
-    username,
-    expiresAt: session.data?.expires_at,
-    canWrite: username != null,
-    checking: session.isLoading,
-    login, logout, asking, ask, dismiss,
-  }), [username, session.data?.expires_at, session.isLoading, login, logout, asking, ask, dismiss]);
+  const value = useMemo<AuthState>(
+    () => ({
+      username,
+      expiresAt: session.data?.expires_at,
+      canWrite: username != null,
+      checking: session.isLoading,
+      login,
+      logout,
+      asking,
+      ask,
+      dismiss,
+    }),
+    [username, session.data?.expires_at, session.isLoading, login, logout, asking, ask, dismiss],
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
@@ -119,7 +134,10 @@ export function LoginHint({ what = "make changes" }: { what?: string }) {
   if (canWrite) return null;
   return (
     <p className="login-hint">
-      <button type="button" className="link" onClick={ask}>Log in</button> to {what}.
+      <button type="button" className="link" onClick={ask}>
+        Log in
+      </button>{" "}
+      to {what}.
     </p>
   );
 }

@@ -11,38 +11,60 @@
 
 import { useEffect, useRef, useState } from "react";
 
-export interface PanePoint { id: number; x: number; y: number; z: number }   // normalised to [-1, 1]
-export interface PaneQuery { id: number; label: string; x: number; y: number; z: number }
-export interface PaneHit { id: number; rank: number; relevant: boolean }
+export interface PanePoint {
+  id: number;
+  x: number;
+  y: number;
+  z: number;
+} // normalised to [-1, 1]
+export interface PaneQuery {
+  id: number;
+  label: string;
+  x: number;
+  y: number;
+  z: number;
+}
+export interface PaneHit {
+  id: number;
+  rank: number;
+  relevant: boolean;
+}
 
 export interface Pane {
-  key: string;                  // stays the same while points should move rather than reappear
+  key: string; // stays the same while points should move rather than reappear
   label?: string;
-  points: PanePoint[];          // keep the same array while positions don't change (it starts a morph)
-  colors: string[];             // one per point
-  visible: boolean[] | null;    // filters; null = all
+  points: PanePoint[]; // keep the same array while positions don't change (it starts a morph)
+  colors: string[]; // one per point
+  visible: boolean[] | null; // filters; null = all
   emphasis: Set<number> | null; // when set, every other point is dimmed
-  queries: PaneQuery[];         // every question, as small hollow diamonds
-  focus: PaneQuery | null;      // the picked question
-  hits: PaneHit[];              // its ranked list for the chosen step
-  missed: number[];             // relevant chunks that list doesn't have
+  queries: PaneQuery[]; // every question, as small hollow diamonds
+  focus: PaneQuery | null; // the picked question
+  hits: PaneHit[]; // its ranked list for the chosen step
+  missed: number[]; // relevant chunks that list doesn't have
   selected: number | null;
-  neighbours: number[];         // the selected chunk's true nearest neighbours
-  linked: Set<number> | null;   // what the pointer is on in the other pane
+  neighbours: number[]; // the selected chunk's true nearest neighbours
+  linked: Set<number> | null; // what the pointer is on in the other pane
 }
 
 export type Target = { pane: number; kind: "chunk" | "query"; id: number; clientX: number; clientY: number };
 export type ViewCommand = { n: number; type: "in" | "out" | "reset" };
 
-interface Camera { yaw: number; pitch: number; persp: number; zoom: number; panX: number; panY: number }
+interface Camera {
+  yaw: number;
+  pitch: number;
+  persp: number;
+  zoom: number;
+  panX: number;
+  panY: number;
+}
 const FLAT: Camera = { yaw: 0, pitch: 0, persp: 0, zoom: 1, panX: 0, panY: 0 };
 // The map lies on the floor (x, y) and the third coordinate is height (z). 2D looks straight down;
 // 3D tilts the floor back (pitch) and turns it around the vertical axis (yaw).
 const ORBIT = { yaw: 0.45, pitch: 1.0, persp: 1 };
-const DEPTH = 5;                // camera distance for the perspective, in normalised units
-const FLOOR = -1.15;            // height of the floor grid, just under the lowest points
-const IDLE_MS = 2500;           // turn slowly after this long without interaction
-const SPIN = 0.12;              // radians per second
+const DEPTH = 5; // camera distance for the perspective, in normalised units
+const FLOOR = -1.15; // height of the floor grid, just under the lowest points
+const IDLE_MS = 2500; // turn slowly after this long without interaction
+const SPIN = 0.12; // radians per second
 const FONT = "600 11px 'Mona Sans Variable', ui-sans-serif, system-ui, sans-serif";
 
 function cssVar(name: string): string {
@@ -52,10 +74,15 @@ const reducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)"
 const ease = (t: number) => 1 - Math.pow(1 - t, 3);
 
 /** Centre the points on the origin and scale them into [-1, 1], keeping proportions. */
-export function normalise<T extends { x: number; y: number; z: number | null }>(rows: T[], three: boolean): { x: number; y: number; z: number }[] {
+export function normalise<T extends { x: number; y: number; z: number | null }>(
+  rows: T[],
+  three: boolean,
+): { x: number; y: number; z: number }[] {
   if (!rows.length) return [];
   const mean = (k: "x" | "y" | "z") => rows.reduce((s, r) => s + (r[k] ?? 0), 0) / rows.length;
-  const mx = mean("x"), my = mean("y"), mz = three ? mean("z") : 0;
+  const mx = mean("x"),
+    my = mean("y"),
+    mz = three ? mean("z") : 0;
   let m = 1e-9;
   for (const r of rows) m = Math.max(m, Math.abs(r.x - mx), Math.abs(r.y - my), three ? Math.abs((r.z ?? 0) - mz) : 0);
   return rows.map((r) => ({ x: (r.x - mx) / m, y: (r.y - my) / m, z: three ? ((r.z ?? 0) - mz) / m : 0 }));
@@ -66,17 +93,26 @@ interface Motion {
   from: Map<number, [number, number, number]>;
   t0: number;
   dur: number;
-  pos: Float32Array;            // displayed x, y, z per point (this frame)
-  sx: Float32Array;             // screen position per point (this frame)
+  pos: Float32Array; // displayed x, y, z per point (this frame)
+  sx: Float32Array; // screen position per point (this frame)
   sy: Float32Array;
   depth: Float32Array;
-  order: number[];              // draw order, far to near
-  index: Map<number, number>;   // chunk id -> point index
+  order: number[]; // draw order, far to near
+  index: Map<number, number>; // chunk id -> point index
   qx: number[];
   qy: number[];
 }
 
-export function SpaceCanvas({ panes, three, insets, command, onHover, onSelect, onPickQuery, label }: {
+export function SpaceCanvas({
+  panes,
+  three,
+  insets,
+  command,
+  onHover,
+  onSelect,
+  onPickQuery,
+  label,
+}: {
   panes: Pane[];
   three: boolean;
   insets: { l: number; r: number; t: number; b: number };
@@ -99,7 +135,7 @@ export function SpaceCanvas({ panes, three, insets, command, onHover, onSelect, 
   const drawRef = useRef<() => void>(() => {});
   const props = useRef({ panes, three, insets, size });
   props.current = { panes, three, insets, size };
-  const box = useRef({ ...insets });   // eases towards `insets`, so opening a sheet slides the field over
+  const box = useRef({ ...insets }); // eases towards `insets`, so opening a sheet slides the field over
 
   useEffect(() => {
     const el = wrapRef.current;
@@ -118,9 +154,18 @@ export function SpaceCanvas({ panes, three, insets, command, onHover, onSelect, 
     const overlap = pane.points.some((p) => from.has(p.id));
     const n = pane.points.length;
     motions.current.set(pane.key, {
-      points: pane.points, from, t0: performance.now(), dur: overlap && !reducedMotion() ? 2400 : 0,
-      pos: new Float32Array(n * 3), sx: new Float32Array(n), sy: new Float32Array(n), depth: new Float32Array(n),
-      order: pane.points.map((_, i) => i), index: new Map(pane.points.map((p, i) => [p.id, i])), qx: [], qy: [],
+      points: pane.points,
+      from,
+      t0: performance.now(),
+      dur: overlap && !reducedMotion() ? 2400 : 0,
+      pos: new Float32Array(n * 3),
+      sx: new Float32Array(n),
+      sy: new Float32Array(n),
+      depth: new Float32Array(n),
+      order: pane.points.map((_, i) => i),
+      index: new Map(pane.points.map((p, i) => [p.id, i])),
+      qx: [],
+      qy: [],
     });
   }
 
@@ -145,12 +190,19 @@ export function SpaceCanvas({ panes, three, insets, command, onHover, onSelect, 
   const boxes = () => {
     const { size: s, panes: ps } = props.current;
     const i = box.current;
-    const w = s.w - i.l - i.r, h = s.h - i.t - i.b;
+    const w = s.w - i.l - i.r,
+      h = s.h - i.t - i.b;
     if (ps.length < 2) return [{ x: i.l, y: i.t, w, h }];
     const gap = 32;
     return w >= h
-      ? [{ x: i.l, y: i.t, w: (w - gap) / 2, h }, { x: i.l + (w + gap) / 2, y: i.t, w: (w - gap) / 2, h }]
-      : [{ x: i.l, y: i.t, w, h: (h - gap) / 2 }, { x: i.l, y: i.t + (h + gap) / 2, w, h: (h - gap) / 2 }];
+      ? [
+          { x: i.l, y: i.t, w: (w - gap) / 2, h },
+          { x: i.l + (w + gap) / 2, y: i.t, w: (w - gap) / 2, h },
+        ]
+      : [
+          { x: i.l, y: i.t, w, h: (h - gap) / 2 },
+          { x: i.l, y: i.t + (h + gap) / 2, w, h: (h - gap) / 2 },
+        ];
   };
 
   drawRef.current = () => {
@@ -170,28 +222,45 @@ export function SpaceCanvas({ panes, three, insets, command, onHover, onSelect, 
     ctx.clearRect(0, 0, s.w, s.h);
 
     // camera and field box ease towards their goals
-    const c = cam.current, g = goal.current;
+    const c = cam.current,
+      g = goal.current;
     let moving = false;
     const want = props.current.insets;
     for (const k of ["l", "r", "t", "b"] as const) {
       const d = want[k] - box.current[k];
-      if (Math.abs(d) > 0.5 && !reducedMotion()) { box.current[k] += d * 0.16; moving = true; } else box.current[k] = want[k];
+      if (Math.abs(d) > 0.5 && !reducedMotion()) {
+        box.current[k] += d * 0.16;
+        moving = true;
+      } else box.current[k] = want[k];
     }
     for (const k of ["yaw", "pitch", "persp", "zoom", "panX", "panY"] as const) {
       const d = g[k] - c[k];
-      if (Math.abs(d) > (k === "panX" || k === "panY" ? 0.2 : 1e-3)) { c[k] += d * 0.16; moving = true; } else c[k] = g[k];
+      if (Math.abs(d) > (k === "panX" || k === "panY" ? 0.2 : 1e-3)) {
+        c[k] += d * 0.16;
+        moving = true;
+      } else c[k] = g[k];
     }
     // 3D: turn slowly once the pointer has been still for a while, unless it rests on a point
     const dt = Math.min(0.1, (now - (lastFrame.current || now)) / 1000);
     lastFrame.current = now;
     if (props.current.three && !reducedMotion() && !hoverRef.current && !drag.current) {
-      if (now - lastTouch.current > IDLE_MS) { g.yaw += SPIN * dt; c.yaw += SPIN * dt; }
+      if (now - lastTouch.current > IDLE_MS) {
+        g.yaw += SPIN * dt;
+        c.yaw += SPIN * dt;
+      }
       moving = true;
     }
 
-    const hair = cssVar("--hair"), ink = cssVar("--ink"), ink2 = cssVar("--ink-2"), ink3 = cssVar("--ink-3");
-    const sweep = cssVar("--sweep-hi"), lost = cssVar("--lost");
-    const cy = Math.cos(c.yaw), sy = Math.sin(c.yaw), cp = Math.cos(c.pitch), sp = Math.sin(c.pitch);
+    const hair = cssVar("--hair"),
+      ink = cssVar("--ink"),
+      ink2 = cssVar("--ink-2"),
+      ink3 = cssVar("--ink-3");
+    const sweep = cssVar("--sweep-hi"),
+      lost = cssVar("--lost");
+    const cy = Math.cos(c.yaw),
+      sy = Math.sin(c.yaw),
+      cp = Math.cos(c.pitch),
+      sp = Math.sin(c.pitch);
     const hov = hoverRef.current;
 
     boxes().forEach((box, pi) => {
@@ -204,8 +273,10 @@ export function SpaceCanvas({ panes, three, insets, command, onHover, onSelect, 
       const oy = box.y + box.h / 2 + c.panY + (FLOOR / 2) * Math.sin(c.pitch) * scale * c.persp;
       // turn the floor around the vertical axis, then tilt it away; depth > 0 is towards the viewer
       const project = (x: number, y: number, z: number): [number, number, number] => {
-        const x1 = x * cy - y * sy, y1 = x * sy + y * cy;
-        const up = y1 * cp + z * sp, depth = z * cp - y1 * sp;
+        const x1 = x * cy - y * sy,
+          y1 = x * sy + y * cy;
+        const up = y1 * cp + z * sp,
+          depth = z * cp - y1 * sp;
         const f = 1 + (DEPTH / (DEPTH - Math.min(depth, DEPTH - 0.5)) - 1) * c.persp;
         return [ox + x1 * scale * f, oy - up * scale * f, depth];
       };
@@ -223,7 +294,16 @@ export function SpaceCanvas({ panes, three, insets, command, onHover, onSelect, 
         for (let v = -1; v <= 1.001; v += 0.25) {
           const edge = Math.abs(v) > 0.99;
           ctx.strokeStyle = edge ? cssVar("--hair-2") : hair;
-          for (const [a, b] of [[[v, -1], [v, 1]], [[-1, v], [1, v]]] as const) {
+          for (const [a, b] of [
+            [
+              [v, -1],
+              [v, 1],
+            ],
+            [
+              [-1, v],
+              [1, v],
+            ],
+          ] as const) {
             const [x1, y1] = project(a[0], a[1], FLOOR);
             const [x2, y2] = project(b[0], b[1], FLOOR);
             ctx.beginPath();
@@ -241,10 +321,16 @@ export function SpaceCanvas({ panes, three, insets, command, onHover, onSelect, 
       const k = ease(t);
       m.points.forEach((p, i) => {
         const f = m.from.get(p.id);
-        const x = f ? f[0] + (p.x - f[0]) * k : p.x, y = f ? f[1] + (p.y - f[1]) * k : p.y, z = f ? f[2] + (p.z - f[2]) * k : p.z;
-        m.pos[i * 3] = x; m.pos[i * 3 + 1] = y; m.pos[i * 3 + 2] = z;
+        const x = f ? f[0] + (p.x - f[0]) * k : p.x,
+          y = f ? f[1] + (p.y - f[1]) * k : p.y,
+          z = f ? f[2] + (p.z - f[2]) * k : p.z;
+        m.pos[i * 3] = x;
+        m.pos[i * 3 + 1] = y;
+        m.pos[i * 3 + 2] = z;
         const [px, py, pz] = project(x, y, z);
-        m.sx[i] = px; m.sy[i] = py; m.depth[i] = pz;
+        m.sx[i] = px;
+        m.sy[i] = py;
+        m.depth[i] = pz;
       });
       if (c.persp > 0.01) m.order.sort((a, b) => m.depth[a] - m.depth[b]);
 
@@ -339,12 +425,14 @@ export function SpaceCanvas({ panes, three, insets, command, onHover, onSelect, 
       }
 
       // every question, as small hollow diamonds
-      m.qx = []; m.qy = [];
+      m.qx = [];
+      m.qy = [];
       ctx.strokeStyle = ink3;
       ctx.lineWidth = 1;
       for (const q of pane.queries) {
         const [qx, qy] = project(q.x, q.y, q.z);
-        m.qx.push(qx); m.qy.push(qy);
+        m.qx.push(qx);
+        m.qy.push(qy);
         diamond(ctx, qx, qy, 3.5);
         ctx.stroke();
       }
@@ -376,7 +464,8 @@ export function SpaceCanvas({ panes, three, insets, command, onHover, onSelect, 
       for (const h of pane.hits) {
         const i = at(h.id);
         if (i == null) continue;
-        const x = m.sx[i], y = m.sy[i];
+        const x = m.sx[i],
+          y = m.sy[i];
         ctx.fillStyle = sweep;
         ctx.beginPath();
         ctx.arc(x, y, 4, 0, Math.PI * 2);
@@ -414,7 +503,8 @@ export function SpaceCanvas({ panes, three, insets, command, onHover, onSelect, 
       if (hov && hov.pane === pi) {
         const p = hov.kind === "chunk" ? at(hov.id) : undefined;
         const qi = hov.kind === "query" ? pane.queries.findIndex((q) => q.id === hov.id) : -1;
-        const x = p != null ? m.sx[p] : m.qx[qi], y = p != null ? m.sy[p] : m.qy[qi];
+        const x = p != null ? m.sx[p] : m.qx[qi],
+          y = p != null ? m.sy[p] : m.qy[qi];
         if (x != null && y != null) {
           ctx.strokeStyle = ink;
           ctx.lineWidth = 1;
@@ -436,7 +526,9 @@ export function SpaceCanvas({ panes, three, insets, command, onHover, onSelect, 
   }
 
   // redraw whenever anything shown changes
-  useEffect(() => { drawRef.current(); });
+  useEffect(() => {
+    drawRef.current();
+  });
   useEffect(() => () => cancelAnimationFrame(frame.current), []);
 
   // ---------- pointer ----------
@@ -446,18 +538,24 @@ export function SpaceCanvas({ panes, three, insets, command, onHover, onSelect, 
   const find = (mx: number, my: number): Omit<Target, "clientX" | "clientY"> | null => {
     const { panes: ps } = props.current;
     let best: Omit<Target, "clientX" | "clientY"> | null = null;
-    let bestD = 64;   // 8px radius, squared
+    let bestD = 64; // 8px radius, squared
     ps.forEach((pane, pi) => {
       const m = motions.current.get(pane.key);
       if (!m) return;
       pane.queries.forEach((q, qi) => {
         const d = (m.qx[qi] - mx) ** 2 + (m.qy[qi] - my) ** 2;
-        if (d < bestD) { bestD = d; best = { pane: pi, kind: "query", id: q.id }; }
+        if (d < bestD) {
+          bestD = d;
+          best = { pane: pi, kind: "query", id: q.id };
+        }
       });
       for (let i = 0; i < m.points.length; i++) {
         if (pane.visible && !pane.visible[i]) continue;
         const d = (m.sx[i] - mx) ** 2 + (m.sy[i] - my) ** 2;
-        if (d < bestD) { bestD = d; best = { pane: pi, kind: "chunk", id: m.points[i].id }; }
+        if (d < bestD) {
+          bestD = d;
+          best = { pane: pi, kind: "chunk", id: m.points[i].id };
+        }
       }
     });
     return best;
@@ -478,16 +576,24 @@ export function SpaceCanvas({ panes, three, insets, command, onHover, onSelect, 
     lastTouch.current = performance.now();
     const d = drag.current;
     if (d) {
-      const dx = e.clientX - d.x, dy = e.clientY - d.y;
+      const dx = e.clientX - d.x,
+        dy = e.clientY - d.y;
       if (!d.moved && Math.hypot(dx, dy) < 4) return;
       d.moved = true;
-      d.x = e.clientX; d.y = e.clientY;
-      const g = goal.current, c = cam.current;
-      if (d.pan) { g.panX += dx; g.panY += dy; c.panX = g.panX; c.panY = g.panY; }
-      else {
+      d.x = e.clientX;
+      d.y = e.clientY;
+      const g = goal.current,
+        c = cam.current;
+      if (d.pan) {
+        g.panX += dx;
+        g.panY += dy;
+        c.panX = g.panX;
+        c.panY = g.panY;
+      } else {
         g.yaw += dx * 0.008;
-        g.pitch = Math.max(0, Math.min(1.45, g.pitch + dy * 0.008));   // from straight down to the side, never under the floor
-        c.yaw = g.yaw; c.pitch = g.pitch;
+        g.pitch = Math.max(0, Math.min(1.45, g.pitch + dy * 0.008)); // from straight down to the side, never under the floor
+        c.yaw = g.yaw;
+        c.pitch = g.pitch;
       }
       hoverRef.current = null;
       onHover(null);
@@ -520,11 +626,13 @@ export function SpaceCanvas({ panes, three, insets, command, onHover, onSelect, 
     const onWheel = (e: WheelEvent) => {
       e.preventDefault();
       lastTouch.current = performance.now();
-      const g = goal.current, c = cam.current;
+      const g = goal.current,
+        c = cam.current;
       const z = Math.min(30, Math.max(0.4, g.zoom * Math.exp(-e.deltaY * 0.0015)));
       const [mx, my] = local(e);
       const box = boxes().find((b) => mx >= b.x && mx <= b.x + b.w && my >= b.y && my <= b.y + b.h) ?? boxes()[0];
-      const cx = box.x + box.w / 2, cy = box.y + box.h / 2;
+      const cx = box.x + box.w / 2,
+        cy = box.y + box.h / 2;
       g.panX = mx - cx - (mx - cx - g.panX) * (z / g.zoom);
       g.panY = my - cy - (my - cy - g.panY) * (z / g.zoom);
       g.zoom = z;
@@ -538,14 +646,24 @@ export function SpaceCanvas({ panes, three, insets, command, onHover, onSelect, 
 
   return (
     <div ref={wrapRef} className="space-wrap">
-      <canvas ref={canvasRef} className={`space-canvas ${three ? "orbit" : ""}`} style={{ width: size.w, height: size.h }}
-              onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp}
-              onPointerLeave={() => {
-                if (!drag.current) { hoverRef.current = null; onHover(null); }
-                drawRef.current();
-              }}
-              onContextMenu={(e) => e.preventDefault()}
-              role="img" aria-label={label} />
+      <canvas
+        ref={canvasRef}
+        className={`space-canvas ${three ? "orbit" : ""}`}
+        style={{ width: size.w, height: size.h }}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerLeave={() => {
+          if (!drag.current) {
+            hoverRef.current = null;
+            onHover(null);
+          }
+          drawRef.current();
+        }}
+        onContextMenu={(e) => e.preventDefault()}
+        role="img"
+        aria-label={label}
+      />
     </div>
   );
 }

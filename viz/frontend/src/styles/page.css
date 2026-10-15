@@ -2,63 +2,142 @@
    centred column with a sticky header. The HUD corners stay on top. Imported by global.css. */
 
 /* the scroll area starts under the tabs, so rows never scroll behind them */
-.page-full { @apply absolute inset-x-0 top-[calc(var(--nav-top)+44px)] bottom-0 overflow-y-auto px-(--edge) pb-[260px]; }
+.page-full {
+  @apply absolute inset-x-0 top-[calc(var(--nav-top)+44px)] bottom-0 overflow-y-auto px-(--edge) pb-[260px];
+}
 /* without the timeline there is only the dock to clear at the bottom */
-.hud.no-timeline .page-full { @apply pb-[120px]; }
+.hud.no-timeline .page-full {
+  @apply pb-[120px];
+}
 /* a section with subpages has their row under the tabs */
-.hud.has-subs .page-full { @apply top-[calc(var(--nav-top)+68px)]; }
+.hud.has-subs .page-full {
+  @apply top-[calc(var(--nav-top)+68px)];
+}
 
-.page-col { @apply mx-auto max-w-[1320px] min-w-0; }
+.page-col {
+  @apply mx-auto max-w-[1320px] min-w-0;
+}
 
-.page-head { @apply sticky top-0 z-5 grid gap-3.5 bg-void pt-2 pb-3.5; }
-.page-head-row { @apply flex flex-wrap items-end justify-between gap-6; }
-.page-readouts { @apply flex flex-wrap gap-9; }
-.filter-row { @apply flex flex-wrap items-center gap-2; }
-.filter-row .divider { @apply mx-1 h-4.5 w-px bg-hair; }
+.page-head {
+  @apply sticky top-0 z-5 grid gap-3.5 bg-void pt-2 pb-3.5;
+}
+.page-head-row {
+  @apply flex flex-wrap items-end justify-between gap-6;
+}
+.page-readouts {
+  @apply flex flex-wrap gap-9;
+}
+.filter-row {
+  @apply flex flex-wrap items-center gap-2;
+}
+.filter-row .divider {
+  @apply mx-1 h-4.5 w-px bg-hair;
+}
 
-.section { @apply border-t border-hair py-4.5; }
-.section > .section-head { @apply mb-3; }
+.section {
+  @apply border-t border-hair py-4.5;
+}
+.section > .section-head {
+  @apply mb-3;
+}
 
 /* ---------- tables ---------- */
 
-.t-table { @apply grid; }
+.t-table {
+  @apply grid;
+}
 .t-row {
   @apply relative grid w-full grid-cols-(--cols) items-center gap-x-4 gap-y-0 border-b border-row-divider py-[9px]
     text-left transition-[background] duration-160 ease-instrument;
 }
-button.t-row:hover { @apply bg-tint-1; }
-.t-row[aria-current="true"] { @apply bg-sel-row; }
+button.t-row:hover {
+  @apply bg-tint-1;
+}
+.t-row[aria-current="true"] {
+  @apply bg-sel-row;
+}
 .t-row[aria-current="true"]::before {
   @apply absolute top-1.5 bottom-1.5 -left-3 w-0.5 rounded-[2px] bg-sweep-hi content-[''];
 }
-.t-head { @apply border-b border-hair pt-1.5 pb-2 text-micro text-ink-3; }
-.t-head button { @apply rounded-[4px] text-micro tracking-[0.02em] text-ink-3; text-align: inherit; }
-.t-head button:hover, .t-head button[aria-pressed="true"] { @apply text-ink; }
-.t-num { @apply justify-self-end text-right tabular-nums; }
-.t-num > .t-val, .t-num > .t-meta { @apply block; }
-.t-name { @apply min-w-0; }
-.t-name .main { @apply block text-row font-medium text-ink; }
-.t-name .sub { @apply mt-0.5 block text-micro text-ink-3; }
-.t-val { @apply text-row font-medium text-ink; }
-.t-meta { @apply mt-0.5 text-micro whitespace-nowrap text-ink-3; }
-.t-meta.rise { @apply text-rise-hi; }
-.t-meta.fall { @apply text-fall-hi; }
-.t-id { @apply text-label font-semibold tracking-[0.04em] text-ink-2; }
-.t-empty { @apply py-10 text-center text-row text-ink-3; }
+.t-head {
+  @apply border-b border-hair pt-1.5 pb-2 text-micro text-ink-3;
+}
+.t-head button {
+  @apply rounded-[4px] text-micro tracking-[0.02em] text-ink-3;
+  text-align: inherit;
+}
+.t-head button:hover,
+.t-head button[aria-pressed="true"] {
+  @apply text-ink;
+}
+.t-num {
+  @apply justify-self-end text-right tabular-nums;
+}
+.t-num > .t-val,
+.t-num > .t-meta {
+  @apply block;
+}
+.t-name {
+  @apply min-w-0;
+}
+.t-name .main {
+  @apply block text-row font-medium text-ink;
+}
+.t-name .sub {
+  @apply mt-0.5 block text-micro text-ink-3;
+}
+.t-val {
+  @apply text-row font-medium text-ink;
+}
+.t-meta {
+  @apply mt-0.5 text-micro whitespace-nowrap text-ink-3;
+}
+.t-meta.rise {
+  @apply text-rise-hi;
+}
+.t-meta.fall {
+  @apply text-fall-hi;
+}
+.t-id {
+  @apply text-label font-semibold tracking-[0.04em] text-ink-2;
+}
+.t-empty {
+  @apply py-10 text-center text-row text-ink-3;
+}
 
-.verdict { @apply justify-self-center text-[11px] leading-none; }
-.verdict.better { @apply text-rise-hi; }
-.verdict.worse { @apply text-fall-hi; }
-.verdict.none { @apply text-ink-3; }
+.verdict {
+  @apply justify-self-center text-[11px] leading-none;
+}
+.verdict.better {
+  @apply text-rise-hi;
+}
+.verdict.worse {
+  @apply text-fall-hi;
+}
+.verdict.none {
+  @apply text-ink-3;
+}
 
 @media (max-width: 900px) {
-  .t-row { @apply gap-x-2.5; }
-  .t-name .main { -webkit-line-clamp: 2; }
+  .t-row {
+    @apply gap-x-2.5;
+  }
+  .t-name .main {
+    -webkit-line-clamp: 2;
+  }
 }
 
 @media (max-width: 760px) {
-  .page-full { @apply static overflow-visible p-0; }
-  .page-head { @apply relative top-0; }
-  .page-readouts { @apply gap-x-6 gap-y-4.5; }
-  .page-readouts .num-28 { @apply text-[22px]; }
+  .page-full {
+    @apply static overflow-visible p-0;
+  }
+  .page-head {
+    @apply relative top-0;
+  }
+  .page-readouts {
+    @apply gap-x-6 gap-y-4.5;
+  }
+  .page-readouts .num-28 {
+    @apply text-[22px];
+  }
 }

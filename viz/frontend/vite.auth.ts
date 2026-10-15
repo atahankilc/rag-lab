@@ -19,7 +19,7 @@ import type { Plugin } from "vite";
 // talks to them as web_auth, a role the browser can't take. There is no sign-up: `make user NAME=...`.
 
 const COOKIE = "lab_session";
-const MAX_AGE = 30 * 24 * 3600;   // matches the database's 30 days
+const MAX_AGE = 30 * 24 * 3600; // matches the database's 30 days
 
 function b64url(data: Buffer | string): string {
   return Buffer.from(data).toString("base64url");
@@ -55,7 +55,10 @@ function send(res: ServerResponse, status: number, body: unknown) {
 
 /** A problem with the request itself: its message is safe to show the browser. */
 class BadRequest extends Error {
-  constructor(readonly status: number, message: string) {
+  constructor(
+    readonly status: number,
+    message: string,
+  ) {
     super(message);
   }
 }
@@ -88,7 +91,10 @@ function fromThisPage(req: IncomingMessage): boolean {
   return origin == null || origin === `http://${req.headers.host}`;
 }
 
-interface Session { username: string; expires_at: string }
+interface Session {
+  username: string;
+  expires_at: string;
+}
 
 export function authPlugin({ apiUrl, secret }: { apiUrl: string; secret: string | undefined }): Plugin {
   /** Calls one of the web_auth functions (api.login, api.web_session, api.logout). */
@@ -101,7 +107,7 @@ export function authPlugin({ apiUrl, secret }: { apiUrl: string; secret: string 
     });
     const text = await res.text();
     if (!res.ok) throw new Error(`${fn}: ${res.status} ${text}`);
-    return (text ? JSON.parse(text) : null) as T;   // a void function (logout) answers with no body
+    return (text ? JSON.parse(text) : null) as T; // a void function (logout) answers with no body
   }
 
   const sessionOf = async (req: IncomingMessage): Promise<Session | null> => {
@@ -125,7 +131,8 @@ export function authPlugin({ apiUrl, secret }: { apiUrl: string; secret: string 
           if (url === "/auth/login" && req.method === "POST") {
             const { username, password } = await readJson(req);
             const s = await call<(Session & { token: string }) | null>("login", {
-              username: String(username ?? ""), password: String(password ?? ""),
+              username: String(username ?? ""),
+              password: String(password ?? ""),
             });
             if (!s) return send(res, 401, { message: "Wrong username or password." });
             setCookie(res, s.token);
@@ -134,7 +141,7 @@ export function authPlugin({ apiUrl, secret }: { apiUrl: string; secret: string 
 
           if (url === "/auth/session" && req.method === "GET") {
             const s = await sessionOf(req);
-            if (!s && readCookie(req)) setCookie(res, null);   // expired or logged out elsewhere
+            if (!s && readCookie(req)) setCookie(res, null); // expired or logged out elsewhere
             return send(res, 200, s ?? { username: null });
           }
 
@@ -146,7 +153,7 @@ export function authPlugin({ apiUrl, secret }: { apiUrl: string; secret: string 
           }
 
           if (url.startsWith("/api/")) {
-            delete req.headers.authorization;   // a role is only ever chosen here, never by the browser
+            delete req.headers.authorization; // a role is only ever chosen here, never by the browser
             if (write) {
               // a plain HTML form can't send JSON, so this also stops form posts PostgREST would accept
               if (!(req.headers["content-type"] ?? "").startsWith("application/json")) {
@@ -155,12 +162,14 @@ export function authPlugin({ apiUrl, secret }: { apiUrl: string; secret: string 
               if (!(await sessionOf(req))) return send(res, 401, { message: "Log in to make changes." });
               req.headers.authorization = `Bearer ${signToken(secret!, "web_writer")}`;
             }
-            delete req.headers.cookie;   // PostgREST has no use for the session token
+            delete req.headers.cookie; // PostgREST has no use for the session token
           }
         } catch (e) {
           if (e instanceof BadRequest) return send(res, e.status, { message: e.message });
           // the details (PostgREST's answer, a missing secret) go to the terminal, not to the browser
-          server.config.logger.error(`[rag-lab-auth] ${req.method} ${url}: ${e instanceof Error ? e.message : String(e)}`);
+          server.config.logger.error(
+            `[rag-lab-auth] ${req.method} ${url}: ${e instanceof Error ? e.message : String(e)}`,
+          );
           return send(res, 502, { message: "Couldn't check the login. The dev server's terminal says why." });
         }
         next();
@@ -174,7 +183,8 @@ export function authPlugin({ apiUrl, secret }: { apiUrl: string; secret: string 
         const write = req.method !== "GET" && req.method !== "HEAD";
         if (url.startsWith("/api") && !url.startsWith("/api/")) return send(res, 404, { message: "Not found." });
         if (url === "/auth/session") return send(res, 200, { username: null });
-        if (url.startsWith("/auth/")) return send(res, 403, { message: "A preview is read-only: log in with `make dev`." });
+        if (url.startsWith("/auth/"))
+          return send(res, 403, { message: "A preview is read-only: log in with `make dev`." });
         if (url.startsWith("/api/")) {
           if (write) return send(res, 403, { message: "A preview is read-only: make changes with `make dev`." });
           delete req.headers.authorization;

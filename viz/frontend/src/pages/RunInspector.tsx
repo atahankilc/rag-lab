@@ -10,7 +10,7 @@ function headline(run: Run, stages: RunStage[] | undefined): string {
   if (run.status === "queued") return "Queued, waiting for a backend to claim it";
   if (run.status === "done") return `Done in ${formatDuration(run.duration_ms)}`;
   const active = stages?.find((s) => s.state !== "done" && s.state !== "pending");
-  if (run.status === "failed") return `Failed during ${active ? active.label ?? active.stage : "the run"}`;
+  if (run.status === "failed") return `Failed during ${active ? (active.label ?? active.stage) : "the run"}`;
   if (!active) return "Running";
   return `${active.label ?? active.stage}${active.total ? ` · ${active.done ?? 0} of ${active.total}` : ""}`;
 }
@@ -36,17 +36,25 @@ export function RunInspector({ run, onClose }: { run: Run; onClose: () => void }
         <>
           <Readout label="Duration" size={34} value={formatDuration(run.duration_ms)} />
           <Readout label="Answers" size={34} value={`${run.results}`} unit={`/ ${run.questions}`} />
-          <Readout label="Cost" size={34} value={run.total_cost_usd != null ? formatUsd(Number(run.total_cost_usd)) : "—"} />
+          <Readout
+            label="Cost"
+            size={34}
+            value={run.total_cost_usd != null ? formatUsd(Number(run.total_cost_usd)) : "—"}
+          />
         </>
       }
     >
       {run.status === "queued" ? (
         <p className="lede run-note">
-          Nothing will pick this run up yet. A backend spike claims queued runs and writes its results back
-          (see <code>viz/docs/backend-contract.md</code>, coming last). Until then it stays queued.
+          Nothing will pick this run up yet. A backend spike claims queued runs and writes its results back (see{" "}
+          <code>viz/docs/backend-contract.md</code>, coming last). Until then it stays queued.
         </p>
       ) : null}
-      {run.error ? <p className="run-error" role="alert">{run.error}</p> : null}
+      {run.error ? (
+        <p className="run-error" role="alert">
+          {run.error}
+        </p>
+      ) : null}
 
       <InspectorSection title="Stages" count={stages ? `${done} / ${stages.length} done` : undefined}>
         <ul className="run-stages big">
@@ -55,9 +63,17 @@ export function RunInspector({ run, onClose }: { run: Run; onClose: () => void }
             return (
               <li key={s.stage} className={`run-stage ${s.state}`}>
                 <span className="run-stage-name">{s.label ?? s.stage}</span>
-                <span className={`bar thick ${s.state === "failed" ? "limit" : ""}`}><span style={{ width: `${Math.max(frac * 100, s.state === "failed" ? 2 : 0)}%` }} /></span>
+                <span className={`bar thick ${s.state === "failed" ? "limit" : ""}`}>
+                  <span style={{ width: `${Math.max(frac * 100, s.state === "failed" ? 2 : 0)}%` }} />
+                </span>
                 <span className="run-stage-count">
-                  {s.state === "done" ? "done" : s.total ? `${s.done ?? 0}/${s.total}` : s.state === "pending" ? "—" : s.state}
+                  {s.state === "done"
+                    ? "done"
+                    : s.total
+                      ? `${s.done ?? 0}/${s.total}`
+                      : s.state === "pending"
+                        ? "—"
+                        : s.state}
                 </span>
               </li>
             );
@@ -66,31 +82,50 @@ export function RunInspector({ run, onClose }: { run: Run; onClose: () => void }
       </InspectorSection>
 
       <InspectorSection title="Overrides">
-        {flatten(run.overrides).length === 0 ? <p className="muted">None: the version's config as is.</p>
-          : flatten(run.overrides).map(([p, v]) => (
-            <div key={p} className="kv-row changed"><span className="k">{p}</span><span className="v">{showValue(v)}</span></div>
-          ))}
+        {flatten(run.overrides).length === 0 ? (
+          <p className="muted">None: the version's config as is.</p>
+        ) : (
+          flatten(run.overrides).map(([p, v]) => (
+            <div key={p} className="kv-row changed">
+              <span className="k">{p}</span>
+              <span className="v">{showValue(v)}</span>
+            </div>
+          ))
+        )}
       </InspectorSection>
 
       {run.status === "done" ? (
         <InspectorSection title="Metrics">
-          {(metrics.data ?? []).filter((m) => m.scope === "all").map((m) => {
-            const f = formatValue(m.value, m.format);
-            return (
-              <div key={m.name} className="kv-row">
-                <span className="k">{m.label}</span>
-                <span className="v">{f.value}{f.unit ? ` ${f.unit}` : ""}</span>
-              </div>
-            );
-          })}
+          {(metrics.data ?? [])
+            .filter((m) => m.scope === "all")
+            .map((m) => {
+              const f = formatValue(m.value, m.format);
+              return (
+                <div key={m.name} className="kv-row">
+                  <span className="k">{m.label}</span>
+                  <span className="v">
+                    {f.value}
+                    {f.unit ? ` ${f.unit}` : ""}
+                  </span>
+                </div>
+              );
+            })}
         </InspectorSection>
       ) : null}
 
       <InspectorSection title="Cost by stage">
-        {Object.keys(run.stage_cost).length === 0 ? <p className="muted">No spend recorded yet.</p>
-          : Object.entries(run.stage_cost).sort((a, b) => b[1] - a[1]).map(([k, v]) => (
-            <div key={k} className="kv-row"><span className="k">{k}</span><span className="v">{formatUsd(Number(v))}</span></div>
-          ))}
+        {Object.keys(run.stage_cost).length === 0 ? (
+          <p className="muted">No spend recorded yet.</p>
+        ) : (
+          Object.entries(run.stage_cost)
+            .sort((a, b) => b[1] - a[1])
+            .map(([k, v]) => (
+              <div key={k} className="kv-row">
+                <span className="k">{k}</span>
+                <span className="v">{formatUsd(Number(v))}</span>
+              </div>
+            ))
+        )}
       </InspectorSection>
 
       <InspectorSection title="Events" count={events.data ? events.data.length : undefined}>
@@ -107,13 +142,37 @@ export function RunInspector({ run, onClose }: { run: Run; onClose: () => void }
       </InspectorSection>
 
       <InspectorSection title="Where it ran">
-        <div className="kv-row"><span className="k">queued</span><span className="v">{shortDate(run.queued_at)} {clockSeconds(run.queued_at)}</span></div>
-        <div className="kv-row"><span className="k">started</span><span className="v">{run.started_at ? `${shortDate(run.started_at)} ${clockSeconds(run.started_at)}` : "—"}</span></div>
-        <div className="kv-row"><span className="k">finished</span><span className="v">{run.finished_at ? `${shortDate(run.finished_at)} ${clockSeconds(run.finished_at)}` : "—"}</span></div>
-        <div className="kv-row"><span className="k">git commit</span><span className="v">{run.git_commit ?? "—"}</span></div>
-        <div className="kv-row"><span className="k">worker</span><span className="v">{run.worker ?? "—"}</span></div>
+        <div className="kv-row">
+          <span className="k">queued</span>
+          <span className="v">
+            {shortDate(run.queued_at)} {clockSeconds(run.queued_at)}
+          </span>
+        </div>
+        <div className="kv-row">
+          <span className="k">started</span>
+          <span className="v">
+            {run.started_at ? `${shortDate(run.started_at)} ${clockSeconds(run.started_at)}` : "—"}
+          </span>
+        </div>
+        <div className="kv-row">
+          <span className="k">finished</span>
+          <span className="v">
+            {run.finished_at ? `${shortDate(run.finished_at)} ${clockSeconds(run.finished_at)}` : "—"}
+          </span>
+        </div>
+        <div className="kv-row">
+          <span className="k">git commit</span>
+          <span className="v">{run.git_commit ?? "—"}</span>
+        </div>
+        <div className="kv-row">
+          <span className="k">worker</span>
+          <span className="v">{run.worker ?? "—"}</span>
+        </div>
         {flatten(run.environment).map(([p, v]) => (
-          <div key={p} className="kv-row"><span className="k">{p}</span><span className="v">{showValue(v)}</span></div>
+          <div key={p} className="kv-row">
+            <span className="k">{p}</span>
+            <span className="v">{showValue(v)}</span>
+          </div>
         ))}
       </InspectorSection>
     </Inspector>
