@@ -1,0 +1,57 @@
+# RAG Lab database stack: Postgres 17 + pgvector, PostgREST, and dbmate (run on demand).
+# Run from the repo root through the Makefile (it passes --env-file .env).
+# Every port binds to 127.0.0.1 only.
+
+name: rag-lab
+
+services:
+  db:
+    image: pgvector/pgvector:0.8.0-pg17
+    environment:
+      POSTGRES_DB: lab
+      POSTGRES_USER: lab
+      POSTGRES_PASSWORD: ${LAB_DB_PASSWORD:?set LAB_DB_PASSWORD in .env}
+      # read by init/00-roles.sh on first start
+      LAB_AUTHENTICATOR_PASSWORD: ${LAB_AUTHENTICATOR_PASSWORD:?set LAB_AUTHENTICATOR_PASSWORD in .env}
+      LAB_BACKEND_PASSWORD: ${LAB_BACKEND_PASSWORD:?set LAB_BACKEND_PASSWORD in .env}
+    ports:
+      - "127.0.0.1:${LAB_PG_PORT:-54329}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lab -d lab"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  api:
+    image: postgrest/postgrest:v12.2.12
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PGRST_DB_URI: postgres://authenticator:${LAB_AUTHENTICATOR_PASSWORD}@db:5432/lab
+      PGRST_DB_SCHEMAS: api
+      PGRST_DB_ANON_ROLE: web_anon
+      PGRST_JWT_SECRET: ${LAB_JWT_SECRET:?set LAB_JWT_SECRET in .env}
+      PGRST_DB_MAX_ROWS: 20000
+      PGRST_SERVER_PORT: 3000
+    ports:
+      - "127.0.0.1:${LAB_API_PORT:-3301}:3000"
+
+  dbmate:
+    image: ghcr.io/amacneil/dbmate:2.26.0
+    profiles: ["tools"]
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://lab:${LAB_DB_PASSWORD}@db:5432/lab?sslmode=disable&search_path=public
+      DBMATE_MIGRATIONS_DIR: /db/migrations
+      DBMATE_NO_DUMP_SCHEMA: "true"
+    volumes:
+      - ./migrations:/db/migrations:ro
+
+volumes:
+  pgdata:

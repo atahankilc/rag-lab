@@ -1,0 +1,73 @@
+/* Questions: the eval set as a table, and the question inspector. */
+
+.q-text {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ---------- inspector ---------- */
+
+.q-answer { font-size: 14px; color: var(--ink); line-height: 1.5; }
+.q-gold, .q-judge { font-size: 13px; color: var(--ink-2); line-height: 1.5; }
+.q-gold .label, .q-judge .label { margin-right: 6px; }
+
+.cite {
+  display: inline-block;
+  font-size: var(--t-micro);
+  font-weight: 600;
+  color: var(--sweep-hi);
+  padding: 0 2px;
+  border-radius: 3px;
+  vertical-align: 1px;
+}
+button.cite:hover { background: var(--sweep-wash); }
+.cite.static { color: var(--sweep-hi); }
+
+.ctx-list { display: grid; gap: 4px; margin-top: 6px; }
+.ctx { border-radius: 6px; transition: background var(--med) var(--ease); }
+.ctx.flash { background: var(--sweep-wash); }
+.ctx-btn { display: grid; grid-template-columns: 22px 1fr; gap: 8px; width: 100%; text-align: left; padding: 6px 4px; border-radius: 6px; }
+.ctx-btn:hover { background: rgba(255, 255, 255, 0.025); }
+.ctx-rank { font-size: 16px; color: var(--ink-2); padding-top: 1px; }
+.ctx-body { display: grid; gap: 5px; min-width: 0; }
+.ctx-head { display: flex; align-items: center; gap: 7px; font-size: var(--t-label); min-width: 0; }
+.ctx-head .mark { width: 7px; height: 7px; }
+.ctx-doc { color: var(--ink); font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.ctx-score { margin-left: auto; color: var(--ink-3); font-size: var(--t-micro); }
+.ctx-text {
+  font-size: var(--t-label);
+  color: var(--ink-2);
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.ctx-text.open { -webkit-line-clamp: unset; display: block; white-space: pre-line; }
+
+.q-evidence { display: grid; grid-template-columns: 14px 1fr; gap: 8px; }
+.q-ev-mark { padding-top: 5px; }
+.q-ev-mark .mark { width: 7px; height: 7px; }
+.q-ev-mark .mark.lost { width: 9px; height: 9px; }
+.q-ev-text { font-size: 13px; color: var(--ink-2); line-height: 1.45; }
+
+.kv-row .v .was.rise { color: var(--ink-3); }
+.kv-row .v .was.fall { color: var(--ink-3); }
+
+.q-side { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.q-side-col { display: grid; gap: 8px; align-content: start; min-width: 0; }
+.q-side-answer {
+  font-size: var(--t-label);
+  color: var(--ink-2);
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.q-side-ctx { display: grid; gap: 3px; }
+.q-side-ctx li { display: flex; align-items: center; gap: 6px; font-size: var(--t-micro); min-width: 0; }
+.q-side-ctx .mark { width: 6px; height: 6px; }
+.q-side-ctx .ctx-doc { font-weight: 400; color: var(--ink-2); }

@@ -1,0 +1,25 @@
+# data & outputs (large / regenerable)
+/data/
+runs/*
+!runs/.gitkeep
+.cache/
+vendor/
+
+# python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# secrets
+.env
+
+# IDE
+.idea/
+.DS_Store
+
+# node / frontend
+node_modules/
+dist/
+*.tsbuildinfo

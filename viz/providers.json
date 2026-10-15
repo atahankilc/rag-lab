@@ -1,0 +1,44 @@
+{
+  "providers": [
+    {
+      "id": "openai",
+      "name": "OpenAI",
+      "kind": "openai",
+      "location": "cloud",
+      "endpoint": "https://api.openai.com/v1",
+      "key_env": "OPENAI_API_KEY",
+      "models": [
+        { "name": "text-embedding-3-small", "kinds": ["embed", "retrieve"], "dim": 1536, "price_in_per_1m": 0.02 },
+        { "name": "text-embedding-3-large", "kinds": ["embed", "retrieve"], "dim": 3072, "price_in_per_1m": 0.13 },
+        { "name": "gpt-5-mini", "kinds": ["generate", "query_rewrite", "judge"], "price_in_per_1m": null, "price_out_per_1m": null },
+        { "name": "gpt-5.4", "kinds": ["judge", "generate"], "price_in_per_1m": null, "price_out_per_1m": null }
+      ]
+    },
+    {
+      "id": "ollama",
+      "name": "Ollama",
+      "kind": "ollama",
+      "location": "local",
+      "endpoint": "http://127.0.0.1:11434",
+      "models": []
+    },
+    {
+      "id": "st-local",
+      "name": "sentence-transformers",
+      "kind": "sentence-transformers",
+      "location": "local",
+      "endpoint": "in-process",
+      "models": [
+        { "name": "BAAI/bge-base-en-v1.5", "kinds": ["embed", "retrieve"], "dim": 768 },
+        { "name": "BAAI/bge-reranker-v2-m3", "kinds": ["rerank"] }
+      ]
+    }
+  ],
+  "defaults": {
+    "embed":         { "provider": "openai", "model": "text-embedding-3-small" },
+    "query_rewrite": { "provider": "openai", "model": "gpt-5-mini" },
+    "rerank":        { "provider": "st-local", "model": "BAAI/bge-reranker-v2-m3" },
+    "generate":      { "provider": "openai", "model": "gpt-5-mini" },
+    "judge":         { "provider": "openai", "model": "gpt-5.4" }
+  }
+}

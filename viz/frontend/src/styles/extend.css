@@ -1,0 +1,25 @@
+/* Extensions to the design language (documented in docs/DESIGN_LANGUAGE.md, "Extensions").
+   tokens.css stays verbatim; anything new lives here. */
+
+:root {
+  /* categorical data palette, for data types inside visualisations only */
+  --cat-1: #3987e5;  /* blue */
+  --cat-2: #d95926;  /* orange */
+  --cat-3: #199e70;  /* green */
+  --cat-4: #c98500;  /* gold */
+  --cat-5: #d55181;  /* pink */
+  --cat-6: #2bb5c6;  /* cyan */
+  --cat-7: #9b6ce0;  /* violet */
+  --cat-8: #e0a33b;  /* amber-gold */
+
+  /* HUD geometry */
+  --corner-w: 300px;          /* dock and timeline width */
+  --nav-top: 10px;            /* the menu, utilities and readout sit this close to the top */
+  --top-bar-h: 46px;          /* the inspector starts at --nav-top + this */
+  --inspector-w: 440px;
+  --row-divider: rgba(255, 255, 255, 0.05);
+}
+
+@media (max-width: 760px) {
+  :root { --edge: 16px; }
+}
