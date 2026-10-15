@@ -174,6 +174,10 @@ select lab.ensure_experiment(
   :config_jsonb);                                -- -> experiment_id
 ```
 
+`:chunk_set_id` and `:embedding_space_id` may be `null`: both for a closed-book version (no retrieval), only
+the embedding space for a lexical one (BM25 over chunks). An embedding space without a chunk set is an error.
+Such a version shows only the library steps it has on the Pipeline page, and the Space page says it has no vectors.
+
 If a version with exactly this library and this config already exists, you get its id back, whatever its slug.
 A new config with a slug that's already taken is an error: pick the next slug (`v6`).
 

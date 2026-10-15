@@ -18,12 +18,14 @@ export interface Experiment {
   created_at: string;
   ord: number;
   corpus_version_id: number;
-  chunk_set_id: number;
-  embedding_space_id: number;
+  /** null for a version without chunks (closed-book) */
+  chunk_set_id: number | null;
+  /** null for a version without vectors (closed-book, lexical only) */
+  embedding_space_id: number | null;
   eval_set_id: number;
-  chunk_set_name: string;
-  embedding_model: string;
-  embedding_location: "local" | "cloud";
+  chunk_set_name: string | null;
+  embedding_model: string | null;
+  embedding_location: "local" | "cloud" | null;
   step_ids: string[];
   latest_run_id: number | null;
   last_run_id: number | null;
@@ -47,11 +49,11 @@ export interface ExperimentDetail {
   pipeline_config: JsonObject;
   config: JsonObject;
   corpus: { id: number; name: string; hash: string; manifest: JsonObject; documents: number };
-  chunk_set: { id: number; name: string; config: JsonObject; hash: string; chunks: number };
+  chunk_set: { id: number; name: string; config: JsonObject; hash: string; chunks: number } | null;
   embedding_space: {
     id: number; provider: string; model: string; dim: number; location: "local" | "cloud";
     config: JsonObject; table: string | null; build_stats: JsonObject | null; hash: string;
-  };
+  } | null;
   eval_set: { id: number; name: string; version: string; questions: number };
   notes: { id: number; body: string; actor: string; created_at: string }[];
   latest_run_id: number | null;

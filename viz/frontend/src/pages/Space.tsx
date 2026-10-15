@@ -37,11 +37,11 @@ function pickMethod(methods: SpaceMethod[] | undefined, wanted: string | null | 
 
 /** Everything one version's side of the page needs. */
 function useSide(exp: Experiment | undefined, method: string | undefined) {
-  const points = useSpacePoints(exp?.embedding_space_id, method);
-  const queries = useQueryPoints(exp?.embedding_space_id, method);
+  const points = useSpacePoints(exp?.embedding_space_id ?? undefined, method);
+  const queries = useQueryPoints(exp?.embedding_space_id ?? undefined, method);
   const results = useQuestionResults(exp?.id);
   const runHits = useRunHits(exp?.latest_run_id ?? undefined);
-  const relevant = useRelevantPairs(exp?.chunk_set_id);
+  const relevant = useRelevantPairs(exp?.chunk_set_id ?? undefined);
   const stats = useMemo(() => retrievalStats(runHits.data, relevant.data, exp?.step_ids ?? []),
     [runHits.data, relevant.data, exp?.step_ids]);
   return { exp, points, queries, results, runHits, relevant, stats };
@@ -83,8 +83,8 @@ function SpaceView({ other }: { other: Experiment | undefined }) {
   const allQueries = params.get("all") === "1";
   const fieldsOpen = params.get("fields") === "1";
 
-  const methods = useSpaceMethods(current?.embedding_space_id);
-  const otherMethods = useSpaceMethods(other?.embedding_space_id);
+  const methods = useSpaceMethods(current?.embedding_space_id ?? undefined);
+  const otherMethods = useSpaceMethods(other?.embedding_space_id ?? undefined);
   const method = pickMethod(methods.data, params.get("m"));
   const otherMethod = pickMethod(otherMethods.data, method);
   const info = methods.data?.find((m) => m.method === method);
@@ -209,7 +209,7 @@ function SpaceView({ other }: { other: Experiment | undefined }) {
   });
 
   const selectedPane = selectedSide ? sides.indexOf(selectedSide) : -1;
-  const neighbourIds = useNeighbourIds(selectedSide?.exp?.embedding_space_id, selectedId);
+  const neighbourIds = useNeighbourIds(selectedSide?.exp?.embedding_space_id ?? undefined, selectedId);
   if (selectedPane >= 0) panes[selectedPane].neighbours = neighbourIds;
   // the selected chunk in the other pane, too
   if (selectedPoint && sides.length > 1) {
@@ -221,6 +221,19 @@ function SpaceView({ other }: { other: Experiment | undefined }) {
   useEffect(() => { setHover(null); }, [current?.id, other?.id]);
 
   if (!current) return null;
+  if (current.embedding_space_id == null) {
+    return (
+      <Centered>
+        <div className="empty-state">
+          <p className="section-head">No vectors in this version</p>
+          <p className="lede">
+            {current.slug} has no embedding space{current.chunk_set_id == null ? " and no chunks: it answers without retrieval" : ": it retrieves without vectors (lexical only)"}.
+            {" "}Pick a version that embeds its chunks to see the map.
+          </p>
+        </div>
+      </Centered>
+    );
+  }
   if (methods.error || main.points.error) return <Centered><ErrorNote error={methods.error ?? main.points.error} /></Centered>;
   if (methods.isLoading || main.points.isLoading) return <Centered><Loading label="Loading space" /></Centered>;
   if (!methods.data?.length) {
@@ -289,7 +302,7 @@ function SpaceView({ other }: { other: Experiment | undefined }) {
           <div className="ctl">
             <select id="space-cmp" className="select" value={other?.slug ?? ""} onChange={(e) => set({ cmp: e.target.value || null })}>
               <option value="">Only {current.slug}</option>
-              {experiments.filter((e) => e.id !== current.id).map((e) => (
+              {experiments.filter((e) => e.id !== current.id && e.embedding_space_id != null).map((e) => (
                 <option key={e.id} value={e.slug}>
                   {current.slug} vs {e.slug} · {e.embedding_model} · {e.chunk_set_name}{e.chunk_set_id === current.chunk_set_id ? " · same chunks" : ""}
                 </option>
@@ -395,7 +408,7 @@ function SpaceView({ other }: { other: Experiment | undefined }) {
         <ChunkInspector
           point={selectedPoint}
           index={selectedSide.points.data!.indexOf(selectedPoint)}
-          spaceId={selectedSide.exp.embedding_space_id}
+          spaceId={selectedSide.exp.embedding_space_id!}
           slug={selectedSide.exp.slug}
           fields={fieldsOf(selectedSide)}
           colorMark={panes[selectedPane]?.colors[selectedSide.points.data!.indexOf(selectedPoint)]}

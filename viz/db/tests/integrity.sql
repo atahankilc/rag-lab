@@ -236,6 +236,26 @@ select pg_temp.check('the same version config -> the same version (whatever the 
 select pg_temp.must_fail('a version mixing artifacts from different chunk sets',
   format('select lab.ensure_experiment(''bad5'', ''x'', null, null, %s, %s, %s, %s, ''{}'')', :corpus, :cs_a, :space_b, :eval_set));
 
+select '-- a version may skip part of the library';
+select lab.ensure_experiment('test-closed-book', 'Closed book', null, 'no retrieval', :corpus, null, null, :eval_set,
+  '{"steps": [{"id": "generate", "kind": "generate", "provider": "test-local"}]}') as exp_cb \gset
+select pg_temp.check('closed-book again -> the same version',
+  lab.ensure_experiment('test-closed-book-2', 'x', null, null, :corpus, null, null, :eval_set,
+    '{"steps": [{"id": "generate", "kind": "generate", "provider": "test-local"}]}') = :exp_cb);
+select pg_temp.must_pass('a lexical version: chunks, no vectors',
+  format('select lab.ensure_experiment(''test-bm25'', ''x'', null, null, %s, %s, null, %s, ''{"steps": [{"id": "bm25", "kind": "retrieve", "method": "bm25"}]}'')', :corpus, :cs_a, :eval_set));
+select pg_temp.must_fail('an embedding space without a chunk set',
+  format('select lab.ensure_experiment(''bad6'', ''x'', null, null, %s, null, %s, %s, ''{}'')', :corpus, :space_a, :eval_set));
+select pg_temp.check('a closed-book version is on the timeline',
+  exists (select 1 from api.experiments where id = :exp_cb and chunk_set_id is null));
+select pg_temp.check('its detail has no chunk set or embedding space',
+  (select chunk_set is null and embedding_space is null and not (config ? 'chunking') and not (config ? 'embedding')
+   from api.experiment_detail where id = :exp_cb));
+select pg_temp.check('its pipeline is ingest + its own steps',
+  (select array_agg(step_id order by ord) from api.step_summary where experiment_id = :exp_cb) = array['ingest', 'generate']);
+select pg_temp.check('a diff to a version with vectors lists chunking and embedding',
+  (select count(*) from api.config_diff(:exp_cb, :exp_a) where path like 'chunking.%' or path like 'embedding.%') > 0);
+
 select '-- relevance survives rechunking';
 select pg_temp.check('the question has a relevant chunk in both chunk sets',
   (select count(distinct chunk_set_id) from api.relevant_chunks where question_id = :q1) = 2);
