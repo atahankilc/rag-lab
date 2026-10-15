@@ -2,7 +2,13 @@ import type { Direction } from "../lib/format";
 
 /** A label above a big light numeral, with a small delta beside it. */
 export function Readout({
-  label, value, unit, delta, dir = "flat", size = 28, title,
+  label,
+  value,
+  unit,
+  delta,
+  dir = "flat",
+  size = 28,
+  title,
 }: {
   label: string;
   value: string;

@@ -10,10 +10,20 @@ import { useVersion } from "../state/version";
 import { VerdictMark } from "./Questions";
 
 function found(ev: Evidence, context: RetrievalHit[]): boolean {
-  return context.some((h) => h.document_id === ev.document_id && h.char_start < ev.char_end && ev.char_start < h.char_end);
+  return context.some(
+    (h) => h.document_id === ev.document_id && h.char_start < ev.char_end && ev.char_start < h.char_end,
+  );
 }
 
-export function QuestionInspector({ r, onClose, verdict }: { r: QuestionResult; onClose: () => void; verdict: Verdict | null }) {
+export function QuestionInspector({
+  r,
+  onClose,
+  verdict,
+}: {
+  r: QuestionResult;
+  onClose: () => void;
+  verdict: Verdict | null;
+}) {
   const { reference, refMode, experiments } = useVersion();
   const stepIds = experiments.find((e) => e.id === r.experiment_id)?.step_ids ?? [];
   const defs = useMetricDefs();
@@ -43,7 +53,9 @@ export function QuestionInspector({ r, onClose, verdict }: { r: QuestionResult; 
     if (!c) return;
     setStageChoice(final ?? null);
     setFlash(c.chunk_id);
-    requestAnimationFrame(() => document.getElementById(`ctx-${c.chunk_id}`)?.scrollIntoView({ block: "nearest", behavior: "smooth" }));
+    requestAnimationFrame(() =>
+      document.getElementById(`ctx-${c.chunk_id}`)?.scrollIntoView({ block: "nearest", behavior: "smooth" }),
+    );
     window.setTimeout(() => setFlash(null), 1600);
   };
 
@@ -59,11 +71,19 @@ export function QuestionInspector({ r, onClose, verdict }: { r: QuestionResult; 
       title={r.question}
       figure={
         <>
-          <Readout label={primary.label} size={34} value={formatValue(r.score, primary.format).value}
-                   delta={d != null ? formatDelta(d, primary.format) : undefined}
-                   dir={direction(d, true, 0.005)} />
-          <Readout label="Latency" size={34} value={formatValue(r.latency_total_ms, "ms").value}
-                   unit={formatValue(r.latency_total_ms, "ms").unit} />
+          <Readout
+            label={primary.label}
+            size={34}
+            value={formatValue(r.score, primary.format).value}
+            delta={d != null ? formatDelta(d, primary.format) : undefined}
+            dir={direction(d, true, 0.005)}
+          />
+          <Readout
+            label="Latency"
+            size={34}
+            value={formatValue(r.latency_total_ms, "ms").value}
+            unit={formatValue(r.latency_total_ms, "ms").unit}
+          />
           <Readout label="Cost" size={34} value={r.cost_usd != null ? formatUsd(Number(r.cost_usd)) : "—"} />
         </>
       }
@@ -73,10 +93,14 @@ export function QuestionInspector({ r, onClose, verdict }: { r: QuestionResult; 
           <CitedText text={r.answer ?? "No answer."} onCite={jumpTo} />
         </p>
         {r.gold_answer ? (
-          <div className="q-gold"><span className="label">Gold</span> {r.gold_answer}</div>
+          <div className="q-gold">
+            <span className="label">Gold</span> {r.gold_answer}
+          </div>
         ) : null}
         {r.judge_rationale ? (
-          <div className="q-judge"><span className="label">Judge</span> {r.judge_rationale}</div>
+          <div className="q-judge">
+            <span className="label">Judge</span> {r.judge_rationale}
+          </div>
         ) : null}
       </InspectorSection>
 
@@ -93,7 +117,14 @@ export function QuestionInspector({ r, onClose, verdict }: { r: QuestionResult; 
         <ContextList hits={shown} cited={stage === final ? citedBy : new Map()} flash={flash} />
       </InspectorSection>
 
-      <InspectorSection title="Gold evidence" count={question.data ? `${question.data.evidence.filter((e) => found(e, context)).length} / ${question.data.evidence.length} found` : undefined}>
+      <InspectorSection
+        title="Gold evidence"
+        count={
+          question.data
+            ? `${question.data.evidence.filter((e) => found(e, context)).length} / ${question.data.evidence.length} found`
+            : undefined
+        }
+      >
         {question.data?.evidence.length === 0 ? (
           <p className="muted">None: the corpus doesn't answer this question. The right answer is to say so.</p>
         ) : null}
@@ -101,12 +132,18 @@ export function QuestionInspector({ r, onClose, verdict }: { r: QuestionResult; 
           const ok = found(ev, context);
           return (
             <div key={i} className="q-evidence">
-              <span className="q-ev-mark" title={ok ? "Found in the final context" : "Missed: no retrieved chunk covers it"}>
+              <span
+                className="q-ev-mark"
+                title={ok ? "Found in the final context" : "Missed: no retrieved chunk covers it"}
+              >
                 {ok ? <i className="mark held" /> : <i className="mark lost" />}
               </span>
               <div>
                 <div className="q-ev-text">{ev.text}</div>
-                <div className="t-meta">{ev.document_title} · chars {ev.char_start}–{ev.char_end}{ok ? "" : " · missed"}</div>
+                <div className="t-meta">
+                  {ev.document_title} · chars {ev.char_start}–{ev.char_end}
+                  {ok ? "" : " · missed"}
+                </div>
               </div>
             </div>
           );
@@ -137,22 +174,39 @@ export function QuestionInspector({ r, onClose, verdict }: { r: QuestionResult; 
       </InspectorSection>
 
       <InspectorSection title="Latency by stage">
-        {Object.entries(r.latency_ms).filter(([k]) => k !== "total")
+        {Object.entries(r.latency_ms)
+          .filter(([k]) => k !== "total")
           .sort((a, b) => stepRank(stepIds, a[0]) - stepRank(stepIds, b[0]))
           .map(([k, v]) => (
-          <div key={k} className="kv-row">
-            <span className="k">{k}</span>
-            <span className="v">{formatValue(v, "ms").value} {formatValue(v, "ms").unit}</span>
-          </div>
-        ))}
+            <div key={k} className="kv-row">
+              <span className="k">{k}</span>
+              <span className="v">
+                {formatValue(v, "ms").value} {formatValue(v, "ms").unit}
+              </span>
+            </div>
+          ))}
       </InspectorSection>
 
       {reference ? (
         <InspectorSection title={`Side by side · ${r.slug} vs ${reference.slug}`}>
-          {!refRow ? <p className="muted">{reference.slug} has no result for this question.</p> : (
+          {!refRow ? (
+            <p className="muted">{reference.slug} has no result for this question.</p>
+          ) : (
             <div className="q-side">
-              <SideColumn label={r.slug} row={r} hits={hits.data ?? []} stepIds={stepIds} primaryFormat={primary.format} />
-              <SideColumn label={reference.slug} row={refRow} hits={refHits.data ?? []} stepIds={reference.step_ids} primaryFormat={primary.format} />
+              <SideColumn
+                label={r.slug}
+                row={r}
+                hits={hits.data ?? []}
+                stepIds={stepIds}
+                primaryFormat={primary.format}
+              />
+              <SideColumn
+                label={reference.slug}
+                row={refRow}
+                hits={refHits.data ?? []}
+                stepIds={reference.step_ids}
+                primaryFormat={primary.format}
+              />
             </div>
           )}
         </InspectorSection>
@@ -168,7 +222,9 @@ function CitedText({ text, onCite }: { text: string; onCite: (marker: string) =>
     <>
       {parts.map((p, i) =>
         /^\[\d+\]$/.test(p) ? (
-          <button key={i} type="button" className="cite" onClick={() => onCite(p)} aria-label={`Show cited chunk ${p}`}>{p}</button>
+          <button key={i} type="button" className="cite" onClick={() => onCite(p)} aria-label={`Show cited chunk ${p}`}>
+            {p}
+          </button>
         ) : (
           <Fragment key={i}>{p}</Fragment>
         ),
@@ -177,30 +233,54 @@ function CitedText({ text, onCite }: { text: string; onCite: (marker: string) =>
   );
 }
 
-function ContextList({ hits, cited, flash }: { hits: RetrievalHit[]; cited: Map<number, string>; flash: number | null }) {
+function ContextList({
+  hits,
+  cited,
+  flash,
+}: {
+  hits: RetrievalHit[];
+  cited: Map<number, string>;
+  flash: number | null;
+}) {
   const [open, setOpen] = useState<number | null>(null);
   const scores = hits.map((h) => h.score ?? 0);
-  const lo = Math.min(...scores), hi = Math.max(...scores);
+  const lo = Math.min(...scores),
+    hi = Math.max(...scores);
   return (
     <ol className="ctx-list">
       {hits.map((h) => {
         const frac = hi > lo ? ((h.score ?? lo) - lo) / (hi - lo) : 1;
         const marker = cited.get(h.chunk_id);
         return (
-          <li key={`${h.stage}-${h.rank}`} id={`ctx-${h.chunk_id}`} className={`ctx ${flash === h.chunk_id ? "flash" : ""}`}>
-            <button type="button" className="ctx-btn" onClick={() => setOpen(open === h.rank ? null : h.rank)}
-                    aria-expanded={open === h.rank}>
+          <li
+            key={`${h.stage}-${h.rank}`}
+            id={`ctx-${h.chunk_id}`}
+            className={`ctx ${flash === h.chunk_id ? "flash" : ""}`}
+          >
+            <button
+              type="button"
+              className="ctx-btn"
+              onClick={() => setOpen(open === h.rank ? null : h.rank)}
+              aria-expanded={open === h.rank}
+            >
               <span className="ctx-rank num">{h.rank}</span>
               <span className="ctx-body">
                 <span className="ctx-head">
-                  <i className={h.relevant ? "mark held" : "mark new"} title={h.relevant ? "Overlaps gold evidence" : "Not relevant"} />
+                  <i
+                    className={h.relevant ? "mark held" : "mark new"}
+                    title={h.relevant ? "Overlaps gold evidence" : "Not relevant"}
+                  />
                   <span className="ctx-doc">{h.document_title}</span>
                   {marker ? <span className="cite no-link">{marker}</span> : null}
                   <span className="ctx-score">{h.score != null ? h.score.toFixed(3) : ""}</span>
                 </span>
-                <span className="bar"><span style={{ width: `${Math.max(4, frac * 100)}%` }} /></span>
+                <span className="bar">
+                  <span style={{ width: `${Math.max(4, frac * 100)}%` }} />
+                </span>
                 <span className={`ctx-text ${open === h.rank ? "open" : ""}`}>{h.text}</span>
-                <span className="t-meta">{h.source} · chunk {h.chunk_ord} · {h.token_count} tokens</span>
+                <span className="t-meta">
+                  {h.source} · chunk {h.chunk_ord} · {h.token_count} tokens
+                </span>
               </span>
             </button>
           </li>
@@ -210,8 +290,18 @@ function ContextList({ hits, cited, flash }: { hits: RetrievalHit[]; cited: Map<
   );
 }
 
-function SideColumn({ label, row, hits, stepIds, primaryFormat }: {
-  label: string; row: QuestionResult; hits: RetrievalHit[]; stepIds: string[]; primaryFormat: string;
+function SideColumn({
+  label,
+  row,
+  hits,
+  stepIds,
+  primaryFormat,
+}: {
+  label: string;
+  row: QuestionResult;
+  hits: RetrievalHit[];
+  stepIds: string[];
+  primaryFormat: string;
 }) {
   const final = finalStage(hits, stepIds);
   const context = hits.filter((h) => h.stage === final);

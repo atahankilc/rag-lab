@@ -41,11 +41,14 @@ export function VersionProvider({ children }: { children: ReactNode }) {
 
   const update = useCallback(
     (key: string, value: string) =>
-      setParams((p) => {
-        const next = new URLSearchParams(p);
-        next.set(key, value);
-        return next;
-      }, { replace: true }),
+      setParams(
+        (p) => {
+          const next = new URLSearchParams(p);
+          next.set(key, value);
+          return next;
+        },
+        { replace: true },
+      ),
     [setParams],
   );
 
@@ -60,8 +63,18 @@ export function VersionProvider({ children }: { children: ReactNode }) {
   );
 
   const value: VersionState = {
-    experiments, current, index, parent, baseline, reference, refMode, setSlug, step, setRefMode,
-    isLoading, error: error as Error | null,
+    experiments,
+    current,
+    index,
+    parent,
+    baseline,
+    reference,
+    refMode,
+    setSlug,
+    step,
+    setRefMode,
+    isLoading,
+    error: error as Error | null,
   };
   return <VersionContext.Provider value={value}>{children}</VersionContext.Provider>;
 }

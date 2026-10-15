@@ -54,24 +54,41 @@ export function Runs() {
   const selectedId = params.get("run") ? Number(params.get("run")) : null;
   const select = (id: number | null) => {
     setQueueing(false);
-    setParams((p) => {
-      const next = new URLSearchParams(p);
-      if (id == null) next.delete("run");
-      else next.set("run", String(id));
-      return next;
-    }, { replace: true });
+    setParams(
+      (p) => {
+        const next = new URLSearchParams(p);
+        if (id == null) next.delete("run");
+        else next.set("run", String(id));
+        return next;
+      },
+      { replace: true },
+    );
   };
 
   const all = useMemo(() => runs.data ?? [], [runs.data]);
   const counts = { queued: 0, running: 0, done: 0, failed: 0 } as Record<RunStatus, number>;
   for (const r of all) counts[r.status] += 1;
-  const slugs = [...new Map(all.map((r) => [r.slug, r.experiment_id])).entries()].sort((a, b) => a[1] - b[1]).map(([s]) => s);
-  const visible = all.filter((r) => (status === "all" || r.status === status) && (versions.size === 0 || versions.has(r.slug)));
+  const slugs = [...new Map(all.map((r) => [r.slug, r.experiment_id])).entries()]
+    .sort((a, b) => a[1] - b[1])
+    .map(([s]) => s);
+  const visible = all.filter(
+    (r) => (status === "all" || r.status === status) && (versions.size === 0 || versions.has(r.slug)),
+  );
   const spent = all.reduce((sum, r) => sum + Number(r.total_cost_usd ?? 0), 0);
   const selected = all.find((r) => r.id === selectedId);
 
-  if (runs.error) return <Centered><ErrorNote error={runs.error} /></Centered>;
-  if (runs.isLoading) return <Centered><Loading label="Loading runs" /></Centered>;
+  if (runs.error)
+    return (
+      <Centered>
+        <ErrorNote error={runs.error} />
+      </Centered>
+    );
+  if (runs.isLoading)
+    return (
+      <Centered>
+        <Loading label="Loading runs" />
+      </Centered>
+    );
 
   const cols = md ? "52px minmax(200px, 1fr) 150px 110px 84px 76px 76px" : "40px minmax(0, 1fr) 84px";
   const toggleVersion = (s: string) =>
@@ -90,14 +107,23 @@ export function Runs() {
             <div>
               <div className="runs-title">
                 <h1 className="page-title">Runs</h1>
-                <button type="button" className="pill" aria-pressed={queueing} disabled={!canWrite} title={canWrite ? undefined : LOCKED_HINT}
-                        onClick={() => { select(null); setQueueing(true); }}>
+                <button
+                  type="button"
+                  className="pill"
+                  aria-pressed={queueing}
+                  disabled={!canWrite}
+                  title={canWrite ? undefined : LOCKED_HINT}
+                  onClick={() => {
+                    select(null);
+                    setQueueing(true);
+                  }}
+                >
                   <Plus /> Queue run
                 </button>
               </div>
               <p className="lede">
-                Every evaluation of every version. A queued run waits for a backend to claim it, and there is no
-                backend yet, so new runs stay queued.
+                Every evaluation of every version. A queued run waits for a backend to claim it, and there is no backend
+                yet, so new runs stay queued.
               </p>
             </div>
             <div className="page-readouts">
@@ -124,7 +150,13 @@ export function Runs() {
             />
             <span className="divider" aria-hidden="true" />
             {slugs.map((s) => (
-              <button key={s} type="button" className="chip" aria-pressed={versions.has(s)} onClick={() => toggleVersion(s)}>
+              <button
+                key={s}
+                type="button"
+                className="chip"
+                aria-pressed={versions.has(s)}
+                onClick={() => toggleVersion(s)}
+              >
                 {s} <span className="count">{all.filter((r) => r.slug === s).length}</span>
               </button>
             ))}
@@ -148,32 +180,57 @@ export function Runs() {
         <div className="t-table" aria-label="Runs">
           {visible.length === 0 ? <p className="t-empty">No run matches these filters.</p> : null}
           {visible.map((r) => (
-            <button key={r.id} type="button" className={`t-row run-row ${r.status}`} style={{ ["--cols" as string]: cols }}
-                    aria-current={r.id === selectedId} onClick={() => select(r.id)}
-                    aria-label={`Run ${r.id}, ${r.slug}, ${STATUS_TEXT[r.status]}`}>
+            <button
+              key={r.id}
+              type="button"
+              className={`t-row run-row ${r.status}`}
+              style={{ ["--cols" as string]: cols }}
+              aria-current={r.id === selectedId}
+              onClick={() => select(r.id)}
+              aria-label={`Run ${r.id}, ${r.slug}, ${STATUS_TEXT[r.status]}`}
+            >
               <span className="t-id">#{r.id}</span>
               <span className="t-name">
-                <span className="main"><span className="timeline-slug">{r.slug}</span> {r.experiment_name}</span>
+                <span className="main">
+                  <span className="timeline-slug">{r.slug}</span> {r.experiment_name}
+                </span>
                 <span className="sub run-overrides">{overridesSummary(r.overrides)}</span>
               </span>
               <span className="run-status">
-                <span className="run-status-main"><RunStatusMark status={r.status} /> {STATUS_TEXT[r.status]}</span>
+                <span className="run-status-main">
+                  <RunStatusMark status={r.status} /> {STATUS_TEXT[r.status]}
+                </span>
                 <span className="t-meta">
-                  {r.status === "queued" ? "waiting for a backend"
-                    : r.status === "failed" ? (r.error?.split(":")[0] ?? "failed")
-                    : r.status === "running" ? `${r.results} / ${r.questions} answered`
-                    : `${r.events} events`}
+                  {r.status === "queued"
+                    ? "waiting for a backend"
+                    : r.status === "failed"
+                      ? (r.error?.split(":")[0] ?? "failed")
+                      : r.status === "running"
+                        ? `${r.results} / ${r.questions} answered`
+                        : `${r.events} events`}
                 </span>
               </span>
               {md ? (
                 <>
                   <span>
                     <span className="t-val">{r.started_at ? shortDate(r.started_at) : "—"}</span>
-                    <span className="t-meta">{r.started_at ? clockTime(r.started_at) : `queued ${clockTime(r.queued_at)}`}</span>
+                    <span className="t-meta">
+                      {r.started_at ? clockTime(r.started_at) : `queued ${clockTime(r.queued_at)}`}
+                    </span>
                   </span>
-                  <span className="t-num"><span className="t-val">{formatDuration(r.duration_ms)}</span></span>
-                  <span className="t-num"><span className="t-val">{r.results} / {r.questions}</span></span>
-                  <span className="t-num"><span className="t-val">{r.total_cost_usd != null ? formatUsd(Number(r.total_cost_usd)) : "—"}</span></span>
+                  <span className="t-num">
+                    <span className="t-val">{formatDuration(r.duration_ms)}</span>
+                  </span>
+                  <span className="t-num">
+                    <span className="t-val">
+                      {r.results} / {r.questions}
+                    </span>
+                  </span>
+                  <span className="t-num">
+                    <span className="t-val">
+                      {r.total_cost_usd != null ? formatUsd(Number(r.total_cost_usd)) : "—"}
+                    </span>
+                  </span>
                 </>
               ) : null}
             </button>

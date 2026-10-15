@@ -1,6 +1,12 @@
 /** Hairline pill container with inner 24px pills. */
 export function Segmented<T extends string>({
-  label, value, options, onChange, ariaLabel, disabled, title,
+  label,
+  value,
+  options,
+  onChange,
+  ariaLabel,
+  disabled,
+  title,
 }: {
   label?: string;
   value: T;
@@ -15,8 +21,13 @@ export function Segmented<T extends string>({
     <div className="seg" role="group" aria-label={ariaLabel} title={title}>
       {label ? <span className="seg-label">{label}</span> : null}
       {options.map((o) => (
-        <button key={o.value} type="button" aria-pressed={o.value === value} disabled={disabled || o.disabled}
-                onClick={() => onChange(o.value)}>
+        <button
+          key={o.value}
+          type="button"
+          aria-pressed={o.value === value}
+          disabled={disabled || o.disabled}
+          onClick={() => onChange(o.value)}
+        >
           {o.label}
           {o.count != null ? <span className="count">{o.count}</span> : null}
         </button>

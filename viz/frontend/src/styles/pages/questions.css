@@ -1,47 +1,116 @@
 /* Questions: the eval set as a table, and the question inspector. */
 
-.q-text { @apply line-clamp-1; }
+.q-text {
+  @apply line-clamp-1;
+}
 
 /* ---------- inspector ---------- */
 
-.q-answer { @apply text-body leading-[1.5] text-ink; }
-.q-gold, .q-judge { @apply text-row leading-[1.5] text-ink-2; }
-.q-gold .label, .q-judge .label { @apply mr-1.5; }
+.q-answer {
+  @apply text-body leading-[1.5] text-ink;
+}
+.q-gold,
+.q-judge {
+  @apply text-row leading-[1.5] text-ink-2;
+}
+.q-gold .label,
+.q-judge .label {
+  @apply mr-1.5;
+}
 
 .cite {
   @apply inline-block rounded-[3px] px-0.5 align-[1px] text-micro font-semibold text-sweep-hi;
 }
-button.cite:hover { @apply bg-sweep-wash; }
-.cite.no-link { @apply text-sweep-hi; }
+button.cite:hover {
+  @apply bg-sweep-wash;
+}
+.cite.no-link {
+  @apply text-sweep-hi;
+}
 
-.ctx-list { @apply mt-1.5 grid gap-1; }
-.ctx { @apply rounded-md transition-[background] duration-240 ease-instrument; }
-.ctx.flash { @apply bg-sweep-wash; }
-.ctx-btn { @apply grid w-full grid-cols-[22px_1fr] gap-2 rounded-md px-1 py-1.5 text-left; }
-.ctx-btn:hover { @apply bg-tint-1; }
-.ctx-rank { @apply pt-px text-[16px] text-ink-2; }
-.ctx-body { @apply grid min-w-0 gap-[5px]; }
-.ctx-head { @apply flex min-w-0 items-center gap-[7px] text-label; }
-.ctx-head .mark { @apply size-[7px]; }
-.ctx-doc { @apply min-w-0 truncate font-medium text-ink; }
-.ctx-score { @apply ml-auto text-micro text-ink-3; }
-.ctx-text { @apply line-clamp-3 text-label leading-[1.45] text-ink-2; }
+.ctx-list {
+  @apply mt-1.5 grid gap-1;
+}
+.ctx {
+  @apply rounded-md transition-[background] duration-240 ease-instrument;
+}
+.ctx.flash {
+  @apply bg-sweep-wash;
+}
+.ctx-btn {
+  @apply grid w-full grid-cols-[22px_1fr] gap-2 rounded-md px-1 py-1.5 text-left;
+}
+.ctx-btn:hover {
+  @apply bg-tint-1;
+}
+.ctx-rank {
+  @apply pt-px text-[16px] text-ink-2;
+}
+.ctx-body {
+  @apply grid min-w-0 gap-[5px];
+}
+.ctx-head {
+  @apply flex min-w-0 items-center gap-[7px] text-label;
+}
+.ctx-head .mark {
+  @apply size-[7px];
+}
+.ctx-doc {
+  @apply min-w-0 truncate font-medium text-ink;
+}
+.ctx-score {
+  @apply ml-auto text-micro text-ink-3;
+}
+.ctx-text {
+  @apply line-clamp-3 text-label leading-[1.45] text-ink-2;
+}
 /* opened: all lines, still clipped at the box (line-clamp-none would also drop overflow: hidden) */
-.ctx-text.open { -webkit-line-clamp: unset; @apply block whitespace-pre-line; }
+.ctx-text.open {
+  -webkit-line-clamp: unset;
+  @apply block whitespace-pre-line;
+}
 
-.q-evidence { @apply grid grid-cols-[14px_1fr] gap-2; }
-.q-ev-mark { @apply pt-[5px]; }
-.q-ev-mark .mark { @apply size-[7px]; }
-.q-ev-mark .mark.lost { @apply size-[9px]; }
-.q-ev-text { @apply text-row leading-[1.45] text-ink-2; }
+.q-evidence {
+  @apply grid grid-cols-[14px_1fr] gap-2;
+}
+.q-ev-mark {
+  @apply pt-[5px];
+}
+.q-ev-mark .mark {
+  @apply size-[7px];
+}
+.q-ev-mark .mark.lost {
+  @apply size-[9px];
+}
+.q-ev-text {
+  @apply text-row leading-[1.45] text-ink-2;
+}
 
-.kv-row .v .was.rise { @apply text-ink-3; }
-.kv-row .v .was.fall { @apply text-ink-3; }
+.kv-row .v .was.rise {
+  @apply text-ink-3;
+}
+.kv-row .v .was.fall {
+  @apply text-ink-3;
+}
 
-.q-side { @apply grid grid-cols-2 gap-4; }
-.q-side-col { @apply grid min-w-0 content-start gap-2; }
-.q-side-answer { @apply line-clamp-4 text-label leading-[1.45] text-ink-2; }
-.q-side-ctx { @apply grid gap-[3px]; }
-.q-side-ctx li { @apply flex min-w-0 items-center gap-1.5 text-micro; }
-.q-side-ctx .mark { @apply size-1.5; }
-.q-side-ctx .ctx-doc { @apply font-normal text-ink-2; }
+.q-side {
+  @apply grid grid-cols-2 gap-4;
+}
+.q-side-col {
+  @apply grid min-w-0 content-start gap-2;
+}
+.q-side-answer {
+  @apply line-clamp-4 text-label leading-[1.45] text-ink-2;
+}
+.q-side-ctx {
+  @apply grid gap-[3px];
+}
+.q-side-ctx li {
+  @apply flex min-w-0 items-center gap-1.5 text-micro;
+}
+.q-side-ctx .mark {
+  @apply size-1.5;
+}
+.q-side-ctx .ctx-doc {
+  @apply font-normal text-ink-2;
+}

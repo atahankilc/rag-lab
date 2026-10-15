@@ -22,7 +22,7 @@ function parse(text: string, original: Json, added?: boolean): Json | undefined 
     try {
       return JSON.parse(text) as Json;
     } catch {
-      return added ? text : undefined;      // a new setting may simply be a string
+      return added ? text : undefined; // a new setting may simply be a string
     }
   }
   if (typeof original === "number") {
@@ -71,7 +71,9 @@ export function QueueRunForm({ onClose, onQueued }: { onClose: () => void; onQue
     setOrder(s.map((x) => x.id));
     setSkipped(new Set());
     setFields([
-      ...s.flatMap((step) => flatten(step.settings).map(([p, v]) => ({ path: `steps.${step.id}.${p}`, original: v, text: toText(v) }))),
+      ...s.flatMap((step) =>
+        flatten(step.settings).map(([p, v]) => ({ path: `steps.${step.id}.${p}`, original: v, text: toText(v) })),
+      ),
       ...flatten(rest as JsonObject).map(([path, v]) => ({ path, original: v, text: toText(v) })),
     ]);
   }, [detail.data]);
@@ -87,12 +89,14 @@ export function QueueRunForm({ onClose, onQueued }: { onClose: () => void; onQue
   for (const id of skipped) overrides = setPath(overrides, `steps.${id}`, null);
   if (!same(order, originalOrder)) overrides = { ...overrides, step_order: order.filter((id) => !skipped.has(id)) };
 
-  const setText = (path: string, text: string) => setFields((fs) => fs.map((f) => (f.path === path ? { ...f, text } : f)));
+  const setText = (path: string, text: string) =>
+    setFields((fs) => fs.map((f) => (f.path === path ? { ...f, text } : f)));
   const reset = (path: string) =>
     setFields((fs) => fs.flatMap((f) => (f.path !== path ? [f] : f.added ? [] : [{ ...f, text: toText(f.original) }])));
   const move = (id: string, by: number) =>
     setOrder((o) => {
-      const i = o.indexOf(id), j = i + by;
+      const i = o.indexOf(id),
+        j = i + by;
       if (j < 0 || j >= o.length) return o;
       const next = [...o];
       [next[i], next[j]] = [next[j], next[i]];
@@ -128,23 +132,45 @@ export function QueueRunForm({ onClose, onQueued }: { onClose: () => void; onQue
     const id = `q-${f.path}`;
     return (
       <div key={f.path} className={`qf-row ${isChanged ? "changed" : ""} ${p.value === undefined ? "invalid" : ""}`}>
-        <label className="k" htmlFor={id}>{label}{f.added ? <span className="qf-new">new</span> : null}</label>
+        <label className="k" htmlFor={id}>
+          {label}
+          {f.added ? <span className="qf-new">new</span> : null}
+        </label>
         {typeof f.original === "boolean" && !f.added ? (
-          <button id={id} type="button" role="switch" className="toggle" aria-checked={f.text === "true"}
-                  onClick={() => setText(f.path, f.text === "true" ? "false" : "true")} />
+          <button
+            id={id}
+            type="button"
+            role="switch"
+            className="toggle"
+            aria-checked={f.text === "true"}
+            onClick={() => setText(f.path, f.text === "true" ? "false" : "true")}
+          />
         ) : (
-          <input id={id} className="input" value={f.text} spellCheck={false}
-                 inputMode={typeof f.original === "number" ? "decimal" : undefined}
-                 onChange={(e) => setText(f.path, e.target.value)} />
+          <input
+            id={id}
+            className="input"
+            value={f.text}
+            spellCheck={false}
+            inputMode={typeof f.original === "number" ? "decimal" : undefined}
+            onChange={(e) => setText(f.path, e.target.value)}
+          />
         )}
         {isChanged || f.added ? (
-          <button type="button" className="icon-btn" onClick={() => reset(f.path)}
-                  aria-label={f.added ? `Remove ${f.path}` : `Reset ${f.path}`}>
+          <button
+            type="button"
+            className="icon-btn"
+            onClick={() => reset(f.path)}
+            aria-label={f.added ? `Remove ${f.path}` : `Reset ${f.path}`}
+          >
             {f.added ? <X /> : <RotateCcw />}
           </button>
-        ) : <span />}
+        ) : (
+          <span />
+        )}
         {isChanged && !f.added ? <span className="qf-was">was {showValue(f.original)}</span> : null}
-        {p.value === undefined ? <span className="qf-was qf-bad">not a valid {typeof f.original === "number" ? "number" : "JSON value"}</span> : null}
+        {p.value === undefined ? (
+          <span className="qf-was qf-bad">not a valid {typeof f.original === "number" ? "number" : "JSON value"}</span>
+        ) : null}
       </div>
     );
   };
@@ -153,76 +179,145 @@ export function QueueRunForm({ onClose, onQueued }: { onClose: () => void; onQue
   const orderChanged = !same(order, originalOrder);
 
   return (
-    <Inspector open onClose={onClose} label="Queue a run" layer="Queue a run" layerMark={<i className="mark new" />}
-               what="Runs a version's steps, with optional one-off changes for this run only."
-               title="New runs stay queued until a backend exists">
+    <Inspector
+      open
+      onClose={onClose}
+      label="Queue a run"
+      layer="Queue a run"
+      layerMark={<i className="mark new" />}
+      what="Runs a version's steps, with optional one-off changes for this run only."
+      title="New runs stay queued until a backend exists"
+    >
       <LoginHint what="queue a run" />
       <form className="queue-form" onSubmit={submit}>
         <fieldset className="plain" disabled={!canWrite}>
-        <InspectorSection title="Version">
-          <label className="sr-only" htmlFor="q-version">Version</label>
-          <select id="q-version" className="select" value={experimentId ?? ""} onChange={(e) => setExperimentId(Number(e.target.value))}>
-            {experiments.map((x) => (
-              <option key={x.id} value={x.id}>{x.slug} · {x.name}</option>
-            ))}
-          </select>
-        </InspectorSection>
+          <InspectorSection title="Version">
+            <label className="sr-only" htmlFor="q-version">
+              Version
+            </label>
+            <select
+              id="q-version"
+              className="select"
+              value={experimentId ?? ""}
+              onChange={(e) => setExperimentId(Number(e.target.value))}
+            >
+              {experiments.map((x) => (
+                <option key={x.id} value={x.id}>
+                  {x.slug} · {x.name}
+                </option>
+              ))}
+            </select>
+          </InspectorSection>
 
-        <InspectorSection title="Steps, in order" count={orderChanged ? "reordered" : skipped.size ? `${skipped.size} left out` : undefined}>
-          {order.length === 0 ? <p className="muted">This version declares no steps.</p> : null}
-          {order.map((id, i) => {
-            const step = steps.find((s) => s.id === id)!;
-            const off = skipped.has(id);
-            const movedHere = originalOrder.indexOf(id) !== i;
-            return (
-              <div key={id} className={`qf-step ${off ? "off" : ""}`}>
-                <div className="qf-step-head">
-                  <span className={`qf-step-pos num ${movedHere ? "moved" : ""}`}>{i + 1}</span>
-                  <span className="qf-step-name">{id}</span>
-                  <span className="qf-step-kind">{step.kind}</span>
-                  <span className="qf-step-tools">
-                    <button type="button" className="icon-btn" onClick={() => move(id, -1)} disabled={i === 0} aria-label={`Move ${id} up`}><ArrowUp /></button>
-                    <button type="button" className="icon-btn" onClick={() => move(id, 1)} disabled={i === order.length - 1} aria-label={`Move ${id} down`}><ArrowDown /></button>
-                    <button type="button" className="chip qf-skip" aria-pressed={off} onClick={() => toggleSkip(id)}>
-                      {off ? "left out" : "leave out"}
-                    </button>
-                  </span>
+          <InspectorSection
+            title="Steps, in order"
+            count={orderChanged ? "reordered" : skipped.size ? `${skipped.size} left out` : undefined}
+          >
+            {order.length === 0 ? <p className="muted">This version declares no steps.</p> : null}
+            {order.map((id, i) => {
+              const step = steps.find((s) => s.id === id)!;
+              const off = skipped.has(id);
+              const movedHere = originalOrder.indexOf(id) !== i;
+              return (
+                <div key={id} className={`qf-step ${off ? "off" : ""}`}>
+                  <div className="qf-step-head">
+                    <span className={`qf-step-pos num ${movedHere ? "moved" : ""}`}>{i + 1}</span>
+                    <span className="qf-step-name">{id}</span>
+                    <span className="qf-step-kind">{step.kind}</span>
+                    <span className="qf-step-tools">
+                      <button
+                        type="button"
+                        className="icon-btn"
+                        onClick={() => move(id, -1)}
+                        disabled={i === 0}
+                        aria-label={`Move ${id} up`}
+                      >
+                        <ArrowUp />
+                      </button>
+                      <button
+                        type="button"
+                        className="icon-btn"
+                        onClick={() => move(id, 1)}
+                        disabled={i === order.length - 1}
+                        aria-label={`Move ${id} down`}
+                      >
+                        <ArrowDown />
+                      </button>
+                      <button type="button" className="chip qf-skip" aria-pressed={off} onClick={() => toggleSkip(id)}>
+                        {off ? "left out" : "leave out"}
+                      </button>
+                    </span>
+                  </div>
+                  {off
+                    ? null
+                    : fields
+                        .filter((f) => f.path.startsWith(`steps.${id}.`))
+                        .map((f) => field(f, f.path.slice(`steps.${id}.`.length)))}
                 </div>
-                {off ? null : fields.filter((f) => f.path.startsWith(`steps.${id}.`)).map((f) => field(f, f.path.slice(`steps.${id}.`.length)))}
-              </div>
-            );
-          })}
-        </InspectorSection>
+              );
+            })}
+          </InspectorSection>
 
-        <InspectorSection title="Other settings">
-          {otherFields.length === 0 ? <p className="muted">None.</p> : otherFields.map((f) => field(f, f.path))}
-          <div className="qf-add">
-            <input className="input" placeholder="steps.rerank.top_n, or a new step's steps.hyde.kind" value={newPath} spellCheck={false}
-                   aria-label="New setting path" onChange={(e) => setNewPath(e.target.value)} />
-            <input className="input" placeholder="value (JSON or text)" value={newValue} spellCheck={false}
-                   aria-label="New setting value" onChange={(e) => setNewValue(e.target.value)}
-                   onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addSetting(); } }} />
-            <button type="button" className="pill small" onClick={addSetting} disabled={!newPath.trim()}>Add</button>
+          <InspectorSection title="Other settings">
+            {otherFields.length === 0 ? <p className="muted">None.</p> : otherFields.map((f) => field(f, f.path))}
+            <div className="qf-add">
+              <input
+                className="input"
+                placeholder="steps.rerank.top_n, or a new step's steps.hyde.kind"
+                value={newPath}
+                spellCheck={false}
+                aria-label="New setting path"
+                onChange={(e) => setNewPath(e.target.value)}
+              />
+              <input
+                className="input"
+                placeholder="value (JSON or text)"
+                value={newValue}
+                spellCheck={false}
+                aria-label="New setting value"
+                onChange={(e) => setNewValue(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    addSetting();
+                  }
+                }}
+              />
+              <button type="button" className="pill small" onClick={addSetting} disabled={!newPath.trim()}>
+                Add
+              </button>
+            </div>
+          </InspectorSection>
+
+          <InspectorSection title="Overrides sent">
+            <pre className="qf-json">{JSON.stringify(overrides, null, 2)}</pre>
+          </InspectorSection>
+
+          <InspectorSection title="Note">
+            <label className="sr-only" htmlFor="q-note">
+              Why this run
+            </label>
+            <textarea
+              id="q-note"
+              className="input"
+              rows={2}
+              placeholder="Why this run (goes into the log)"
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+            />
+          </InspectorSection>
+
+          <div className="qf-submit">
+            <button type="submit" className="pill" disabled={!experimentId || invalid.length > 0 || queue.isPending}>
+              {queue.isPending ? "Queueing…" : "Queue run"}
+            </button>
+            {queue.error ? <span className="run-error">{(queue.error as Error).message}</span> : null}
+            {invalid.length ? (
+              <span className="run-error">
+                Fix {invalid.length} setting{invalid.length > 1 ? "s" : ""} first.
+              </span>
+            ) : null}
           </div>
-        </InspectorSection>
-
-        <InspectorSection title="Overrides sent">
-          <pre className="qf-json">{JSON.stringify(overrides, null, 2)}</pre>
-        </InspectorSection>
-
-        <InspectorSection title="Note">
-          <label className="sr-only" htmlFor="q-note">Why this run</label>
-          <textarea id="q-note" className="input" rows={2} placeholder="Why this run (goes into the log)"
-                    value={note} onChange={(e) => setNote(e.target.value)} />
-        </InspectorSection>
-
-        <div className="qf-submit">
-          <button type="submit" className="pill" disabled={!experimentId || invalid.length > 0 || queue.isPending}>
-            {queue.isPending ? "Queueing…" : "Queue run"}
-          </button>
-          {queue.error ? <span className="run-error">{(queue.error as Error).message}</span> : null}
-          {invalid.length ? <span className="run-error">Fix {invalid.length} setting{invalid.length > 1 ? "s" : ""} first.</span> : null}
-        </div>
         </fieldset>
       </form>
     </Inspector>

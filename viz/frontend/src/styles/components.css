@@ -6,25 +6,53 @@
   font-stretch: 118%;
   font-variant-numeric: tabular-nums;
 }
-.num-28 { @apply text-[28px]; }
-.num-34 { @apply text-[34px]; }
-.num-20 { @apply text-[20px]; }
+.num-28 {
+  @apply text-[28px];
+}
+.num-34 {
+  @apply text-[34px];
+}
+.num-20 {
+  @apply text-[20px];
+}
 
 .page-title {
   @apply text-[28px] leading-[1.1] font-light tracking-[-0.02em];
   font-variation-settings: "wdth" 118;
 }
-.section-head { @apply text-label font-semibold tracking-[0.08em] text-ink-3 uppercase; }
-.section-head .count { @apply ml-2 text-ink-2; }
-.label { @apply text-micro tracking-[0.02em] text-ink-3; }
-.axis { @apply text-micro font-semibold tracking-[0.1em] text-ink-3 uppercase; }
-.delta { @apply text-label font-semibold whitespace-nowrap text-ink-2; }
-.delta.rise { @apply text-rise-hi; }
-.delta.fall { @apply text-fall-hi; }
-.lede { @apply max-w-[80ch] text-row leading-[1.5] text-ink-3; }
-.muted { @apply text-ink-3; }
-.dim { @apply opacity-42; }
-.mono-dash { @apply text-ink-3; }
+.section-head {
+  @apply text-label font-semibold tracking-[0.08em] text-ink-3 uppercase;
+}
+.section-head .count {
+  @apply ml-2 text-ink-2;
+}
+.label {
+  @apply text-micro tracking-[0.02em] text-ink-3;
+}
+.axis {
+  @apply text-micro font-semibold tracking-[0.1em] text-ink-3 uppercase;
+}
+.delta {
+  @apply text-label font-semibold whitespace-nowrap text-ink-2;
+}
+.delta.rise {
+  @apply text-rise-hi;
+}
+.delta.fall {
+  @apply text-fall-hi;
+}
+.lede {
+  @apply max-w-[80ch] text-row leading-[1.5] text-ink-3;
+}
+.muted {
+  @apply text-ink-3;
+}
+.dim {
+  @apply opacity-42;
+}
+.mono-dash {
+  @apply text-ink-3;
+}
 
 /* ----- surfaces ----- */
 
@@ -56,60 +84,106 @@
     text-row font-semibold tracking-[0.04em] whitespace-nowrap text-ink-3
     transition-[color,border-color,background-color] duration-160 ease-instrument;
 }
-.pill:hover { @apply border-hair-2 text-ink; }
+.pill:hover {
+  @apply border-hair-2 text-ink;
+}
 .pill[aria-pressed="true"],
 .pill[aria-current="page"],
-.pill.active { @apply border-hair-2 bg-tint-3 text-ink; }
-.pill:disabled { @apply cursor-not-allowed opacity-42; }
-.pill svg { @apply size-3.5 flex-none stroke-[1.75]; }
-.pill.small { @apply h-7 px-3 text-label; }
+.pill.active {
+  @apply border-hair-2 bg-tint-3 text-ink;
+}
+.pill:disabled {
+  @apply cursor-not-allowed opacity-42;
+}
+.pill svg {
+  @apply size-3.5 flex-none stroke-[1.75];
+}
+.pill.small {
+  @apply h-7 px-3 text-label;
+}
 
 .icon-btn {
   @apply inline-grid size-7.5 place-items-center rounded-pill text-ink-3
     transition-[color,background-color] duration-160 ease-instrument;
 }
-.icon-btn:hover { @apply bg-tint-2 text-ink; }
-.icon-btn:disabled { @apply cursor-not-allowed; }
-.icon-btn svg { @apply size-3.5 stroke-[1.75]; }
+.icon-btn:hover {
+  @apply bg-tint-2 text-ink;
+}
+.icon-btn:disabled {
+  @apply cursor-not-allowed;
+}
+.icon-btn svg {
+  @apply size-3.5 stroke-[1.75];
+}
 
 /* ----- chips ----- */
 .chip {
   @apply inline-flex h-6.5 items-center gap-1.5 rounded-pill border border-hair bg-fill px-2.5
     text-label whitespace-nowrap text-ink-2 transition-[color,border-color] duration-160 ease-instrument;
 }
-button.chip:hover { @apply border-hair-2 text-ink; }
-.chip .count { @apply text-ink-3; }
-.chip[aria-pressed="true"] { @apply border-sel-border text-ink; }
-.chip.filter-chip { @apply h-7; }
-.chip.filter-chip.set { @apply border-sel-border text-ink; }
-.chip .glyph { @apply size-[7px] flex-none rounded-full; }
-.chip .x { @apply ml-0.5 text-ink-3; }
+button.chip:hover {
+  @apply border-hair-2 text-ink;
+}
+.chip .count {
+  @apply text-ink-3;
+}
+.chip[aria-pressed="true"] {
+  @apply border-sel-border text-ink;
+}
+.chip.filter-chip {
+  @apply h-7;
+}
+.chip.filter-chip.set {
+  @apply border-sel-border text-ink;
+}
+.chip .glyph {
+  @apply size-[7px] flex-none rounded-full;
+}
+.chip .x {
+  @apply ml-0.5 text-ink-3;
+}
 
 /* a config value on a stage: key in ink-3, value in ink-2 */
 .kv-chip {
   @apply inline-flex h-5.5 items-baseline gap-[5px] rounded-pill border border-hair px-2 text-micro
     leading-5 whitespace-nowrap text-ink-2;
 }
-.kv-chip .k { @apply text-ink-3; }
-.kv-chip.changed { @apply border-sel-border text-ink; }
+.kv-chip .k {
+  @apply text-ink-3;
+}
+.kv-chip.changed {
+  @apply border-sel-border text-ink;
+}
 
 /* local / cloud badge: cloud dashed, local solid, so they differ without colour */
 .loc {
   @apply inline-flex h-4.5 items-center rounded-pill border border-hair-2 px-[7px] text-[10px]
     font-semibold tracking-[0.08em] text-ink-2 uppercase;
 }
-.loc.cloud { @apply border-dashed; }
+.loc.cloud {
+  @apply border-dashed;
+}
 
 /* ----- segmented control ----- */
-.seg { @apply inline-flex h-7.5 items-center gap-0.5 rounded-pill border border-hair bg-fill p-0.5; }
-.seg .seg-label { @apply pr-1.5 pl-2 text-micro text-ink-3; }
+.seg {
+  @apply inline-flex h-7.5 items-center gap-0.5 rounded-pill border border-hair bg-fill p-0.5;
+}
+.seg .seg-label {
+  @apply pr-1.5 pl-2 text-micro text-ink-3;
+}
 .seg button {
   @apply h-6 rounded-pill px-2.5 text-label font-medium text-ink-3
     transition-[color,background-color,box-shadow] duration-160 ease-instrument;
 }
-.seg button:hover { @apply text-ink; }
-.seg button[aria-pressed="true"] { @apply bg-tint-4 text-ink light:shadow-[0_1px_2px_rgba(16,24,40,0.12)]; }
-.seg button .count { @apply ml-[5px] text-ink-3; }
+.seg button:hover {
+  @apply text-ink;
+}
+.seg button[aria-pressed="true"] {
+  @apply bg-tint-4 text-ink light:shadow-[0_1px_2px_rgba(16,24,40,0.12)];
+}
+.seg button .count {
+  @apply ml-[5px] text-ink-3;
+}
 
 /* ----- toggle switch: no colour ----- */
 .toggle {
@@ -120,28 +194,66 @@ button.chip:hover { @apply border-hair-2 text-ink; }
     transition-[translate,background-color] duration-160 ease-instrument;
 }
 /* translate-x-* sets `translate`, not `transform`: the transition above must name `translate` */
-.toggle[aria-checked="true"] { @apply bg-ink-2; }
-.toggle[aria-checked="true"]::after { @apply translate-x-3 bg-knob-on; }
+.toggle[aria-checked="true"] {
+  @apply bg-ink-2;
+}
+.toggle[aria-checked="true"]::after {
+  @apply translate-x-3 bg-knob-on;
+}
 
 /* ----- thin bars ----- */
-.bar { @apply relative h-0.5 overflow-hidden rounded-[2px] bg-hair; }
-.bar.thick { @apply h-[3px]; }
+.bar {
+  @apply relative h-0.5 overflow-hidden rounded-[2px] bg-hair;
+}
+.bar.thick {
+  @apply h-[3px];
+}
 /* width changes snap: animating it forces layout */
-.bar > span { @apply absolute inset-y-0 left-0 rounded-[2px] bg-ink-2 transition-colors duration-160 ease-instrument; }
-.bar.limit > span { @apply bg-lost; }
-.bar.sel > span { @apply bg-sweep-hi; }
+.bar > span {
+  @apply absolute inset-y-0 left-0 rounded-[2px] bg-ink-2 transition-colors duration-160 ease-instrument;
+}
+.bar.limit > span {
+  @apply bg-lost;
+}
+.bar.sel > span {
+  @apply bg-sweep-hi;
+}
 
 /* ----- status marks ----- */
-.mark { @apply inline-block size-2 flex-none rounded-full align-middle; }
-.mark.held { @apply bg-ink; }
-.mark.new { @apply border border-ink-2; }
-.mark.strong { @apply border border-ink; box-shadow: 0 0 0 2px var(--void), 0 0 0 3px var(--ink-2); }
-.mark.weak { @apply bg-lost; }
-.mark.sel { @apply bg-sweep-hi; box-shadow: 0 0 0 4px var(--sweep-wash); }
-.mark.changed { @apply bg-sweep-hi; }
-.mark.rise { @apply bg-rise; }
-.mark.fall { @apply bg-fall; }
-.mark.amber-ring { @apply border-[1.5px] border-lost; }
+.mark {
+  @apply inline-block size-2 flex-none rounded-full align-middle;
+}
+.mark.held {
+  @apply bg-ink;
+}
+.mark.new {
+  @apply border border-ink-2;
+}
+.mark.strong {
+  @apply border border-ink;
+  box-shadow:
+    0 0 0 2px var(--void),
+    0 0 0 3px var(--ink-2);
+}
+.mark.weak {
+  @apply bg-lost;
+}
+.mark.sel {
+  @apply bg-sweep-hi;
+  box-shadow: 0 0 0 4px var(--sweep-wash);
+}
+.mark.changed {
+  @apply bg-sweep-hi;
+}
+.mark.rise {
+  @apply bg-rise;
+}
+.mark.fall {
+  @apply bg-fall;
+}
+.mark.amber-ring {
+  @apply border-[1.5px] border-lost;
+}
 .mark.lost {
   @apply size-[9px] rounded-none;
   background:
@@ -150,47 +262,98 @@ button.chip:hover { @apply border-hair-2 text-ink; }
 }
 
 /* ----- rise / fall callouts ----- */
-.risefall { @apply border-l-2 border-hair-2 px-3 py-2; }
-.risefall.rise { @apply border-rise bg-linear-to-r from-rise-wash to-transparent to-80%; }
-.risefall.fall { @apply border-fall bg-linear-to-r from-fall-wash to-transparent to-80%; }
-.risefall .head { @apply text-label font-semibold; }
-.risefall.rise .head { @apply text-rise-hi; }
-.risefall.fall .head { @apply text-fall-hi; }
+.risefall {
+  @apply border-l-2 border-hair-2 px-3 py-2;
+}
+.risefall.rise {
+  @apply border-rise bg-linear-to-r from-rise-wash to-transparent to-80%;
+}
+.risefall.fall {
+  @apply border-fall bg-linear-to-r from-fall-wash to-transparent to-80%;
+}
+.risefall .head {
+  @apply text-label font-semibold;
+}
+.risefall.rise .head {
+  @apply text-rise-hi;
+}
+.risefall.fall .head {
+  @apply text-fall-hi;
+}
 
 /* ----- inputs: single-line fields are pills, like the buttons beside them ----- */
-.input, .select {
+.input,
+.select {
   @apply h-7.5 rounded-pill border border-hair bg-fill px-3.5 text-row text-ink
     transition-colors duration-160 ease-instrument;
 }
-.input:hover, .select:hover { @apply border-hair-2; }
-.input::placeholder { @apply text-ink-3; }
+.input:hover,
+.select:hover {
+  @apply border-hair-2;
+}
+.input::placeholder {
+  @apply text-ink-3;
+}
 /* selects draw their own chevron, so it sits inside the pill's curve instead of against the edge */
 .select {
   @apply appearance-none bg-size-[12px] bg-position-[right_12px_center] bg-no-repeat pr-8 text-ellipsis;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23868d99' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
 }
-.select option, .select optgroup { @apply bg-option-bg text-ink; }
+.select option,
+.select optgroup {
+  @apply bg-option-bg text-ink;
+}
 /* several lines can't be a pill: the same softness at a fixed radius */
-textarea.input { @apply h-auto resize-y rounded-[14px] px-3.5 py-2 leading-[1.45]; }
+textarea.input {
+  @apply h-auto resize-y rounded-[14px] px-3.5 py-2 leading-[1.45];
+}
 
 /* ----- locked: what a logged-out visitor can't change ----- */
-.toggle:disabled, .chip:disabled, .input:disabled, .select:disabled, .swatch:disabled, .seg button:disabled {
+.toggle:disabled,
+.chip:disabled,
+.input:disabled,
+.select:disabled,
+.swatch:disabled,
+.seg button:disabled {
   @apply cursor-not-allowed opacity-42;
 }
-button.chip:disabled:hover { @apply border-hair text-ink-2; }
-.input:disabled:hover, .select:disabled:hover { @apply border-hair; }
-.seg button:disabled:hover { @apply text-ink-3; }
+button.chip:disabled:hover {
+  @apply border-hair text-ink-2;
+}
+.input:disabled:hover,
+.select:disabled:hover {
+  @apply border-hair;
+}
+.seg button:disabled:hover {
+  @apply text-ink-3;
+}
 /* a fieldset that only groups (to disable a whole form at once), never a box */
-fieldset.plain { @apply m-0 min-w-0 border-0 p-0; }
+fieldset.plain {
+  @apply m-0 min-w-0 border-0 p-0;
+}
 
 /* a text button that reads like a link */
-button.link { @apply text-[length:inherit] text-sweep-hi hover:underline hover:underline-offset-3; }
-.login-hint { @apply mb-2.5 text-label text-ink-3; }
+button.link {
+  @apply text-[length:inherit] text-sweep-hi hover:underline hover:underline-offset-3;
+}
+.login-hint {
+  @apply mb-2.5 text-label text-ink-3;
+}
 
 /* ----- loading / errors ----- */
-.loading { @apply grid justify-items-center gap-3.5; }
-.loading .spin-ring { @apply size-16 animate-[spin_1.4s_linear_infinite] rounded-full border border-hair border-t-sweep-hi; }
-.loading .text { @apply text-label tracking-[0.08em] text-ink-3 uppercase; }
-.error-note { @apply max-w-[48ch] text-center text-row text-lost; }
+.loading {
+  @apply grid justify-items-center gap-3.5;
+}
+.loading .spin-ring {
+  @apply size-16 animate-[spin_1.4s_linear_infinite] rounded-full border border-hair border-t-sweep-hi;
+}
+.loading .text {
+  @apply text-label tracking-[0.08em] text-ink-3 uppercase;
+}
+.error-note {
+  @apply max-w-[48ch] text-center text-row text-lost;
+}
 
-.appear { animation: slide-in var(--med) var(--ease) both; }
+.appear {
+  animation: slide-in var(--med) var(--ease) both;
+}

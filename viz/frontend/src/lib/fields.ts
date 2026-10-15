@@ -21,26 +21,26 @@ export const GROUP_LABEL: Record<FieldGroup, string> = {
 export type Value = string | number | null;
 
 export interface Field {
-  id: string;                // 'document.source', 'chunk.metadata.section', 'retrieval.outcome'
+  id: string; // 'document.source', 'chunk.metadata.section', 'retrieval.outcome'
   group: FieldGroup;
   label: string;
-  kind: FieldKind;           // what the page uses: the override, or the detected kind
+  kind: FieldKind; // what the page uses: the override, or the detected kind
   detected: FieldKind;
   hidden: boolean;
   style: FieldStyle | undefined;
-  values: Value[];           // one per point, in the points' order
-  present: number;           // points with a value
+  values: Value[]; // one per point, in the points' order
+  present: number; // points with a value
   distinct: number;
   /** category: values by count, most common first */
   categories: { value: string; count: number }[];
-  min: number | null;        // number / date
+  min: number | null; // number / date
   max: number | null;
 }
 
 /** A field is worth colouring or filtering by when it varies. */
 export const usable = (f: Field) => !f.hidden && f.distinct > 1 && f.kind !== "text";
 
-const MAX_CATEGORIES = 30;   // more distinct strings than this: detected as text
+const MAX_CATEGORIES = 30; // more distinct strings than this: detected as text
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}([T ]\d{2}:\d{2}(:\d{2}(\.\d+)?)?(Z|[+-]\d{2}:?\d{2})?)?$/;
 const NUMERIC = /^-?\d+(\.\d+)?$/;
 
@@ -82,7 +82,11 @@ function typed(v: Raw, kind: FieldKind): Value {
 /** "document.metadata.issue_type" -> "Issue type" */
 export function humanize(id: string): string {
   const last = id.split(".").pop() ?? id;
-  const s = last.replace(/[_-]+/g, " ").replace(/([a-z])([A-Z])/g, "$1 $2").trim().toLowerCase();
+  const s = last
+    .replace(/[_-]+/g, " ")
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .trim()
+    .toLowerCase();
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
@@ -101,26 +105,26 @@ const FIXED_LABEL: Record<string, string> = {
 
 /** How the latest run treated each chunk, across every question of the eval set. */
 export interface RetrievalStats {
-  stage: string | undefined;            // the final stage: the last step in order that wrote lists
-  retrieved: Map<number, number>;       // chunk -> questions whose final list has it
-  relevant: Map<number, number>;        // chunk -> questions it is relevant to
+  stage: string | undefined; // the final stage: the last step in order that wrote lists
+  retrieved: Map<number, number>; // chunk -> questions whose final list has it
+  relevant: Map<number, number>; // chunk -> questions it is relevant to
   outcome: Map<number, Outcome>;
 }
 
 export type Outcome = "found" | "partly found" | "never found" | "noise" | "unused";
 export const OUTCOME_COLORS: Record<Outcome, string> = {
-  "found": "--cat-6",
+  found: "--cat-6",
   "partly found": "--cat-5",
-  "never found": "--lost",          // the same amber as "a relevant chunk it missed"
-  "noise": "--cat-7",
-  "unused": "--ink-3",
+  "never found": "--lost", // the same amber as "a relevant chunk it missed"
+  noise: "--cat-7",
+  unused: "--ink-3",
 };
 export const OUTCOME_TEXT: Record<Outcome, string> = {
-  "found": "relevant to some questions, and retrieved for all of them",
+  found: "relevant to some questions, and retrieved for all of them",
   "partly found": "relevant to several questions, retrieved for only some",
   "never found": "relevant to some questions, never retrieved for them",
-  "noise": "retrieved, but never for a question it is relevant to",
-  "unused": "never retrieved and relevant to no question",
+  noise: "retrieved, but never for a question it is relevant to",
+  unused: "never retrieved and relevant to no question",
 };
 
 /** The final stage of a run: the last step, in the version's order, that wrote ranked lists. */
@@ -131,7 +135,9 @@ export function finalStageOfRun(hits: RunHit[], stepIds: string[]): string | und
 }
 
 export function retrievalStats(
-  hits: RunHit[] | undefined, relevantPairs: { question_id: number; chunk_id: number }[] | undefined, stepIds: string[],
+  hits: RunHit[] | undefined,
+  relevantPairs: { question_id: number; chunk_id: number }[] | undefined,
+  stepIds: string[],
 ): RetrievalStats | undefined {
   if (!hits || !relevantPairs || !hits.length) return undefined;
   const stage = finalStageOfRun(hits, stepIds);
@@ -149,10 +155,11 @@ export function retrievalStats(
   const relevantFound = new Map<number, number>();
   const relevantPairsByChunk = new Set<string>();
   for (const r of relevantPairs) {
-    if (!questions.has(r.question_id)) continue;    // only questions this run answered
+    if (!questions.has(r.question_id)) continue; // only questions this run answered
     relevant.set(r.chunk_id, (relevant.get(r.chunk_id) ?? 0) + 1);
     relevantPairsByChunk.add(`${r.question_id}:${r.chunk_id}`);
-    if (finalPairs.has(`${r.question_id}:${r.chunk_id}`)) relevantFound.set(r.chunk_id, (relevantFound.get(r.chunk_id) ?? 0) + 1);
+    if (finalPairs.has(`${r.question_id}:${r.chunk_id}`))
+      relevantFound.set(r.chunk_id, (relevantFound.get(r.chunk_id) ?? 0) + 1);
   }
   const outcome = new Map<number, Outcome>();
   const ids = new Set([...retrieved.keys(), ...relevant.keys()]);
@@ -168,7 +175,7 @@ interface Source {
   id: string;
   group: FieldGroup;
   raw: (p: SpacePoint) => Raw;
-  kind?: FieldKind;          // fixed kind (no detection)
+  kind?: FieldKind; // fixed kind (no detection)
 }
 
 function sources(points: SpacePoint[], stats: RetrievalStats | undefined): Source[] {
@@ -199,21 +206,35 @@ function sources(points: SpacePoint[], stats: RetrievalStats | undefined): Sourc
     }
     return cur;
   };
-  for (const k of [...docKeys].sort()) out.push({ id: `document.metadata.${k}`, group: "document", raw: (p) => at(p.document_metadata, k) });
+  for (const k of [...docKeys].sort())
+    out.push({ id: `document.metadata.${k}`, group: "document", raw: (p) => at(p.document_metadata, k) });
   out.push(
     { id: "chunk.tokens", group: "chunk", raw: (p) => p.token_count, kind: "number" },
     { id: "chunk.chars", group: "chunk", raw: (p) => p.char_end - p.char_start, kind: "number" },
     { id: "chunk.position", group: "chunk", raw: (p) => p.ord, kind: "number" },
   );
-  for (const k of [...chunkKeys].sort()) out.push({ id: `chunk.metadata.${k}`, group: "chunk", raw: (p) => at(p.chunk_metadata, k) });
+  for (const k of [...chunkKeys].sort())
+    out.push({ id: `chunk.metadata.${k}`, group: "chunk", raw: (p) => at(p.chunk_metadata, k) });
   out.push({
-    id: "space.cluster", group: "space", kind: "category",
+    id: "space.cluster",
+    group: "space",
+    kind: "category",
     raw: (p) => (p.cluster == null ? null : p.cluster < 0 ? "noise" : `cluster ${p.cluster}`),
   });
   if (stats) {
     out.push(
-      { id: "retrieval.outcome", group: "retrieval", kind: "category", raw: (p) => stats.outcome.get(p.chunk_id) ?? "unused" },
-      { id: "retrieval.retrieved", group: "retrieval", kind: "number", raw: (p) => stats.retrieved.get(p.chunk_id) ?? 0 },
+      {
+        id: "retrieval.outcome",
+        group: "retrieval",
+        kind: "category",
+        raw: (p) => stats.outcome.get(p.chunk_id) ?? "unused",
+      },
+      {
+        id: "retrieval.retrieved",
+        group: "retrieval",
+        kind: "number",
+        raw: (p) => stats.retrieved.get(p.chunk_id) ?? 0,
+      },
       { id: "retrieval.relevant", group: "retrieval", kind: "number", raw: (p) => stats.relevant.get(p.chunk_id) ?? 0 },
     );
   }
@@ -231,9 +252,10 @@ export function buildFields(points: SpacePoint[], styles: FieldStyle[] | undefin
     const kind = style?.kind ?? detected;
     const values = raw.map((v) => typed(v, kind));
     const present = values.reduce<number>((n, v) => n + (v == null ? 0 : 1), 0);
-    if (present === 0) continue;               // a field nobody filled in doesn't exist for this corpus
+    if (present === 0) continue; // a field nobody filled in doesn't exist for this corpus
     const counts = new Map<string, number>();
-    let min: number | null = null, max: number | null = null;
+    let min: number | null = null,
+      max: number | null = null;
     for (const v of values) {
       if (v == null) continue;
       counts.set(String(v), (counts.get(String(v)) ?? 0) + 1);
@@ -242,12 +264,26 @@ export function buildFields(points: SpacePoint[], styles: FieldStyle[] | undefin
         max = max == null || v > max ? v : max;
       }
     }
-    const categories = kind === "category"
-      ? [...counts].map(([value, count]) => ({ value, count })).sort((a, b) => b.count - a.count || a.value.localeCompare(b.value))
-      : [];
+    const categories =
+      kind === "category"
+        ? [...counts]
+            .map(([value, count]) => ({ value, count }))
+            .sort((a, b) => b.count - a.count || a.value.localeCompare(b.value))
+        : [];
     fields.push({
-      id: src.id, group: src.group, label: style?.label ?? FIXED_LABEL[src.id] ?? humanize(src.id),
-      kind, detected, hidden: style?.hidden ?? false, style, values, present, distinct: counts.size, categories, min, max,
+      id: src.id,
+      group: src.group,
+      label: style?.label ?? FIXED_LABEL[src.id] ?? humanize(src.id),
+      kind,
+      detected,
+      hidden: style?.hidden ?? false,
+      style,
+      values,
+      present,
+      distinct: counts.size,
+      categories,
+      min,
+      max,
     });
   }
   return fields;
@@ -256,7 +292,18 @@ export function buildFields(points: SpacePoint[], styles: FieldStyle[] | undefin
 // ---------- colour ----------
 
 /** Colours a person can pick for a value: the categorical palette plus two greys. */
-export const COLOR_CHOICES = ["--cat-1", "--cat-2", "--cat-3", "--cat-4", "--cat-5", "--cat-6", "--cat-7", "--cat-8", "--ink", "--ink-3"];
+export const COLOR_CHOICES = [
+  "--cat-1",
+  "--cat-2",
+  "--cat-3",
+  "--cat-4",
+  "--cat-5",
+  "--cat-6",
+  "--cat-7",
+  "--cat-8",
+  "--ink",
+  "--ink-3",
+];
 // Automatic order. The palette's blue comes last: on this page blue already means "retrieved".
 const AUTO_ORDER = ["--cat-2", "--cat-3", "--cat-4", "--cat-5", "--cat-6", "--cat-7", "--cat-8", "--cat-1"];
 export const OTHER_COLOR = "--ink-3";
@@ -271,14 +318,22 @@ export function resolveColor(token: string): string {
   return getComputedStyle(document.documentElement).getPropertyValue(token).trim() || "#888";
 }
 
-export interface CategoryColor { value: string; token: string; count: number; auto: boolean }
+export interface CategoryColor {
+  value: string;
+  token: string;
+  count: number;
+  auto: boolean;
+}
 
 /**
  * Colour per category value: the person's choice first; then the most common values, in a fixed
  * order, take the remaining palette colours; the rest share "other". Assigned from all points, so a
  * filter never repaints the values that remain.
  */
-export function categoryColors(field: Field, defaults: Record<string, string> = {}): { list: CategoryColor[]; other: number } {
+export function categoryColors(
+  field: Field,
+  defaults: Record<string, string> = {},
+): { list: CategoryColor[]; other: number } {
   const chosen = { ...defaults, ...(field.style?.colors ?? {}) };
   const taken = new Set(Object.values(chosen));
   const used = new Set<string>();
@@ -292,7 +347,10 @@ export function categoryColors(field: Field, defaults: Record<string, string> = 
     // the colour of its rank, so choosing a colour for one value never repaints the others;
     // only when someone took that colour does this value move to the next free one
     const own = AUTO_ORDER[rank];
-    const token = own && !taken.has(own) && !used.has(own) ? own : AUTO_ORDER.find((t) => !taken.has(t) && !used.has(t) && AUTO_ORDER.indexOf(t) >= field.categories.length);
+    const token =
+      own && !taken.has(own) && !used.has(own)
+        ? own
+        : AUTO_ORDER.find((t) => !taken.has(t) && !used.has(t) && AUTO_ORDER.indexOf(t) >= field.categories.length);
     if (token) {
       used.add(token);
       list.push({ value: c.value, token, count: c.count, auto: true });
@@ -310,7 +368,8 @@ function rampColor(ramp: string[], t: number): string {
   const x = Math.min(1, Math.max(0, t)) * (ramp.length - 1);
   const i = Math.min(ramp.length - 2, Math.floor(x));
   const f = x - i;
-  const a = hexToRgb(ramp[i]), b = hexToRgb(ramp[i + 1]);
+  const a = hexToRgb(ramp[i]),
+    b = hexToRgb(ramp[i + 1]);
   return `rgb(${a.map((v, k) => Math.round(v + (b[k] - v) * f)).join(",")})`;
 }
 
@@ -320,9 +379,9 @@ function rampColor(ramp: string[], t: number): string {
  */
 export interface Scale {
   kind: FieldKind;
-  categories: CategoryColor[];   // category: the coloured values, most common first
-  other: number;                 // points whose value shares the "other" colour
-  map: Map<string, string>;      // value -> resolved colour
+  categories: CategoryColor[]; // category: the coloured values, most common first
+  other: number; // points whose value shares the "other" colour
+  map: Map<string, string>; // value -> resolved colour
   min: number;
   max: number;
 }
@@ -336,10 +395,19 @@ export function makeScale(field: Field | undefined, more: (Field | undefined)[] 
     for (const f of all) for (const c of f.categories) counts.set(c.value, (counts.get(c.value) ?? 0) + c.count);
     const merged: Field = {
       ...field,
-      categories: [...counts].map(([value, count]) => ({ value, count })).sort((a, b) => b.count - a.count || a.value.localeCompare(b.value)),
+      categories: [...counts]
+        .map(([value, count]) => ({ value, count }))
+        .sort((a, b) => b.count - a.count || a.value.localeCompare(b.value)),
     };
     const { list, other } = categoryColors(merged, field.id === "retrieval.outcome" ? OUTCOME_COLORS : {});
-    return { kind: field.kind, categories: list, other, map: new Map(list.map((c) => [c.value, resolveColor(c.token)])), min: 0, max: 0 };
+    return {
+      kind: field.kind,
+      categories: list,
+      other,
+      map: new Map(list.map((c) => [c.value, resolveColor(c.token)])),
+      min: 0,
+      max: 0,
+    };
   }
   const mins = all.map((f) => f.min).filter((v): v is number => v != null);
   const maxs = all.map((f) => f.max).filter((v): v is number => v != null);
@@ -353,11 +421,13 @@ export function applyScale(scale: Scale | undefined, field: Field | undefined, n
   const none = resolveColor(NONE_COLOR);
   if (scale.kind === "category") {
     const other = resolveColor(OTHER_COLOR);
-    return field.values.map((v) => (v == null ? none : scale.map.get(String(v)) ?? other));
+    return field.values.map((v) => (v == null ? none : (scale.map.get(String(v)) ?? other)));
   }
   if (scale.kind === "number" || scale.kind === "date") {
     const ramp = RAMP.map(resolveColor);
-    return field.values.map((v) => (typeof v === "number" ? rampColor(ramp, (v - scale.min) / (scale.max - scale.min || 1)) : none));
+    return field.values.map((v) =>
+      typeof v === "number" ? rampColor(ramp, (v - scale.min) / (scale.max - scale.min || 1)) : none,
+    );
   }
   return new Array(n).fill(plain);
 }

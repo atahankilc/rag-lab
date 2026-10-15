@@ -1,7 +1,14 @@
 import { useEffect, useRef, type ReactNode } from "react";
 
 /** A glass panel under its anchor. Closes on Esc and on a click outside it and its anchor. */
-export function Popover({ open, onClose, anchor, children, label, className = "" }: {
+export function Popover({
+  open,
+  onClose,
+  anchor,
+  children,
+  label,
+  className = "",
+}: {
   open: boolean;
   onClose: () => void;
   anchor: React.RefObject<HTMLElement | null>;

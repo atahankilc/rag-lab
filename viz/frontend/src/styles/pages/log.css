@@ -1,50 +1,106 @@
 /* Log: an audit trail on a vertical rail, grouped by day. */
 
-.log-col { @apply max-w-[920px]; }
-.log-search { @apply inline-flex max-w-[320px] flex-[1_1_220px] items-center gap-1.5 text-ink-3; }
-.log-search svg { @apply size-3.5 flex-none stroke-[1.75]; }
-.log-search .input { @apply h-7.5 w-full; }
-.log-loading { @apply grid place-items-center py-15; }
+.log-col {
+  @apply max-w-[920px];
+}
+.log-search {
+  @apply inline-flex max-w-[320px] flex-[1_1_220px] items-center gap-1.5 text-ink-3;
+}
+.log-search svg {
+  @apply size-3.5 flex-none stroke-[1.75];
+}
+.log-search .input {
+  @apply h-7.5 w-full;
+}
+.log-loading {
+  @apply grid place-items-center py-15;
+}
 
-.log-day { @apply pt-5.5; }
-.log-day-head { @apply flex items-center gap-2 pb-2; }
-.log-day-head .count { @apply font-medium tracking-[0.02em] text-ink-3; }
+.log-day {
+  @apply pt-5.5;
+}
+.log-day-head {
+  @apply flex items-center gap-2 pb-2;
+}
+.log-day-head .count {
+  @apply font-medium tracking-[0.02em] text-ink-3;
+}
 
 /* the rail: one 1px line through every node */
-.log-list { @apply relative; }
-.log-list::before { @apply absolute top-1.5 bottom-1.5 left-1 w-px bg-hair-2 content-['']; }
+.log-list {
+  @apply relative;
+}
+.log-list::before {
+  @apply absolute top-1.5 bottom-1.5 left-1 w-px bg-hair-2 content-[''];
+}
 
 .log-row {
   @apply relative grid w-full grid-cols-[22px_1fr] rounded-md py-[7px] pr-2 pl-0 text-left
     transition-[background] duration-160 ease-instrument;
 }
-.log-row:hover { @apply bg-tint-1; }
-.log-row.selected { @apply bg-sel-row; }
+.log-row:hover {
+  @apply bg-tint-1;
+}
+.log-row.selected {
+  @apply bg-sel-row;
+}
 
-.log-node { @apply relative z-1 mt-1 size-[9px] rounded-full border border-ink-2 bg-void; }
-.log-node.held { @apply border-ink bg-ink; }
-.log-node.new { @apply border-ink-2 bg-void; }
-.log-node.weak { @apply border-lost bg-lost; }
+.log-node {
+  @apply relative z-1 mt-1 size-[9px] rounded-full border border-ink-2 bg-void;
+}
+.log-node.held {
+  @apply border-ink bg-ink;
+}
+.log-node.new {
+  @apply border-ink-2 bg-void;
+}
+.log-node.weak {
+  @apply border-lost bg-lost;
+}
 .log-node.lost {
   @apply rounded-none border-0;
   background:
     linear-gradient(45deg, transparent 42%, var(--lost) 42%, var(--lost) 58%, transparent 58%),
-    linear-gradient(-45deg, transparent 42%, var(--lost) 42%, var(--lost) 58%, transparent 58%),
-    var(--void);
+    linear-gradient(-45deg, transparent 42%, var(--lost) 42%, var(--lost) 58%, transparent 58%), var(--void);
 }
-.log-node.sel { @apply border-sweep-hi bg-sweep-hi; box-shadow: 0 0 0 4px var(--sweep-wash); }
+.log-node.sel {
+  @apply border-sweep-hi bg-sweep-hi;
+  box-shadow: 0 0 0 4px var(--sweep-wash);
+}
 
-.log-body { @apply grid min-w-0 gap-[3px]; }
-.log-text { @apply text-row leading-[1.45] wrap-anywhere text-ink; }
-.log-text.milestone { @apply font-semibold; }
-.log-text.warn { @apply text-lost; }
-.log-note { @apply line-clamp-2 text-row leading-[1.45] text-ink-2; }
-.log-meta { @apply text-micro text-ink-3; }
+.log-body {
+  @apply grid min-w-0 gap-[3px];
+}
+.log-text {
+  @apply text-row leading-[1.45] wrap-anywhere text-ink;
+}
+.log-text.milestone {
+  @apply font-semibold;
+}
+.log-text.warn {
+  @apply text-lost;
+}
+.log-note {
+  @apply line-clamp-2 text-row leading-[1.45] text-ink-2;
+}
+.log-meta {
+  @apply text-micro text-ink-3;
+}
 
-.log-more { @apply flex justify-center px-0 pt-6.5 pb-0; }
-.log-end { @apply pt-6.5 text-center; }
+.log-more {
+  @apply flex justify-center px-0 pt-6.5 pb-0;
+}
+.log-end {
+  @apply pt-6.5 text-center;
+}
 
 /* inspector */
-.log-insp-note { @apply text-row leading-[1.5] text-ink; }
-.log-link { @apply rounded-[4px] text-sweep-hi; }
-.log-link:hover { @apply underline; }
+.log-insp-note {
+  @apply text-row leading-[1.5] text-ink;
+}
+.log-link {
+  @apply rounded-[4px] text-sweep-hi;
+}
+.log-link:hover {
+  @apply underline;
+}

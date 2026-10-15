@@ -3,7 +3,13 @@ import { formatValue } from "../lib/format";
 import { useVersion } from "../state/version";
 
 /** Green/red callouts: the questions that got better or worse vs the reference, and what changed. */
-export function RiseFall({ results, reference, changedKeys, limit = 4, onPick }: {
+export function RiseFall({
+  results,
+  reference,
+  changedKeys,
+  limit = 4,
+  onPick,
+}: {
   results: QuestionResult[];
   reference: Experiment | undefined;
   changedKeys: string[];
@@ -25,8 +31,7 @@ export function RiseFall({ results, reference, changedKeys, limit = 4, onPick }:
     <ul className="rf-list">
       {rows.slice(0, limit).map((r) => (
         <li key={r.question_id}>
-          <button type="button" className="rf-item" onClick={() => onPick?.(r)} disabled={!onPick}
-                  title={r.question}>
+          <button type="button" className="rf-item" onClick={() => onPick?.(r)} disabled={!onPick} title={r.question}>
             <span className="rf-id">{r.external_id}</span>
             <span className="rf-type">{r.qtype.replace(/_/g, " ")}</span>
             <span className="rf-scores">
@@ -45,14 +50,18 @@ export function RiseFall({ results, reference, changedKeys, limit = 4, onPick }:
         <div className="risefall rise">
           <div className="head">▲ {better.length} improved</div>
           {list(better)}
-          <div className="rf-cause">{metric} vs {reference.slug} · {cause}</div>
+          <div className="rf-cause">
+            {metric} vs {reference.slug} · {cause}
+          </div>
         </div>
       ) : null}
       {worse.length ? (
         <div className="risefall fall">
           <div className="head">▼ {worse.length} regressed — review</div>
           {list(worse)}
-          <div className="rf-cause">{metric} vs {reference.slug} · {cause}</div>
+          <div className="rf-cause">
+            {metric} vs {reference.slug} · {cause}
+          </div>
         </div>
       ) : null}
       {!better.length && !worse.length ? (

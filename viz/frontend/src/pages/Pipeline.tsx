@@ -24,8 +24,8 @@ type StepView = StepSummary & {
   status: Status;
   changedPaths: Set<string>;
   diff: ConfigDiffRow[];
-  refPosition?: number;        // 1-based position among the reference's own steps
-  position?: number;           // 1-based position among this version's own steps
+  refPosition?: number; // 1-based position among the reference's own steps
+  position?: number; // 1-based position among this version's own steps
 };
 
 const STATUS_FLAG: Partial<Record<Status, string>> = { new: "new", moved: "moved", removed: "removed" };
@@ -62,7 +62,11 @@ export function Pipeline() {
         else status = mine.length ? "changed" : "same";
       }
       return {
-        ...r, ref, status, diff: mine, changedPaths: new Set(mine.map((d) => d.path)),
+        ...r,
+        ref,
+        status,
+        diff: mine,
+        changedPaths: new Set(mine.map((d) => d.path)),
         position: own.indexOf(r.step_id) + 1 || undefined,
         refPosition: refOwn.indexOf(r.step_id) + 1 || undefined,
       };
@@ -72,24 +76,52 @@ export function Pipeline() {
   }, [steps.data, refSteps.data, diff.data, reference]);
 
   if (!current) return null;
-  if (steps.error) return <Centered><ErrorNote error={steps.error} /></Centered>;
-  if (steps.isLoading) return <Centered><Loading label="Loading pipeline" /></Centered>;
+  if (steps.error)
+    return (
+      <Centered>
+        <ErrorNote error={steps.error} />
+      </Centered>
+    );
+  if (steps.isLoading)
+    return (
+      <Centered>
+        <Loading label="Loading pipeline" />
+      </Centered>
+    );
 
   const live = views.filter((v) => v.status !== "removed");
-  const idx = Math.max(0, live.findIndex((v) => v.step_id === selectedId));
+  const idx = Math.max(
+    0,
+    live.findIndex((v) => v.step_id === selectedId),
+  );
   const sel = live[idx] ?? views[0];
   const goto = (i: number) => setSelectedId(live[(i + live.length) % live.length].step_id);
   const library = views.filter((v) => v.phase === "index");
   const perQuestion = views.filter((v) => v.phase === "query");
-  const open = (id: string) => { setSelectedId(id); setInspecting(true); };
+  const open = (id: string) => {
+    setSelectedId(id);
+    setInspecting(true);
+  };
 
   const riseFall = (
     <RiseFall
       results={results.data ?? []}
       reference={reference}
-      changedKeys={current.changed_keys.length && reference?.id === current.parent_id
-        ? current.changed_keys
-        : [...new Set((diff.data ?? []).map((d) => (d.path.startsWith("steps.") ? d.path.split(".")[1] : d.path === "step_order" ? "step order" : d.path.split(".")[0])))]}
+      changedKeys={
+        current.changed_keys.length && reference?.id === current.parent_id
+          ? current.changed_keys
+          : [
+              ...new Set(
+                (diff.data ?? []).map((d) =>
+                  d.path.startsWith("steps.")
+                    ? d.path.split(".")[1]
+                    : d.path === "step_order"
+                      ? "step order"
+                      : d.path.split(".")[0],
+                ),
+              ),
+            ]
+      }
     />
   );
 
@@ -97,7 +129,10 @@ export function Pipeline() {
     <>
       <div className="hud-tl pipeline-tl">
         <div className="page-label section-head">
-          Pipeline<span className="count">{current.slug} · {current.name}</span>
+          Pipeline
+          <span className="count">
+            {current.slug} · {current.name}
+          </span>
         </div>
         <Funnel views={live} />
         {sel ? (
@@ -105,11 +140,15 @@ export function Pipeline() {
             <button type="button" className="icon-btn" onClick={() => goto(idx - 1)} aria-label="Previous step">
               <ChevronLeft />
             </button>
-            <span className="stepper-pos num">{idx + 1}/{live.length}</span>
+            <span className="stepper-pos num">
+              {idx + 1}/{live.length}
+            </span>
             <button type="button" className="icon-btn" onClick={() => goto(idx + 1)} aria-label="Next step">
               <ChevronRight />
             </button>
-            <button type="button" className="stepper-name" onClick={() => setInspecting(true)}>{sel.step_id}</button>
+            <button type="button" className="stepper-name" onClick={() => setInspecting(true)}>
+              {sel.step_id}
+            </button>
             <span className="stepper-what">{sel.description}</span>
           </div>
         ) : null}
@@ -123,24 +162,41 @@ export function Pipeline() {
             <ol className="flow">
               {library.map((s, i) => (
                 <Fragment key={s.step_id}>
-                  {i > 0 ? <li className="flow-arrow" aria-hidden="true">→</li> : null}
-                  <li><StepCard s={s} selected={s.step_id === sel?.step_id} onSelect={() => open(s.step_id)} /></li>
+                  {i > 0 ? (
+                    <li className="flow-arrow" aria-hidden="true">
+                      →
+                    </li>
+                  ) : null}
+                  <li>
+                    <StepCard s={s} selected={s.step_id === sel?.step_id} onSelect={() => open(s.step_id)} />
+                  </li>
                 </Fragment>
               ))}
             </ol>
           </section>
           <section className="flow-group" aria-label="Per question, in order">
-            <h2 className="axis flow-group-head">Per question · {perQuestion.filter((v) => v.status !== "removed").length} steps, in order</h2>
+            <h2 className="axis flow-group-head">
+              Per question · {perQuestion.filter((v) => v.status !== "removed").length} steps, in order
+            </h2>
             {perQuestion.length === 0 ? (
-              <p className="lede flow-empty">This version declares no steps. A spike lists them in its config (see the contract doc).</p>
+              <p className="lede flow-empty">
+                This version declares no steps. A spike lists them in its config (see the contract doc).
+              </p>
             ) : (
               <ol className="flow">
                 {perQuestion.map((s, i) => (
                   <Fragment key={`${s.step_id}-${s.status}`}>
-                    {i > 0 ? <li className="flow-arrow" aria-hidden="true">→</li> : null}
+                    {i > 0 ? (
+                      <li className="flow-arrow" aria-hidden="true">
+                        →
+                      </li>
+                    ) : null}
                     <li>
-                      <StepCard s={s} selected={s.step_id === sel?.step_id && s.status !== "removed"}
-                                onSelect={() => s.status !== "removed" && open(s.step_id)} />
+                      <StepCard
+                        s={s}
+                        selected={s.step_id === sel?.step_id && s.status !== "removed"}
+                        onSelect={() => s.status !== "removed" && open(s.step_id)}
+                      />
                     </li>
                   </Fragment>
                 ))}
@@ -168,7 +224,11 @@ function Funnel({ views }: { views: StepView[] }) {
         const d = v.ref?.item_count != null && v.item_count != null ? v.item_count - v.ref.item_count : null;
         return (
           <Fragment key={v.step_id}>
-            {i > 0 ? <li className="funnel-arrow" aria-hidden="true">→</li> : null}
+            {i > 0 ? (
+              <li className="funnel-arrow" aria-hidden="true">
+                →
+              </li>
+            ) : null}
             <li>
               <Readout
                 label={LIBRARY_UNIT[v.step_id] ?? v.step_id}
@@ -183,7 +243,15 @@ function Funnel({ views }: { views: StepView[] }) {
   );
 }
 
-function Headline({ metrics, refMetrics, defs }: { metrics: Record<string, number>; refMetrics?: Record<string, number>; defs?: MetricDef[] }) {
+function Headline({
+  metrics,
+  refMetrics,
+  defs,
+}: {
+  metrics: Record<string, number>;
+  refMetrics?: Record<string, number>;
+  defs?: MetricDef[];
+}) {
   const shown = HEADLINE.filter((m) => metrics[m] != null);
   if (shown.length === 0) return <p className="lede">No finished run for this version yet, so there are no numbers.</p>;
   return (
@@ -193,10 +261,15 @@ function Headline({ metrics, refMetrics, defs }: { metrics: Record<string, numbe
         const f = formatValue(metrics[m], def.format);
         const d = refMetrics?.[m] != null ? metrics[m] - refMetrics[m] : null;
         return (
-          <Readout key={m} label={def.label} value={f.value} unit={f.unit}
-                   delta={d != null ? formatDelta(d, def.format) : undefined}
-                   dir={direction(d, def.higher_is_better, def.format === "ratio" ? 0.005 : 1e-9)}
-                   title={def.description ?? undefined} />
+          <Readout
+            key={m}
+            label={def.label}
+            value={f.value}
+            unit={f.unit}
+            delta={d != null ? formatDelta(d, def.format) : undefined}
+            dir={direction(d, def.higher_is_better, def.format === "ratio" ? 0.005 : 1e-9)}
+            title={def.description ?? undefined}
+          />
         );
       })}
     </div>
@@ -231,10 +304,16 @@ function StepCard({ s, selected, onSelect }: { s: StepView; selected: boolean; o
             {c.value}
           </span>
         ))}
-        {chips.length > 6 ? <span className="kv-chip"><span className="k">+{chips.length - 6}</span></span> : null}
+        {chips.length > 6 ? (
+          <span className="kv-chip">
+            <span className="k">+{chips.length - 6}</span>
+          </span>
+        ) : null}
       </span>
       {s.status === "removed" ? (
-        <span className="stage-figure"><span className="label">not in this version</span></span>
+        <span className="stage-figure">
+          <span className="label">not in this version</span>
+        </span>
       ) : library ? (
         <span className="stage-figure">
           <span className="num num-20">{formatInt(s.item_count)}</span>
@@ -245,7 +324,9 @@ function StepCard({ s, selected, onSelect }: { s: StepView; selected: boolean; o
           <span className="stage-figure-row">
             <span className="num num-20">{s.p50_ms != null ? formatValue(s.p50_ms, "ms").value : "—"}</span>
             <span className="readout-unit">{s.p50_ms != null ? formatValue(s.p50_ms, "ms").unit : ""}</span>
-            {d != null && Math.abs(d) >= 1 ? <span className={`delta ${direction(d, false, 1)}`}>{formatDelta(d, "ms")}</span> : null}
+            {d != null && Math.abs(d) >= 1 ? (
+              <span className={`delta ${direction(d, false, 1)}`}>{formatDelta(d, "ms")}</span>
+            ) : null}
           </span>
           <span className="label">
             p50{s.p95_ms != null ? ` · p95 ${formatValue(s.p95_ms, "ms").value}` : ""}
@@ -266,28 +347,49 @@ const STATUS_TEXT: Record<Status, (s: StepView, ref?: string) => string> = {
   removed: (_, ref) => `Only in ${ref}.`,
 };
 
-function StepInspector({ open, onClose, s, refSlug }: { open: boolean; onClose: () => void; s: StepView; refSlug?: string }) {
+function StepInspector({
+  open,
+  onClose,
+  s,
+  refSlug,
+}: {
+  open: boolean;
+  onClose: () => void;
+  s: StepView;
+  refSlug?: string;
+}) {
   const rows = flatten(s.config);
   const changed = new Map(s.diff.map((d) => [d.path, d]));
   const ref = s.ref;
   const library = s.phase === "index";
   const markClass = s.status === "new" ? "new" : s.status === "changed" || s.status === "moved" ? "changed" : "held";
-  const ms = (v: number | null | undefined) => (v != null ? `${formatValue(v, "ms").value} ${formatValue(v, "ms").unit}` : "—");
+  const ms = (v: number | null | undefined) =>
+    v != null ? `${formatValue(v, "ms").value} ${formatValue(v, "ms").unit}` : "—";
 
-  const figure = library
-    ? <Readout label={LIBRARY_UNIT[s.step_id] ?? "Items"} value={formatInt(s.item_count)} size={34}
-               delta={ref?.item_count != null && s.item_count != null && s.item_count !== ref.item_count
-                 ? `${s.item_count > ref.item_count ? "+" : "−"}${Math.abs(s.item_count - ref.item_count)}` : undefined} />
-    : (
-      <>
-        <Readout label="Latency p50" size={34}
-                 value={s.p50_ms != null ? formatValue(s.p50_ms, "ms").value : "—"}
-                 unit={s.p50_ms != null ? formatValue(s.p50_ms, "ms").unit : undefined}
-                 delta={s.p50_ms != null && ref?.p50_ms != null ? formatDelta(s.p50_ms - ref.p50_ms, "ms") : undefined}
-                 dir={s.p50_ms != null && ref?.p50_ms != null ? direction(s.p50_ms - ref.p50_ms, false, 1) : "flat"} />
-        <Readout label="Items" size={34} value={formatInt(s.item_count)} />
-      </>
-    );
+  const figure = library ? (
+    <Readout
+      label={LIBRARY_UNIT[s.step_id] ?? "Items"}
+      value={formatInt(s.item_count)}
+      size={34}
+      delta={
+        ref?.item_count != null && s.item_count != null && s.item_count !== ref.item_count
+          ? `${s.item_count > ref.item_count ? "+" : "−"}${Math.abs(s.item_count - ref.item_count)}`
+          : undefined
+      }
+    />
+  ) : (
+    <>
+      <Readout
+        label="Latency p50"
+        size={34}
+        value={s.p50_ms != null ? formatValue(s.p50_ms, "ms").value : "—"}
+        unit={s.p50_ms != null ? formatValue(s.p50_ms, "ms").unit : undefined}
+        delta={s.p50_ms != null && ref?.p50_ms != null ? formatDelta(s.p50_ms - ref.p50_ms, "ms") : undefined}
+        dir={s.p50_ms != null && ref?.p50_ms != null ? direction(s.p50_ms - ref.p50_ms, false, 1) : "flat"}
+      />
+      <Readout label="Items" size={34} value={formatInt(s.item_count)} />
+    </>
+  );
 
   return (
     <Inspector
@@ -297,7 +399,9 @@ function StepInspector({ open, onClose, s, refSlug }: { open: boolean; onClose: 
       layer={`${s.step_id} · ${s.kind_label}${library ? " · library" : ` · step ${s.position}`}`}
       layerMark={<i className={`mark ${markClass}`} />}
       what={s.description}
-      title={(rows.find(([p]) => p.endsWith("model"))?.[1] as string) ?? (rows[0] ? showValue(rows[0][1]) : s.kind_label)}
+      title={
+        (rows.find(([p]) => p.endsWith("model"))?.[1] as string) ?? (rows[0] ? showValue(rows[0][1]) : s.kind_label)
+      }
       figure={figure}
     >
       <InspectorSection title={refSlug ? `Compared with ${refSlug}` : "Compared with"}>
@@ -305,33 +409,58 @@ function StepInspector({ open, onClose, s, refSlug }: { open: boolean; onClose: 
         {s.diff.map((d) => (
           <div key={d.path} className="kv-row changed">
             <span className="k">{d.path.slice(s.diff_prefix.length + 1) || d.path}</span>
-            <span className="v">{showValue(d.b_value)}<span className="was">was {showValue(d.a_value)}</span></span>
+            <span className="v">
+              {showValue(d.b_value)}
+              <span className="was">was {showValue(d.a_value)}</span>
+            </span>
           </div>
         ))}
       </InspectorSection>
 
       <InspectorSection title="Settings" count={s.location ? s.location.toUpperCase() : undefined}>
-        <div className="kv-row"><span className="k">kind</span><span className="v">{s.kind}</span></div>
-        {s.provider_id ? <div className="kv-row"><span className="k">provider</span><span className="v">{s.provider_id}</span></div> : null}
-        {rows.length === 0 ? <p className="muted">No settings.</p> : rows.map(([path, v]) => {
-          const c = changed.get(`${s.diff_prefix}.${path}`);
-          return (
-            <div key={path} className={`kv-row ${c ? "changed" : ""}`}>
-              <span className="k">{path}</span>
-              <span className="v">{showValue(v)}{c ? <span className="was">was {showValue(c.a_value)}</span> : null}</span>
-            </div>
-          );
-        })}
+        <div className="kv-row">
+          <span className="k">kind</span>
+          <span className="v">{s.kind}</span>
+        </div>
+        {s.provider_id ? (
+          <div className="kv-row">
+            <span className="k">provider</span>
+            <span className="v">{s.provider_id}</span>
+          </div>
+        ) : null}
+        {rows.length === 0 ? (
+          <p className="muted">No settings.</p>
+        ) : (
+          rows.map(([path, v]) => {
+            const c = changed.get(`${s.diff_prefix}.${path}`);
+            return (
+              <div key={path} className={`kv-row ${c ? "changed" : ""}`}>
+                <span className="k">{path}</span>
+                <span className="v">
+                  {showValue(v)}
+                  {c ? <span className="was">was {showValue(c.a_value)}</span> : null}
+                </span>
+              </div>
+            );
+          })
+        )}
       </InspectorSection>
 
       {!library ? (
         <InspectorSection title="Per question">
           <Row k="Latency p50" v={ms(s.p50_ms)} was={ref?.p50_ms != null ? ms(ref.p50_ms) : undefined} />
           <Row k="Latency p95" v={ms(s.p95_ms)} was={ref?.p95_ms != null ? ms(ref.p95_ms) : undefined} />
-          <Row k="Cost per question" v={s.cost_per_query_usd != null ? formatUsd(Number(s.cost_per_query_usd)) : "—"}
-               was={ref?.cost_per_query_usd != null ? formatUsd(Number(ref.cost_per_query_usd)) : undefined} />
+          <Row
+            k="Cost per question"
+            v={s.cost_per_query_usd != null ? formatUsd(Number(s.cost_per_query_usd)) : "—"}
+            was={ref?.cost_per_query_usd != null ? formatUsd(Number(ref.cost_per_query_usd)) : undefined}
+          />
           <Row k="Cost, whole run" v={s.cost_usd != null ? formatUsd(Number(s.cost_usd)) : "—"} />
-          <Row k="Items produced" v={formatInt(s.item_count)} was={ref?.item_count != null ? formatInt(ref.item_count) : undefined} />
+          <Row
+            k="Items produced"
+            v={formatInt(s.item_count)}
+            was={ref?.item_count != null ? formatInt(ref.item_count) : undefined}
+          />
         </InspectorSection>
       ) : null}
     </Inspector>
@@ -342,7 +471,10 @@ function Row({ k, v, was }: { k: string; v: string; was?: string }) {
   return (
     <div className="kv-row">
       <span className="k">{k}</span>
-      <span className="v">{v}{was && was !== v ? <span className="was">was {was}</span> : null}</span>
+      <span className="v">
+        {v}
+        {was && was !== v ? <span className="was">was {was}</span> : null}
+      </span>
     </div>
   );
 }

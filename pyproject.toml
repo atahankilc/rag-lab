@@ -17,8 +17,22 @@ dependencies = [
 local = ["sentence-transformers>=3.0"]
 
 [dependency-groups]
-dev = ["pytest>=8.0", "ipykernel>=6.29"]
+dev = [
+    "pytest>=8.0",
+    "ipykernel>=6.29",
+    "ruff>=0.17.0",
+]
 
 [tool.uv]
 # Not an installable package yet; just an environment for our scripts.
 package = false
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+extend-exclude = ["vendor", "viz"]
+
+[tool.ruff.lint]
+# E/F: real errors (undefined names, unused imports), I: sorted imports,
+# B: common bug patterns, UP: modern Python syntax.
+select = ["E", "F", "I", "B", "UP"]

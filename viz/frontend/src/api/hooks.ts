@@ -1,9 +1,31 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { get, rpc } from "./client";
 import type {
-  ConfigDiffRow, DefaultModel, EvalQuestion, Experiment, ExperimentDetail, JsonObject, LogEvent, LogSummary, MetricDef,
-  FieldStyle, Neighbour, Provider, ProviderUsage, QueryPoint, QuestionResult, RetrievalHit, Run, RunEvent, RunHit, RunMetric,
-  RunProgress, SpaceMethod, SpacePoint, StepDef, StepSummary,
+  ConfigDiffRow,
+  DefaultModel,
+  EvalQuestion,
+  Experiment,
+  ExperimentDetail,
+  JsonObject,
+  LogEvent,
+  LogSummary,
+  MetricDef,
+  FieldStyle,
+  Neighbour,
+  Provider,
+  ProviderUsage,
+  QueryPoint,
+  QuestionResult,
+  RetrievalHit,
+  Run,
+  RunEvent,
+  RunHit,
+  RunMetric,
+  RunProgress,
+  SpaceMethod,
+  SpacePoint,
+  StepDef,
+  StepSummary,
 } from "./types";
 
 // Everything versioned is immutable, so most data can be cached for a long time.
@@ -68,8 +90,10 @@ function useProviderWrite<A extends Record<string, unknown>>(fn: string) {
   });
 }
 
-export const useSetProviderEnabled = () => useProviderWrite<{ provider_id: string; enabled: boolean }>("set_provider_enabled");
-export const useSetProviderCap = () => useProviderWrite<{ provider_id: string; cap_usd: number | null }>("set_provider_cap");
+export const useSetProviderEnabled = () =>
+  useProviderWrite<{ provider_id: string; enabled: boolean }>("set_provider_enabled");
+export const useSetProviderCap = () =>
+  useProviderWrite<{ provider_id: string; cap_usd: number | null }>("set_provider_cap");
 
 export function useExperimentDetail(id: number | undefined) {
   return useQuery({
@@ -112,7 +136,8 @@ export function useQuestionResults(id: number | undefined) {
 export function useRetrievalHits(runId: number | undefined, questionId: number | undefined) {
   return useQuery({
     queryKey: ["retrieval_hits", runId, questionId],
-    queryFn: () => get<RetrievalHit[]>(`retrieval_hits?run_id=eq.${runId}&question_id=eq.${questionId}&order=stage,rank`),
+    queryFn: () =>
+      get<RetrievalHit[]>(`retrieval_hits?run_id=eq.${runId}&question_id=eq.${questionId}&order=stage,rank`),
     enabled: runId != null && questionId != null,
     staleTime: Infinity,
   });
@@ -141,7 +166,8 @@ export function useSpaceMethods(spaceId: number | undefined) {
 export function useSpacePoints(spaceId: number | undefined, method: string | undefined) {
   return useQuery({
     queryKey: ["space_points", spaceId, method],
-    queryFn: () => get<SpacePoint[]>(`space_points?space_id=eq.${spaceId}&method=eq.${encodeURIComponent(method!)}&order=chunk_id`),
+    queryFn: () =>
+      get<SpacePoint[]>(`space_points?space_id=eq.${spaceId}&method=eq.${encodeURIComponent(method!)}&order=chunk_id`),
     enabled: spaceId != null && method != null,
     staleTime: Infinity,
   });
@@ -171,7 +197,10 @@ export function useRunHits(runId: number | undefined) {
 export function useRelevantPairs(chunkSetId: number | undefined) {
   return useQuery({
     queryKey: ["relevant_pairs", chunkSetId],
-    queryFn: () => get<{ question_id: number; chunk_id: number }[]>(`relevant_chunks?chunk_set_id=eq.${chunkSetId}&select=question_id,chunk_id`),
+    queryFn: () =>
+      get<{ question_id: number; chunk_id: number }[]>(
+        `relevant_chunks?chunk_set_id=eq.${chunkSetId}&select=question_id,chunk_id`,
+      ),
     enabled: chunkSetId != null,
     staleTime: Infinity,
   });
@@ -210,8 +239,9 @@ export function useRelevantChunks(chunkSetId: number | undefined, questionId: nu
   return useQuery({
     queryKey: ["relevant_chunks", chunkSetId, questionId],
     queryFn: () =>
-      get<{ chunk_id: number }[]>(`relevant_chunks?chunk_set_id=eq.${chunkSetId}&question_id=eq.${questionId}&select=chunk_id`)
-        .then((rows) => new Set(rows.map((r) => r.chunk_id))),
+      get<{ chunk_id: number }[]>(
+        `relevant_chunks?chunk_set_id=eq.${chunkSetId}&question_id=eq.${questionId}&select=chunk_id`,
+      ).then((rows) => new Set(rows.map((r) => r.chunk_id))),
     enabled: chunkSetId != null && questionId != null,
     staleTime: Infinity,
   });
@@ -264,7 +294,8 @@ export function useLatestRun() {
   return useQuery({
     queryKey: ["run_progress", "latest"],
     queryFn: () => get<RunProgress[]>("run_progress?order=queued_at.desc&limit=1").then((r) => r[0] ?? null),
-    refetchInterval: (q) => (q.state.data && q.state.data.status !== "done" && q.state.data.status !== "failed" ? 3_000 : 20_000),
+    refetchInterval: (q) =>
+      q.state.data && q.state.data.status !== "done" && q.state.data.status !== "failed" ? 3_000 : 20_000,
   });
 }
 
@@ -298,7 +329,7 @@ export function useAddNote() {
 export interface LogFilters {
   actors: string[];
   kinds: string[];
-  slug: string | null;        // a version slug, "none" for events without a version, null for all
+  slug: string | null; // a version slug, "none" for events without a version, null for all
   search: string;
 }
 
@@ -325,7 +356,8 @@ export function useLog(f: LogFilters) {
     queryKey: ["log", f],
     initialPageParam: undefined as { ts: string; id: number } | undefined,
     queryFn: ({ pageParam }) => get<LogEvent[]>(logUrl(f, pageParam)),
-    getNextPageParam: (last) => (last.length < LOG_PAGE ? undefined : { ts: last[last.length - 1].ts, id: last[last.length - 1].id }),
+    getNextPageParam: (last) =>
+      last.length < LOG_PAGE ? undefined : { ts: last[last.length - 1].ts, id: last[last.length - 1].id },
     refetchInterval: 15_000,
   });
 }

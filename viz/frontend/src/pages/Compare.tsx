@@ -20,11 +20,14 @@ export function useCompareOther() {
   const others = experiments.filter((e) => e.id !== current?.id);
   const other = others.find((e) => e.slug === params.get("with")) ?? reference ?? others[others.length - 1];
   const pick = (slug: string) =>
-    setParams((p) => {
-      const next = new URLSearchParams(p);
-      next.set("with", slug);
-      return next;
-    }, { replace: true });
+    setParams(
+      (p) => {
+        const next = new URLSearchParams(p);
+        next.set("with", slug);
+        return next;
+      },
+      { replace: true },
+    );
   return { current, other, others, pick };
 }
 
@@ -38,11 +41,15 @@ export function ComparePicker({ id = "cmp-with" }: { id?: string }) {
         <span className="timeline-slug">{current.slug}</span> {current.name}
       </span>
       <span className="muted">vs</span>
-      <label className="sr-only" htmlFor={id}>Compare with</label>
+      <label className="sr-only" htmlFor={id}>
+        Compare with
+      </label>
       <select id={id} className="select" value={other.slug} onChange={(e) => pick(e.target.value)}>
         {others.map((e) => (
           <option key={e.id} value={e.slug}>
-            {e.slug} · {e.name}{e.is_baseline ? " · baseline" : ""}{e.id === current.parent_id ? " · parent" : ""}
+            {e.slug} · {e.name}
+            {e.is_baseline ? " · baseline" : ""}
+            {e.id === current.parent_id ? " · parent" : ""}
           </option>
         ))}
       </select>
@@ -50,7 +57,11 @@ export function ComparePicker({ id = "cmp-with" }: { id?: string }) {
   );
 }
 
-const NOTHING = <Centered><p className="lede">There is only one version, so there is nothing to compare yet.</p></Centered>;
+const NOTHING = (
+  <Centered>
+    <p className="lede">There is only one version, so there is nothing to compare yet.</p>
+  </Centered>
+);
 
 function CompareHead({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -76,8 +87,8 @@ export function Compare() {
     <div className="page-full">
       <div className="page-col compare">
         <CompareHead title="Metrics">
-          Change the left side with the timeline (← →). Green and red show where {current.slug} is better or worse
-          than {other.slug}.
+          Change the left side with the timeline (← →). Green and red show where {current.slug} is better or worse than{" "}
+          {other.slug}.
         </CompareHead>
 
         <section className="section">
@@ -88,12 +99,16 @@ export function Compare() {
             <span className="t-num">Change</span>
           </div>
           {GROUPS.map((g) => {
-            const inGroup = rows.filter((d) => (g.key === "other" ? !["generation", "retrieval", "ops"].includes(d.grp) : d.grp === g.key));
+            const inGroup = rows.filter((d) =>
+              g.key === "other" ? !["generation", "retrieval", "ops"].includes(d.grp) : d.grp === g.key,
+            );
             if (inGroup.length === 0) return null;
             return (
               <div key={g.key} className="cmp-group">
                 <div className="axis cmp-group-label">{g.label}</div>
-                {inGroup.map((d) => <MetricRow key={d.name} def={d} a={other} b={current} />)}
+                {inGroup.map((d) => (
+                  <MetricRow key={d.name} def={d} a={other} b={current} />
+                ))}
               </div>
             );
           })}
@@ -115,8 +130,8 @@ export function CompareConfig() {
     <div className="page-full">
       <div className="page-col compare">
         <CompareHead title="Config">
-          Only the settings that differ, from the library (chunking, embedding) to every step, in the keyed form
-          (<code>steps.rerank.top_n</code>, <code>step_order</code>).
+          Only the settings that differ, from the library (chunking, embedding) to every step, in the keyed form (
+          <code>steps.rerank.top_n</code>, <code>step_order</code>).
         </CompareHead>
 
         <section className="section">
@@ -162,8 +177,14 @@ function MetricRow({ def, a, b }: { def: MetricDef; a: Experiment; b: Experiment
         <span className="main">{def.label}</span>
         {def.description ? <span className="sub">{def.description}</span> : null}
       </span>
-      <span className="t-num t-val cmp-a">{fa.value}{fa.unit ? <span className="readout-unit"> {fa.unit}</span> : null}</span>
-      <span className="t-num t-val">{fb.value}{fb.unit ? <span className="readout-unit"> {fb.unit}</span> : null}</span>
+      <span className="t-num t-val cmp-a">
+        {fa.value}
+        {fa.unit ? <span className="readout-unit"> {fa.unit}</span> : null}
+      </span>
+      <span className="t-num t-val">
+        {fb.value}
+        {fb.unit ? <span className="readout-unit"> {fb.unit}</span> : null}
+      </span>
       <span className={`t-num delta ${dir === "flat" ? "" : dir}`}>
         {d == null ? "—" : formatDelta(d, def.format, def.format === "ratio" ? 3 : undefined)}
       </span>

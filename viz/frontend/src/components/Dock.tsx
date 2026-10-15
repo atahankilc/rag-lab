@@ -25,13 +25,23 @@ export function Dock({ showRun = true }: { showRun?: boolean }) {
         </div>
       ) : null}
       <div className="dock-pills">
-        <button type="button" className="nav-link" aria-pressed={open === "guide"} aria-controls="dock-panel"
-                onClick={() => toggle("guide")}>
+        <button
+          type="button"
+          className="nav-link"
+          aria-pressed={open === "guide"}
+          aria-controls="dock-panel"
+          onClick={() => toggle("guide")}
+        >
           <BookOpen /> Guide
         </button>
         {showRun ? (
-          <button type="button" className="nav-link" aria-pressed={open === "run"} aria-controls="dock-panel"
-                  onClick={() => toggle("run")}>
+          <button
+            type="button"
+            className="nav-link"
+            aria-pressed={open === "run"}
+            aria-controls="dock-panel"
+            onClick={() => toggle("run")}
+          >
             <Radio /> Run
             {active ? <span className="pill-live" aria-label={`run ${run.data!.status}`} /> : null}
           </button>
@@ -51,11 +61,17 @@ function GuidePanel() {
         {guide.entries.map((e) => (
           <li key={e.name}>
             <span className="guide-mark">
-              {e.mark.startsWith("text:") ? <span className="guide-glyph">{e.mark.slice(5)}</span>
-                : e.mark === "loc" ? <span className="loc">local</span>
-                : <i className={e.mark} />}
+              {e.mark.startsWith("text:") ? (
+                <span className="guide-glyph">{e.mark.slice(5)}</span>
+              ) : e.mark === "loc" ? (
+                <span className="loc">local</span>
+              ) : (
+                <i className={e.mark} />
+              )}
             </span>
-            <span><b>{e.name}</b> {e.text}</span>
+            <span>
+              <b>{e.name}</b> {e.text}
+            </span>
           </li>
         ))}
       </ul>
@@ -77,18 +93,24 @@ export function RunPanel({ run }: { run: RunProgress | null }) {
         <span className="num num-20">{done}</span>
         <span className="muted"> / {run.stages.length} stages done</span>
       </p>
-      {run.status === "queued" ? (
-        <p className="lede">Queued. Nothing picks runs up until a backend exists.</p>
-      ) : null}
+      {run.status === "queued" ? <p className="lede">Queued. Nothing picks runs up until a backend exists.</p> : null}
       <ul className="run-stages">
         {run.stages.map((s) => {
           const frac = s.state === "done" ? 1 : s.total ? (s.done ?? 0) / s.total : 0;
           return (
             <li key={s.stage} className={`run-stage ${s.state}`}>
               <span className="run-stage-name">{s.label ?? s.stage}</span>
-              <span className="bar thick"><span style={{ width: `${frac * 100}%` }} /></span>
+              <span className="bar thick">
+                <span style={{ width: `${frac * 100}%` }} />
+              </span>
               <span className="run-stage-count muted">
-                {s.state === "done" ? "done" : s.total ? `${s.done ?? 0}/${s.total}` : s.state === "pending" ? "" : s.state}
+                {s.state === "done"
+                  ? "done"
+                  : s.total
+                    ? `${s.done ?? 0}/${s.total}`
+                    : s.state === "pending"
+                      ? ""
+                      : s.state}
               </span>
             </li>
           );

@@ -10,7 +10,11 @@ export function Loading({ label = "Loading" }: { label?: string }) {
 
 export function ErrorNote({ error }: { error: unknown }) {
   const message = error instanceof Error ? error.message : String(error);
-  return <p className="error-note" role="alert">{message}</p>;
+  return (
+    <p className="error-note" role="alert">
+      {message}
+    </p>
+  );
 }
 
 /** Centred in the visual area. */

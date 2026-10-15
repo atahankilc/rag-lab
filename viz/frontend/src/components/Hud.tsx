@@ -9,7 +9,11 @@ import { Logo } from "./Logo";
 import { Timeline } from "./Timeline";
 import { AccountMenu, ThemeMenu } from "./Utilities";
 
-interface Tab { path: string; label: string; subs?: { path: string; label: string }[] }
+interface Tab {
+  path: string;
+  label: string;
+  subs?: { path: string; label: string }[];
+}
 
 // Text tabs with one blue underline that glides to the open section. A section with subpages shows
 // them on a quieter row underneath, centred under its tab.
@@ -18,13 +22,18 @@ export const TABS: Tab[] = [
   { path: "/space", label: "Space" },
   { path: "/questions", label: "Questions" },
   {
-    path: "/compare", label: "Compare",
-    subs: [{ path: "/compare", label: "Metrics" }, { path: "/compare/config", label: "Config" }],
+    path: "/compare",
+    label: "Compare",
+    subs: [
+      { path: "/compare", label: "Metrics" },
+      { path: "/compare/config", label: "Config" },
+    ],
   },
   { path: "/runs", label: "Runs" },
 ];
 
-const inSection = (pathname: string, t: Tab) => (t.path === "/" ? pathname === "/" : pathname === t.path || pathname.startsWith(`${t.path}/`));
+const inSection = (pathname: string, t: Tab) =>
+  t.path === "/" ? pathname === "/" : pathname === t.path || pathname.startsWith(`${t.path}/`);
 
 // Pages about one version: the timeline picks that version. Runs, Providers and Log span all
 // versions, so the timeline would do nothing there and is left out.
@@ -56,16 +65,20 @@ export function Hud() {
     <div className={`hud ${versioned ? "" : "no-timeline"} ${section?.subs ? "has-subs" : ""}`}>
       <main className="stage" id="main">
         {error ? (
-          <Centered><ErrorNote error={error} /></Centered>
+          <Centered>
+            <ErrorNote error={error} />
+          </Centered>
         ) : isLoading ? (
-          <Centered><Loading label="Loading versions" /></Centered>
+          <Centered>
+            <Loading label="Loading versions" />
+          </Centered>
         ) : experiments.length === 0 && versioned ? (
           <Centered>
             <div className="empty-state">
               <p className="section-head">No versions yet</p>
               <p className="lede">
-                A version appears here when a RAG spike registers one. It follows the steps in
-                {" "}<code>viz/docs/backend-contract.md</code>: register the corpus, chunks and vectors, declare the
+                A version appears here when a RAG spike registers one. It follows the steps in{" "}
+                <code>viz/docs/backend-contract.md</code>: register the corpus, chunks and vectors, declare the
                 version's steps, then run it. Runs, Providers and Log already work.
               </p>
             </div>
@@ -82,21 +95,41 @@ export function Hud() {
         </NavLink>
         <div className="nav-tabs" ref={tabsRef}>
           {TABS.map((t) => (
-            <NavLink key={t.path} to={withSearch(t.path)} end={t.path === "/"} className="nav-tab"
-                     aria-current={section === t ? "page" : undefined}>
+            <NavLink
+              key={t.path}
+              to={withSearch(t.path)}
+              end={t.path === "/"}
+              className="nav-tab"
+              aria-current={section === t ? "page" : undefined}
+            >
               {t.label}
             </NavLink>
           ))}
-          <span className={`nav-under ${under ? "" : "off"}`} aria-hidden
-                style={under ? { transform: `translateX(${under.left}px)`, width: under.width } : undefined} />
+          <span
+            className={`nav-under ${under ? "" : "off"}`}
+            aria-hidden
+            style={under ? { transform: `translateX(${under.left}px)`, width: under.width } : undefined}
+          />
           {section?.subs && under ? (
-            <span className="nav-subs" role="group" aria-label={`${section.label} pages`}
-                  style={{ left: under.left + under.width / 2 }}>
+            <span
+              className="nav-subs"
+              role="group"
+              aria-label={`${section.label} pages`}
+              style={{ left: under.left + under.width / 2 }}
+            >
               {section.subs.map((sub, i) => (
                 <Fragment key={sub.path}>
-                  {i > 0 ? <span className="nav-dot" aria-hidden>·</span> : null}
-                  <NavLink to={withSearch(sub.path)} end className="nav-sub"
-                           aria-current={pathname === sub.path ? "page" : undefined}>
+                  {i > 0 ? (
+                    <span className="nav-dot" aria-hidden>
+                      ·
+                    </span>
+                  ) : null}
+                  <NavLink
+                    to={withSearch(sub.path)}
+                    end
+                    className="nav-sub"
+                    aria-current={pathname === sub.path ? "page" : undefined}
+                  >
                     {sub.label}
                   </NavLink>
                 </Fragment>
@@ -107,12 +140,20 @@ export function Hud() {
       </nav>
 
       <div className="top-right">
-        <NavLink to={withSearch("/providers")} className="nav-link" aria-label="Providers"
-                 aria-current={pathname === "/providers" ? "page" : undefined}>
+        <NavLink
+          to={withSearch("/providers")}
+          className="nav-link"
+          aria-label="Providers"
+          aria-current={pathname === "/providers" ? "page" : undefined}
+        >
           <Cpu /> <span className="pill-text">Providers</span>
         </NavLink>
-        <NavLink to={withSearch("/log")} className="nav-link" aria-label="Log"
-                 aria-current={pathname === "/log" ? "page" : undefined}>
+        <NavLink
+          to={withSearch("/log")}
+          className="nav-link"
+          aria-label="Log"
+          aria-current={pathname === "/log" ? "page" : undefined}
+        >
           <ScrollText /> <span className="pill-text">Log</span>
         </NavLink>
         <ThemeMenu />

@@ -20,7 +20,10 @@ function dayKey(iso: string): string {
 }
 
 function dayLabel(iso: string): string {
-  return new Date(iso).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" }).replace(",", "").toUpperCase();
+  return new Date(iso)
+    .toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })
+    .replace(",", "")
+    .toUpperCase();
 }
 
 const toggleIn = (set: string[], x: string) => (set.includes(x) ? set.filter((y) => y !== x) : [...set, x]);
@@ -48,12 +51,15 @@ export function Log() {
 
   const selectedId = params.get("event") ? Number(params.get("event")) : null;
   const select = (id: number | null) =>
-    setParams((p) => {
-      const next = new URLSearchParams(p);
-      if (id == null) next.delete("event");
-      else next.set("event", String(id));
-      return next;
-    }, { replace: true });
+    setParams(
+      (p) => {
+        const next = new URLSearchParams(p);
+        if (id == null) next.delete("event");
+        else next.set("event", String(id));
+        return next;
+      },
+      { replace: true },
+    );
 
   const events = useMemo(() => log.data?.pages.flat() ?? [], [log.data]);
   const slugOf = (id: number) => experiments.find((e) => e.id === id)?.slug;
@@ -71,8 +77,9 @@ export function Log() {
   const total = rows.reduce((s, r) => s + r.n, 0);
   const byActor = (a: string) => rows.filter((r) => r.actor === a).reduce((s, r) => s + r.n, 0);
   const last = rows.reduce<string | null>((m, r) => (m == null || r.last_ts > m ? r.last_ts : m), null);
-  const versionSlugs = [...new Set(rows.map((r) => r.slug).filter((s): s is string => s != null))]
-    .sort((a, b) => (experiments.findIndex((e) => e.slug === a) - experiments.findIndex((e) => e.slug === b)));
+  const versionSlugs = [...new Set(rows.map((r) => r.slug).filter((s): s is string => s != null))].sort(
+    (a, b) => experiments.findIndex((e) => e.slug === a) - experiments.findIndex((e) => e.slug === b),
+  );
   const filtered = actors.length > 0 || kinds.length > 0 || slug !== "all" || search !== "";
 
   // group into days, newest first
@@ -97,8 +104,8 @@ export function Log() {
             <div>
               <h1 className="page-title">Log</h1>
               <p className="lede">
-                Everything that happened, who or what did it, and what changed. Rows are only ever added, never
-                edited or deleted.
+                Everything that happened, who or what did it, and what changed. Rows are only ever added, never edited
+                or deleted.
               </p>
             </div>
             <div className="page-readouts">
@@ -112,56 +119,116 @@ export function Log() {
 
           <div className="filter-row">
             {versionOptions.length <= 10 && wide ? (
-              <Segmented ariaLabel="Filter by version" label="Version" value={slug} onChange={setSlug} options={versionOptions} />
+              <Segmented
+                ariaLabel="Filter by version"
+                label="Version"
+                value={slug}
+                onChange={setSlug}
+                options={versionOptions}
+              />
             ) : (
-              <select className="select" aria-label="Filter by version" value={slug} onChange={(e) => setSlug(e.target.value)}>
-                {versionOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+              <select
+                className="select"
+                aria-label="Filter by version"
+                value={slug}
+                onChange={(e) => setSlug(e.target.value)}
+              >
+                {versionOptions.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
               </select>
             )}
             <label className="log-search">
               <Search aria-hidden="true" />
               <span className="sr-only">Search the log</span>
-              <input className="input" type="search" placeholder="Search actions, notes, ids" value={searchText}
-                     onChange={(e) => setSearchText(e.target.value)} />
+              <input
+                className="input"
+                type="search"
+                placeholder="Search actions, notes, ids"
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+              />
             </label>
           </div>
           <div className="filter-row">
-            {[...kindCounts.entries()].sort((a, b) => b[1] - a[1]).map(([k, n]) => (
-              <button key={k} type="button" className="chip" aria-pressed={kinds.includes(k)} onClick={() => setKinds(toggleIn(kinds, k))}>
-                {KIND_LABEL[k] ?? k} <span className="count">{n}</span>
-              </button>
-            ))}
+            {[...kindCounts.entries()]
+              .sort((a, b) => b[1] - a[1])
+              .map(([k, n]) => (
+                <button
+                  key={k}
+                  type="button"
+                  className="chip"
+                  aria-pressed={kinds.includes(k)}
+                  onClick={() => setKinds(toggleIn(kinds, k))}
+                >
+                  {KIND_LABEL[k] ?? k} <span className="count">{n}</span>
+                </button>
+              ))}
             <span className="divider" aria-hidden="true" />
             {ACTORS.map((a) => (
-              <button key={a} type="button" className="chip" aria-pressed={actors.includes(a)} onClick={() => setActors(toggleIn(actors, a))}>
+              <button
+                key={a}
+                type="button"
+                className="chip"
+                aria-pressed={actors.includes(a)}
+                onClick={() => setActors(toggleIn(actors, a))}
+              >
                 {ACTOR_LABEL[a]} <span className="count">{actorCounts.get(a) ?? 0}</span>
               </button>
             ))}
             {filtered ? (
-              <button type="button" className="chip" onClick={() => { setActors([]); setKinds([]); setSlug("all"); setSearchText(""); }}>
+              <button
+                type="button"
+                className="chip"
+                onClick={() => {
+                  setActors([]);
+                  setKinds([]);
+                  setSlug("all");
+                  setSearchText("");
+                }}
+              >
                 Clear <span className="x">×</span>
               </button>
             ) : null}
           </div>
         </header>
 
-        {log.error ? <Centered><ErrorNote error={log.error} /></Centered> : null}
-        {log.isLoading ? <div className="log-loading"><Loading label="Loading log" /></div> : null}
+        {log.error ? (
+          <Centered>
+            <ErrorNote error={log.error} />
+          </Centered>
+        ) : null}
+        {log.isLoading ? (
+          <div className="log-loading">
+            <Loading label="Loading log" />
+          </div>
+        ) : null}
         {!log.isLoading && events.length === 0 ? <p className="t-empty">No event matches these filters.</p> : null}
 
         {days.map((d) => (
           <section key={d.key} className="log-day" aria-label={d.label}>
-            <h2 className="axis log-day-head">{d.label}<span className="count">{d.items.length}</span></h2>
+            <h2 className="axis log-day-head">
+              {d.label}
+              <span className="count">{d.items.length}</span>
+            </h2>
             <ol className="log-list">
               {d.items.map((e) => {
                 const desc = describe(e, slugOf);
                 return (
                   <li key={e.id}>
-                    <button type="button" className={`log-row ${e.id === selectedId ? "selected" : ""}`}
-                            aria-current={e.id === selectedId} onClick={() => select(e.id)}>
+                    <button
+                      type="button"
+                      className={`log-row ${e.id === selectedId ? "selected" : ""}`}
+                      aria-current={e.id === selectedId}
+                      onClick={() => select(e.id)}
+                    >
                       <span className={`log-node ${e.id === selectedId ? "sel" : desc.mark}`} aria-hidden="true" />
                       <span className="log-body">
-                        <span className={`log-text ${desc.milestone ? "milestone" : ""} ${desc.mark === "lost" || desc.mark === "weak" ? "warn" : ""}`}>
+                        <span
+                          className={`log-text ${desc.milestone ? "milestone" : ""} ${desc.mark === "lost" || desc.mark === "weak" ? "warn" : ""}`}
+                        >
                           {desc.text}
                         </span>
                         {e.note && e.action !== "experiment.create" ? <span className="log-note">{e.note}</span> : null}
@@ -181,15 +248,27 @@ export function Log() {
 
         {log.hasNextPage ? (
           <div className="log-more">
-            <button type="button" className="pill" onClick={() => log.fetchNextPage()} disabled={log.isFetchingNextPage}>
+            <button
+              type="button"
+              className="pill"
+              onClick={() => log.fetchNextPage()}
+              disabled={log.isFetchingNextPage}
+            >
               {log.isFetchingNextPage ? "Loading…" : "Load older events"}
             </button>
           </div>
-        ) : events.length > 0 ? <p className="log-end axis">Start of the log</p> : null}
+        ) : events.length > 0 ? (
+          <p className="log-end axis">Start of the log</p>
+        ) : null}
       </div>
 
       {selectedId != null ? (
-        <LogInspector id={selectedId} loaded={events.find((e) => e.id === selectedId)} slugOf={slugOf} onClose={() => select(null)} />
+        <LogInspector
+          id={selectedId}
+          loaded={events.find((e) => e.id === selectedId)}
+          slugOf={slugOf}
+          onClose={() => select(null)}
+        />
       ) : null}
     </div>
   );

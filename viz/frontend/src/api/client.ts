@@ -3,7 +3,10 @@
 // Writes go to /rpc/<function>; the dev server adds the write token for a logged-in session (see vite.auth.ts).
 
 export class ApiError extends Error {
-  constructor(message: string, readonly status: number) {
+  constructor(
+    message: string,
+    readonly status: number,
+  ) {
     super(message);
   }
 }
