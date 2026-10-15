@@ -4,6 +4,7 @@ import type { Provider, ProviderUsage } from "../api/types";
 import { Inspector, InspectorSection } from "../components/Inspector";
 import { Readout } from "../components/Readout";
 import { formatInt, formatUsd } from "../lib/format";
+import { LOCKED_HINT, LoginHint, useAuth } from "../state/auth";
 import { CapBar, type ProviderStatus, STATUS_LABEL, StatusMark } from "./Providers";
 
 const STATUS_TEXT: Record<ProviderStatus, string> = {
@@ -19,6 +20,8 @@ export function ProviderInspector({ provider: p, status, usage, defaultFor, onCl
 }) {
   const toggle = useSetProviderEnabled();
   const setCap = useSetProviderCap();
+  const { canWrite } = useAuth();
+  const hint = canWrite ? undefined : LOCKED_HINT;
   const spent = Number(p.spent_usd);
   const cap = p.spend_cap_usd != null ? Number(p.spend_cap_usd) : null;
   const [capText, setCapText] = useState(cap != null ? String(cap) : "");
@@ -31,7 +34,7 @@ export function ProviderInspector({ provider: p, status, usage, defaultFor, onCl
 
   const saveCap = (e: React.FormEvent) => {
     e.preventDefault();
-    if (capChanged) setCap.mutate({ provider_id: p.id, cap_usd: capValue });
+    if (capChanged && canWrite) setCap.mutate({ provider_id: p.id, cap_usd: capValue });
   };
 
   return (
@@ -54,11 +57,12 @@ export function ProviderInspector({ provider: p, status, usage, defaultFor, onCl
         <div className="kv-row prov-switch">
           <span className="k">Enabled</span>
           <span className="v">
-            <button type="button" role="switch" className="toggle" aria-checked={p.enabled} disabled={toggle.isPending}
+            <button type="button" role="switch" className="toggle" aria-checked={p.enabled} disabled={toggle.isPending || !canWrite} title={hint}
                     aria-label={`${p.name} ${p.enabled ? "on" : "off"}`}
                     onClick={() => toggle.mutate({ provider_id: p.id, enabled: !p.enabled })} />
           </span>
         </div>
+        <LoginHint what="turn it on or off, or change its cap" />
         <p className={`prov-status-text ${status === "capped" ? "warn" : ""}`}>{STATUS_TEXT[status]}</p>
         <p className="muted prov-fine">
           Status comes from the database only. RAG Lab never calls provider endpoints, so it can't tell whether a
@@ -72,12 +76,12 @@ export function ProviderInspector({ provider: p, status, usage, defaultFor, onCl
           <label className="sr-only" htmlFor="cap-input">Spend cap in US dollars</label>
           <span className="cap-dollar">$</span>
           <input id="cap-input" className={`input ${capInvalid ? "invalid" : ""}`} inputMode="decimal" placeholder="no cap"
-                 value={capText} onChange={(e) => setCapText(e.target.value)} />
-          <button type="submit" className="pill small" disabled={!capChanged || setCap.isPending}>
+                 disabled={!canWrite} title={hint} value={capText} onChange={(e) => setCapText(e.target.value)} />
+          <button type="submit" className="pill small" disabled={!capChanged || setCap.isPending || !canWrite} title={hint}>
             {setCap.isPending ? "Saving…" : "Save cap"}
           </button>
           {cap != null ? (
-            <button type="button" className="chip" disabled={setCap.isPending}
+            <button type="button" className="chip" disabled={setCap.isPending || !canWrite} title={hint}
                     onClick={() => setCap.mutate({ provider_id: p.id, cap_usd: null })}>
               No cap <span className="x">×</span>
             </button>

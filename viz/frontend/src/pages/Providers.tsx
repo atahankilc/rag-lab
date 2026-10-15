@@ -1,12 +1,12 @@
 import { useSearchParams } from "react-router";
 import { useDefaultModels, useProviders, useProviderUsage, useSetProviderEnabled } from "../api/hooks";
+import { LOCKED_HINT, useAuth } from "../state/auth";
 import type { Provider } from "../api/types";
 import { Centered, ErrorNote, Loading } from "../components/Loading";
 import { Readout } from "../components/Readout";
 import { formatUsd } from "../lib/format";
 import { useMedia } from "../lib/useMedia";
 import { ProviderInspector } from "./ProviderInspector";
-import "./providers.css";
 
 export type ProviderStatus = "ready" | "unused" | "capped" | "off";
 
@@ -55,6 +55,7 @@ export function Providers() {
   const usage = useProviderUsage();
   const defaults = useDefaultModels();
   const toggle = useSetProviderEnabled();
+  const { canWrite } = useAuth();
   const [params, setParams] = useSearchParams();
   const md = useMedia("(min-width: 901px)");
 
@@ -113,7 +114,7 @@ export function Providers() {
           </div>
         </header>
 
-        <div className="table" aria-label="Providers">
+        <div className="t-table" aria-label="Providers">
           {all.map((p) => {
             const status = statuses.get(p.id)!;
             const pending = toggle.isPending && toggle.variables?.provider_id === p.id;
@@ -148,7 +149,8 @@ export function Providers() {
                   <span className="cell prov-status"><StatusMark status={status} /> {STATUS_LABEL[status]}</span>
                 )}
                 <span className="t-num prov-toggle">
-                  <button type="button" role="switch" className="toggle" aria-checked={p.enabled} disabled={pending}
+                  <button type="button" role="switch" className="toggle" aria-checked={p.enabled} disabled={pending || !canWrite}
+                          title={canWrite ? undefined : LOCKED_HINT}
                           aria-label={`${p.name} ${p.enabled ? "on" : "off"}`}
                           onClick={(e) => { e.stopPropagation(); toggle.mutate({ provider_id: p.id, enabled: !p.enabled }); }} />
                 </span>

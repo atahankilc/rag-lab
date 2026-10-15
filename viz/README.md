@@ -20,9 +20,19 @@ make test-contract        # the backend contract, step by step, as the backend r
 make dev                  # the UI on http://127.0.0.1:5173 (needs pnpm)
 ```
 
-The UI calls PostgREST through the Vite dev server at `/api`. Reads go through as the read role;
-writes get a short-lived `web_writer` JWT added by the dev server (`frontend/vite.config.ts`), so the
-secret never reaches the browser. The selected version and reference live in the URL
+The UI calls PostgREST through the Vite dev server at `/api`. Reads go through as the read role.
+Writes need a login: the dev server (`frontend/vite.auth.ts`) keeps the session in an HttpOnly cookie and, only
+while that session is live, adds a short-lived `web_writer` JWT, so neither the secret nor a token reaches the
+browser. Writes must also come from the UI page itself: another origin gets 403, even one on another port of
+127.0.0.1 (the cookie alone would not stop that), and a write that isn't JSON gets 415. `vite preview` of a
+build is read-only: reads work, every write and login gets 403. Without a login the UI is read-only (filters, search and navigation still work). There is no sign-up:
+
+```sh
+make user NAME=atahan     # asks for a password (8+ characters); run again to change it
+```
+
+A login lasts 30 days. Users and sessions live in `lab.web_user` / `lab.web_session` (only a hash of each
+session token is stored). The selected version and reference live in the URL
 (`/?v=v3&ref=baseline`), and every page follows them.
 
 | Command        | What it does                                                        |
@@ -36,6 +46,7 @@ secret never reaches the browser. The selected version and reference live in the
 | `make dev`     | the UI on http://127.0.0.1:5173                                      |
 | `make psql`    | a psql shell on the `lab` database                                   |
 | `make token`   | a JWT for the write role, to try the RPCs with curl                  |
+| `make user NAME=...` | add a UI login, or set a new password (logs that user out everywhere) |
 
 ## How the database is organised
 
@@ -54,6 +65,7 @@ Roles:
 |---------------|----------------------------|--------------------------------------------------|
 | `web_anon`    | every UI read (no token)   | SELECT on `api` views                             |
 | `web_writer`  | UI writes (JWT)            | + the 6 RPCs: `add_note`, `set_baseline`, `set_provider_enabled`, `set_provider_cap`, `queue_run`, `set_field_style` |
+| `web_auth`    | the dev server only (JWT)  | `login`, `web_session`, `logout`: checking UI logins, nothing else |
 | `lab_backend` | future RAG spikes (SQL)    | insert artifacts/runs/results, move its runs forward; never delete |
 
 Every write is logged to `lab.log_event` by triggers (actor `me` for the UI, `system` otherwise).
@@ -116,11 +128,11 @@ viz/
     tests/                integrity.sql, contract.sql (both build their own data, then roll back)
     tools/                jwt.py (a write-role token for curl), load-providers.sh
   providers.json          providers, their models, key variable names, default model per step kind
-  frontend/               React 19 + Vite; one folder per concern
+  frontend/               React 19 + Vite + Tailwind v4; one folder per concern
     src/api/              PostgREST client, types, TanStack Query hooks
     src/components/       HUD pieces: Timeline, Dock, Inspector, Readout, RiseFall, ...
     src/pages/            one file (+ css) per page
-    src/styles/           tokens.css (verbatim), extend.css, base.css, hud.css, page.css
+    src/styles/           Tailwind v4: global.css (tokens, theme, base) + components.css, hud.css, page.css, pages/
   docs/
     DESIGN_LANGUAGE.md    the design rules, plus every extension made while building
     backend-contract.md   how a spike writes its results in

@@ -2,7 +2,7 @@
 export function Loading({ label = "Loading" }: { label?: string }) {
   return (
     <div className="loading" role="status">
-      <div className="ring" />
+      <div className="spin-ring" />
       <div className="text">{label}</div>
     </div>
   );

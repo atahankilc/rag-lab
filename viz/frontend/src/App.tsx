@@ -1,4 +1,5 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { MutationCache, QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ApiError } from "./api/client";
 import { createBrowserRouter, RouterProvider } from "react-router";
 import { Hud } from "./components/Hud";
 import { Log } from "./pages/Log";
@@ -8,10 +9,17 @@ import { Providers } from "./pages/Providers";
 import { Questions } from "./pages/Questions";
 import { Runs } from "./pages/Runs";
 import { Space } from "./pages/Space";
+import { AuthProvider } from "./state/auth";
 import { VersionProvider } from "./state/version";
 
-const queryClient = new QueryClient({
+const queryClient: QueryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, refetchOnWindowFocus: false } },
+  // a write refused for want of a session (it ended, or was logged out elsewhere): recheck, which locks the UI
+  mutationCache: new MutationCache({
+    onError: (e) => {
+      if (e instanceof ApiError && e.status === 401) queryClient.invalidateQueries({ queryKey: ["session"] });
+    },
+  }),
 });
 
 function Root() {
@@ -42,7 +50,9 @@ const router = createBrowserRouter([
 export function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

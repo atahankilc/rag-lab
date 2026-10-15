@@ -361,7 +361,7 @@ export function SpaceCanvas({ panes, three, insets, command, onHover, onSelect, 
         ctx.stroke();
       }
       if (focus) {
-        ctx.strokeStyle = "rgba(77, 148, 255, 0.45)";
+        ctx.strokeStyle = cssVar("--hit-line");
         ctx.lineWidth = 1;
         for (const h of pane.hits) {
           const i = at(h.id);
@@ -559,10 +559,10 @@ function diamond(ctx: CanvasRenderingContext2D, x: number, y: number, r: number)
   ctx.closePath();
 }
 
-/** A small numeral or id on a black label, the scene's only kind of text. */
+/** A small numeral or id on a label the colour of the ground, the scene's only kind of text. */
 function tag(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, ink: string) {
   const w = ctx.measureText(text).width + 8;
-  ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
+  ctx.fillStyle = cssVar("--tag-bg");
   ctx.beginPath();
   ctx.roundRect(x, y, w, 16, 4);
   ctx.fill();

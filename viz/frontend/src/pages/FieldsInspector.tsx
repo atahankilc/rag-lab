@@ -7,6 +7,7 @@ import type { FieldKind, JsonObject } from "../api/types";
 import { ErrorNote } from "../components/Loading";
 import { Inspector } from "../components/Inspector";
 import { Segmented } from "../components/Segmented";
+import { LOCKED_HINT, LoginHint, useAuth } from "../state/auth";
 import { type Field, COLOR_CHOICES, categoryColors, GROUP_LABEL, OUTCOME_COLORS, OUTCOME_TEXT, type Outcome } from "../lib/fields";
 
 const KINDS: { value: FieldKind; label: string }[] = [
@@ -38,6 +39,7 @@ export function FieldsInspector({ fields, corpusName, onClose, colorId, setColor
     <Inspector open onClose={onClose} label="Fields" layer="Fields"
                what={`Found in the data of ${corpusName ?? "this corpus"}. Changes are saved for that corpus and logged.`}
                title={`${fields.length} fields${styled ? ` · ${styled} adjusted` : ""}`}>
+      <LoginHint what="rename, retype, hide or recolour fields" />
       {groups.map((g) => (
         <section key={g} className="inspector-section">
           <h3 className="section-head">{GROUP_LABEL[g]}</h3>
@@ -63,7 +65,9 @@ function FieldBlock({ field, open, onToggle, corpusName, coloured, setColor }: {
   setColor: (id: string) => void;
 }) {
   const save = useSetFieldStyle();
-  const write = (style: JsonObject) => corpusName && save.mutate({ corpus_name: corpusName, field: field.id, style });
+  const { canWrite } = useAuth();
+  const hint = canWrite ? undefined : LOCKED_HINT;
+  const write = (style: JsonObject) => canWrite && corpusName && save.mutate({ corpus_name: corpusName, field: field.id, style });
   const summary = field.distinct <= 1 ? "one value everywhere"
     : field.kind === "category" ? `${field.distinct} values`
     : field.kind === "text" ? `${field.distinct} distinct`
@@ -87,7 +91,7 @@ function FieldBlock({ field, open, onToggle, corpusName, coloured, setColor }: {
 
           <label className="field-row">
             <span className="label">Name</span>
-            <input className="input" defaultValue={field.label} key={field.label}
+            <input className="input" defaultValue={field.label} key={field.label} disabled={!canWrite} title={hint}
                    onBlur={(e) => { if (e.target.value.trim() !== field.label) write({ label: e.target.value.trim() || null }); }}
                    onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }} />
           </label>
@@ -95,23 +99,25 @@ function FieldBlock({ field, open, onToggle, corpusName, coloured, setColor }: {
           <div className="field-row">
             <span className="label">Type · detected {field.detected}</span>
             <Segmented ariaLabel={`Type of ${field.label}`} value={field.kind}
-                       options={KINDS} onChange={(k) => write({ kind: k === field.detected ? null : k })} />
+                       options={KINDS} disabled={!canWrite} title={hint}
+                       onChange={(k) => write({ kind: k === field.detected ? null : k })} />
             <span className="field-hint">{KIND_TEXT[field.kind]}</span>
           </div>
 
-          <div className="field-row inline">
+          <div className="field-row in-line">
             <button type="button" role="switch" className="toggle" aria-checked={!field.hidden}
-                    aria-label={`Show ${field.label}`} onClick={() => write({ hidden: !field.hidden })} />
+                    aria-label={`Show ${field.label}`} disabled={!canWrite} title={hint}
+                    onClick={() => write({ hidden: !field.hidden })} />
             <span>{field.hidden ? "Hidden: not offered for colour or filters" : "Shown"}</span>
             {!field.hidden && field.kind !== "text" && field.distinct > 1 && !coloured ? (
               <button type="button" className="chip" onClick={() => setColor(field.id)}>Colour by this</button>
             ) : null}
           </div>
 
-          {field.kind === "category" ? <ValueColors field={field} write={write} /> : null}
+          {field.kind === "category" ? <ValueColors field={field} write={write} locked={!canWrite} /> : null}
 
-          <div className="field-row inline">
-            <button type="button" className="chip" disabled={!field.style} onClick={() => write({})}>
+          <div className="field-row in-line">
+            <button type="button" className="chip" disabled={!field.style || !canWrite} title={hint} onClick={() => write({})}>
               Reset to detected
             </button>
             {save.isPending ? <span className="muted">Saving…</span> : null}
@@ -124,7 +130,7 @@ function FieldBlock({ field, open, onToggle, corpusName, coloured, setColor }: {
 }
 
 /** One row per value: its colour (click to pick from the palette), and how many chunks have it. */
-function ValueColors({ field, write }: { field: Field; write: (s: JsonObject) => void }) {
+function ValueColors({ field, write, locked }: { field: Field; write: (s: JsonObject) => void; locked: boolean }) {
   const [picking, setPicking] = useState<string | null>(null);
   const outcome = field.id === "retrieval.outcome";
   const { list } = categoryColors(field, outcome ? OUTCOME_COLORS : {});
@@ -138,6 +144,7 @@ function ValueColors({ field, write }: { field: Field; write: (s: JsonObject) =>
           return (
             <li key={c.value}>
               <button type="button" className="swatch" aria-label={`Colour of ${c.value}`} aria-expanded={picking === c.value}
+                      disabled={locked} title={locked ? LOCKED_HINT : undefined}
                       style={{ background: col ? `var(${col.token})` : "var(--ink-3)", opacity: col ? 1 : 0.5 }}
                       onClick={() => setPicking(picking === c.value ? null : c.value)} />
               <span className="value-name">
@@ -145,7 +152,7 @@ function ValueColors({ field, write }: { field: Field; write: (s: JsonObject) =>
                 {outcome && OUTCOME_TEXT[c.value as Outcome] ? <span className="muted"> · {OUTCOME_TEXT[c.value as Outcome]}</span> : null}
               </span>
               <span className="muted">{c.count}</span>
-              {picking === c.value ? (
+              {picking === c.value && !locked ? (
                 <div className="swatches" role="group" aria-label={`Pick a colour for ${c.value}`}>
                   {COLOR_CHOICES.map((t) => (
                     <button key={t} type="button" className="swatch" aria-pressed={col?.token === t} aria-label={t.replace("--", "")}

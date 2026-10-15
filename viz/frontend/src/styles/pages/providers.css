@@ -1,0 +1,43 @@
+/* Providers: the provider table, default roles, and the provider inspector. */
+
+.prov-row { @apply cursor-pointer; }
+.prov-row:hover { @apply bg-tint-1; }
+.prov-row.off > :not(.prov-toggle) { @apply opacity-42; }
+.prov-name { @apply rounded-[4px] text-left; }
+.prov-name:hover { @apply text-sweep-hi; }
+.prov-row .cell { @apply min-w-0 text-row text-ink-2; }
+.prov-endpoint { @apply truncate text-label!; }
+.prov-status { @apply inline-flex items-center gap-[7px]; }
+.prov-status .mark { @apply size-2; }
+.prov-models { @apply truncate; }
+.prov-spend { @apply grid gap-1.5; }
+.prov-spend-row { @apply flex items-baseline gap-1.5; }
+.prov-spend-row .t-meta { @apply m-0; }
+.prov-toggle { @apply flex justify-end; }
+.dim-mark { @apply opacity-50; }
+
+.roles { @apply mt-7; }
+.roles-row { --cols: 120px minmax(0, 1fr) minmax(0, 1fr) 80px; }
+.roles-row .t-val { @apply text-row; }
+.role-warn { @apply text-lost; }
+.roles-note { @apply mt-2.5; }
+.lede code, .prov-fine code { @apply text-label text-ink-2; }
+
+/* ---------- inspector ---------- */
+
+.prov-switch .v { @apply flex justify-end; }
+.prov-status-text { @apply text-row leading-[1.45] text-ink-2; }
+.prov-status-text.warn { @apply text-lost; }
+.prov-fine { @apply text-label leading-[1.45]; }
+.cap-form { @apply mt-1 flex flex-wrap items-center gap-2; }
+.cap-dollar { @apply text-row text-ink-3; }
+.cap-form .input { @apply h-7 w-[110px]; }
+.cap-form .input.invalid { @apply border-lost; }
+.prov-model { @apply grid gap-0.5; }
+.prov-model-name { @apply text-row! text-ink!; }
+.prov-roles { @apply text-row text-ink; }
+
+@media (max-width: 760px) {
+  .roles-row { --cols: 84px minmax(0, 1fr) 0 64px; }
+  .roles-row > :nth-child(3) { @apply hidden; }
+}

@@ -41,7 +41,7 @@ export function FilterRow({ fields, filters, setFilters, search, setSearch, scal
         const field = byId.get(id)!;
         return (
           <span key={id} className="filter-wrap">
-            <span className="chip filter set">
+            <span className="chip filter-chip set">
               <button ref={(el) => { chipRefs.current.set(id, el); }} type="button" aria-expanded={open === id}
                       onClick={() => setOpen(open === id ? null : id)}>
                 <span className="muted">{field.label}</span> {describe(filters[id], field)}
@@ -59,7 +59,7 @@ export function FilterRow({ fields, filters, setFilters, search, setSearch, scal
       })}
 
       <span className="filter-wrap">
-        <button ref={addRef} type="button" className="chip filter" aria-expanded={open === "+"}
+        <button ref={addRef} type="button" className="chip filter-chip" aria-expanded={open === "+"}
                 onClick={() => setOpen(open === "+" ? null : "+")}>
           <Plus size={12} /> Filter
         </button>

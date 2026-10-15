@@ -4,6 +4,7 @@ import { useExperimentDetail, useQueueRun } from "../api/hooks";
 import type { Json, JsonObject } from "../api/types";
 import { Inspector, InspectorSection } from "../components/Inspector";
 import { flatten, setPath, showValue } from "../lib/config";
+import { LoginHint, useAuth } from "../state/auth";
 import { useVersion } from "../state/version";
 
 // Overrides use the "keyed" form the database applies (lab.apply_overrides):
@@ -50,6 +51,7 @@ export function QueueRunForm({ onClose, onQueued }: { onClose: () => void; onQue
   const [experimentId, setExperimentId] = useState<number | undefined>(current?.id);
   const detail = useExperimentDetail(experimentId);
   const queue = useQueueRun();
+  const { canWrite } = useAuth();
   const [steps, setSteps] = useState<Step[]>([]);
   const [order, setOrder] = useState<string[]>([]);
   const [skipped, setSkipped] = useState<Set<string>>(new Set());
@@ -113,7 +115,7 @@ export function QueueRunForm({ onClose, onQueued }: { onClose: () => void; onQue
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!experimentId || invalid.length) return;
+    if (!experimentId || invalid.length || !canWrite) return;
     queue.mutate(
       { experiment_id: experimentId, overrides, note: note.trim() || null },
       { onSuccess: (r) => onQueued(r.run_id) },
@@ -154,7 +156,9 @@ export function QueueRunForm({ onClose, onQueued }: { onClose: () => void; onQue
     <Inspector open onClose={onClose} label="Queue a run" layer="Queue a run" layerMark={<i className="mark new" />}
                what="Runs a version's steps, with optional one-off changes for this run only."
                title="New runs stay queued until a backend exists">
+      <LoginHint what="queue a run" />
       <form className="queue-form" onSubmit={submit}>
+        <fieldset className="plain" disabled={!canWrite}>
         <InspectorSection title="Version">
           <label className="sr-only" htmlFor="q-version">Version</label>
           <select id="q-version" className="select" value={experimentId ?? ""} onChange={(e) => setExperimentId(Number(e.target.value))}>
@@ -219,6 +223,7 @@ export function QueueRunForm({ onClose, onQueued }: { onClose: () => void; onQue
           {queue.error ? <span className="run-error">{(queue.error as Error).message}</span> : null}
           {invalid.length ? <span className="run-error">Fix {invalid.length} setting{invalid.length > 1 ? "s" : ""} first.</span> : null}
         </div>
+        </fieldset>
       </form>
     </Inspector>
   );

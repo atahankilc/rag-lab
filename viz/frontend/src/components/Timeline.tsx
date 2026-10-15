@@ -116,7 +116,7 @@ function VersionCard({ e, isBaseline }: { e: Experiment; isBaseline: boolean }) 
   const diff = useConfigDiff(e.parent_id ?? undefined, e.id);
   const correctness = e.metrics.correctness;
   return (
-    <div className="hover-card field version-card" role="tooltip">
+    <div className="hover-card glass version-card" role="tooltip">
       <div className="hc-title">
         <span className="timeline-slug">{e.slug}</span> {e.name}
       </div>

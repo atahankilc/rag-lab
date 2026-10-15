@@ -11,7 +11,6 @@ import { useMedia } from "../lib/useMedia";
 import { useVersion } from "../state/version";
 import { LogInspector } from "./LogInspector";
 import { ACTOR_LABEL, describe, KIND_LABEL } from "./logText";
-import "./log.css";
 
 const ACTORS = ["me", "system", "model"] as const;
 

@@ -22,12 +22,12 @@ import {
 import { formatInt } from "../lib/format";
 import { stepRank } from "../lib/steps";
 import { useMedia } from "../lib/useMedia";
+import { useTheme } from "../state/theme";
 import { useVersion } from "../state/version";
 import { ChunkInspector, type QuestionName } from "./ChunkInspector";
 import { FieldsInspector } from "./FieldsInspector";
 import { normalise, type Pane, type PanePoint, SpaceCanvas, type Target, type ViewCommand } from "./SpaceCanvas";
 import { type Filters, FilterRow } from "./SpaceFilters";
-import "./space.css";
 
 /** The projection to show: the one asked for if this space has it, else UMAP, else the first. */
 function pickMethod(methods: SpaceMethod[] | undefined, wanted: string | null | undefined): string | undefined {
@@ -111,8 +111,11 @@ function SpaceView({ other }: { other: Experiment | undefined }) {
     [other, second.points.data, styles.data, second.stats]);
   const colorId = mainFields.some((f) => f.id === params.get("color") && usable(f)) ? params.get("color")! : defaultColor(mainFields);
   const colorField = mainFields.find((f) => f.id === colorId);
+  // colours are resolved from the theme's tokens, so a theme change rebuilds them
+  const { theme } = useTheme();
   const scale = useMemo(() => makeScale(colorField, [secondFields.find((f) => f.id === colorId)]),
-    [colorField, secondFields, colorId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [colorField, secondFields, colorId, theme]);
 
   // ---------- the panes ----------
   // this version, and on Compare · Space the other one next to it
@@ -372,7 +375,7 @@ function SpaceView({ other }: { other: Experiment | undefined }) {
       </div>
 
       {hover && hoverPoint ? (
-        <div className="hover-card field space-hover" style={cardPos(hover)}>
+        <div className="hover-card glass space-hover" style={cardPos(hover)}>
           <p className="hc-text">{hoverPoint.text}</p>
           <div className="hc-meta">
             {hoverPoint.document_title ?? hoverPoint.document_external_id} · chunk {hoverPoint.ord + 1}
@@ -382,7 +385,7 @@ function SpaceView({ other }: { other: Experiment | undefined }) {
           </div>
         </div>
       ) : hover?.kind === "query" && questions.get(hover.id) ? (
-        <div className="hover-card field space-hover" style={cardPos(hover)}>
+        <div className="hover-card glass space-hover" style={cardPos(hover)}>
           <p className="hc-text">{questions.get(hover.id)!.question}</p>
           <div className="hc-meta">{questions.get(hover.id)!.external_id} · {questions.get(hover.id)!.qtype.replace(/_/g, " ")} · click to pick</div>
         </div>

@@ -8,7 +8,6 @@ import { defFor, direction, formatDelta, formatValue } from "../lib/format";
 import { useMedia } from "../lib/useMedia";
 import { useVersion } from "../state/version";
 import { QuestionInspector } from "./QuestionInspector";
-import "./questions.css";
 
 type VerdictFilter = "all" | Verdict;
 type SortKey = "id" | "latency" | "delta" | string;   // string = a metric name
@@ -172,7 +171,7 @@ export function Questions() {
           </div>
         </header>
 
-        <div className="table" aria-label="Questions">
+        <div className="t-table" aria-label="Questions">
           {visible.length === 0 ? <p className="t-empty">No question matches these filters.</p> : null}
           {visible.map((r) => (
             <QuestionRow key={r.question_id} r={r} cols={cols} metricCols={shownCols} md={md} primary={primary}

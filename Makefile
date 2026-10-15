@@ -7,11 +7,12 @@
 #   make test-db  run the SQL integrity tests
 #   make test-contract  run the backend contract, step by step, as lab_backend (rolled back)
 #   make psql     open a psql shell on the lab database
+#   make user NAME=...  add a UI user or set a new password (there is no sign-up in the UI)
 
 COMPOSE := docker compose --env-file .env -f viz/db/compose.yaml
 PSQL    := $(COMPOSE) exec -T db psql -v ON_ERROR_STOP=1 -q -U lab -d lab
 
-.PHONY: db migrate providers reset dev test-db test-contract psql down token
+.PHONY: db migrate providers reset dev test-db test-contract psql down token user
 
 db:
 	$(COMPOSE) up -d --wait db api
@@ -47,3 +48,7 @@ down:
 # A signed JWT for the write role, for trying the RPCs with curl.
 token:
 	@uv run --no-project python viz/db/tools/jwt.py
+
+# A UI login. Asks for the password twice; it is stored as a bcrypt hash.
+user:
+	@viz/db/tools/add-user.sh "$(NAME)"

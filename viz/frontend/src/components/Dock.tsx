@@ -20,7 +20,7 @@ export function Dock({ showRun = true }: { showRun?: boolean }) {
   return (
     <div className="dock">
       {open ? (
-        <div className="dock-panel field appear" id="dock-panel">
+        <div className="dock-panel glass appear" id="dock-panel">
           {open === "guide" ? <GuidePanel /> : <RunPanel run={run.data ?? null} />}
         </div>
       ) : null}

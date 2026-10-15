@@ -1,0 +1,24 @@
+/* Compare: two versions side by side. */
+
+.compare { @apply max-w-[960px]; }
+
+.cmp-pick { @apply flex flex-wrap items-center gap-3 text-body; }
+.cmp-side { @apply text-ink; }
+.cmp-pick .select { @apply h-8 max-w-full min-w-[260px]; }
+
+.cmp-row { --cols: minmax(0, 1fr) 110px 110px 110px; }
+.cmp-a { @apply text-ink-2; }
+.cmp-group { @apply pt-3.5; }
+.cmp-group-label { @apply pb-1; }
+
+.cmp-diff-row { --cols: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1fr); @apply text-row; }
+.cmp-path { @apply text-label wrap-anywhere text-ink-3; }
+.cmp-old { @apply wrap-anywhere text-ink-2; }
+.cmp-new { @apply wrap-anywhere text-sweep-hi; }
+
+@media (max-width: 760px) {
+  .cmp-row { --cols: minmax(0, 1fr) 64px 64px 64px; }
+  .cmp-row .t-name .sub { @apply hidden; }
+  .cmp-pick .select { @apply w-full min-w-0; }
+}
+.compare .lede code { @apply text-label text-ink-2; }

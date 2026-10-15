@@ -1,113 +1,64 @@
 /* Full-screen 2D pages (tables, logs, settings): the visual is hidden, content scrolls in a
-   centred column with a sticky header. The HUD corners stay on top. */
+   centred column with a sticky header. The HUD corners stay on top. Imported by global.css. */
 
 /* the scroll area starts under the tabs, so rows never scroll behind them */
-.page-full {
-  position: absolute;
-  inset: calc(var(--nav-top) + 44px) 0 0 0;
-  overflow-y: auto;
-  padding: 0 var(--edge) 260px;
-}
+.page-full { @apply absolute inset-x-0 top-[calc(var(--nav-top)+44px)] bottom-0 overflow-y-auto px-(--edge) pb-[260px]; }
 /* without the timeline there is only the dock to clear at the bottom */
-.hud.no-timeline .page-full { padding-bottom: 120px; }
+.hud.no-timeline .page-full { @apply pb-[120px]; }
 /* a section with subpages has their row under the tabs */
-.hud.has-subs .page-full { top: calc(var(--nav-top) + 68px); }
+.hud.has-subs .page-full { @apply top-[calc(var(--nav-top)+68px)]; }
 
-.page-col {
-  max-width: 1320px;
-  min-width: 0;
-  margin: 0 auto;
-}
+.page-col { @apply mx-auto max-w-[1320px] min-w-0; }
 
-.page-head {
-  position: sticky;
-  top: 0;
-  z-index: 5;
-  display: grid;
-  gap: 14px;
-  padding: 8px 0 14px;
-  background: var(--void);
-}
-.page-head-row {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 24px;
-  flex-wrap: wrap;
-}
-.page-readouts { display: flex; gap: 36px; flex-wrap: wrap; }
-.filter-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.filter-row .divider { width: 1px; height: 18px; background: var(--hair); margin: 0 4px; }
+.page-head { @apply sticky top-0 z-5 grid gap-3.5 bg-void pt-2 pb-3.5; }
+.page-head-row { @apply flex flex-wrap items-end justify-between gap-6; }
+.page-readouts { @apply flex flex-wrap gap-9; }
+.filter-row { @apply flex flex-wrap items-center gap-2; }
+.filter-row .divider { @apply mx-1 h-4.5 w-px bg-hair; }
 
-.section { padding: 18px 0; border-top: 1px solid var(--hair); }
-.section > .section-head { margin-bottom: 12px; }
+.section { @apply border-t border-hair py-4.5; }
+.section > .section-head { @apply mb-3; }
 
 /* ---------- tables ---------- */
 
-.table { display: grid; }
+.t-table { @apply grid; }
 .t-row {
-  display: grid;
-  grid-template-columns: var(--cols);
-  gap: 0 16px;
-  align-items: center;
-  padding: 9px 0;
-  border-bottom: 1px solid var(--row-divider);
-  text-align: left;
-  width: 100%;
-  position: relative;
-  transition: background var(--fast) var(--ease);
+  @apply relative grid w-full grid-cols-(--cols) items-center gap-x-4 gap-y-0 border-b border-row-divider py-[9px]
+    text-left transition-[background] duration-160 ease-instrument;
 }
-button.t-row:hover { background: rgba(255, 255, 255, 0.025); }
-.t-row[aria-current="true"] { background: rgba(77, 148, 255, 0.06); }
+button.t-row:hover { @apply bg-tint-1; }
+.t-row[aria-current="true"] { @apply bg-sel-row; }
 .t-row[aria-current="true"]::before {
-  content: "";
-  position: absolute;
-  left: -12px;
-  top: 6px;
-  bottom: 6px;
-  width: 2px;
-  border-radius: 2px;
-  background: var(--sweep-hi);
+  @apply absolute top-1.5 bottom-1.5 -left-3 w-0.5 rounded-[2px] bg-sweep-hi content-[''];
 }
-.t-head {
-  font-size: var(--t-micro);
-  color: var(--ink-3);
-  border-bottom: 1px solid var(--hair);
-  padding: 6px 0 8px;
-}
-.t-head button {
-  font-size: var(--t-micro);
-  color: var(--ink-3);
-  letter-spacing: 0.02em;
-  text-align: inherit;
-  border-radius: 4px;
-}
-.t-head button:hover, .t-head button[aria-pressed="true"] { color: var(--ink); }
-.t-num { text-align: right; justify-self: end; font-variant-numeric: tabular-nums; }
-.t-num > .t-val, .t-num > .t-meta { display: block; }
-.t-name { min-width: 0; }
-.t-name .main { display: block; font-size: 13px; font-weight: 500; color: var(--ink); }
-.t-name .sub { display: block; font-size: var(--t-micro); color: var(--ink-3); margin-top: 2px; }
-.t-val { font-size: 13px; font-weight: 500; color: var(--ink); }
-.t-meta { font-size: var(--t-micro); color: var(--ink-3); margin-top: 2px; white-space: nowrap; }
-.t-meta.rise { color: var(--rise-hi); }
-.t-meta.fall { color: var(--fall-hi); }
-.t-id { font-size: var(--t-label); font-weight: 600; letter-spacing: 0.04em; color: var(--ink-2); }
-.t-empty { padding: 40px 0; text-align: center; color: var(--ink-3); font-size: 13px; }
+.t-head { @apply border-b border-hair pt-1.5 pb-2 text-micro text-ink-3; }
+.t-head button { @apply rounded-[4px] text-micro tracking-[0.02em] text-ink-3; text-align: inherit; }
+.t-head button:hover, .t-head button[aria-pressed="true"] { @apply text-ink; }
+.t-num { @apply justify-self-end text-right tabular-nums; }
+.t-num > .t-val, .t-num > .t-meta { @apply block; }
+.t-name { @apply min-w-0; }
+.t-name .main { @apply block text-row font-medium text-ink; }
+.t-name .sub { @apply mt-0.5 block text-micro text-ink-3; }
+.t-val { @apply text-row font-medium text-ink; }
+.t-meta { @apply mt-0.5 text-micro whitespace-nowrap text-ink-3; }
+.t-meta.rise { @apply text-rise-hi; }
+.t-meta.fall { @apply text-fall-hi; }
+.t-id { @apply text-label font-semibold tracking-[0.04em] text-ink-2; }
+.t-empty { @apply py-10 text-center text-row text-ink-3; }
 
-.verdict { font-size: 11px; line-height: 1; justify-self: center; }
-.verdict.better { color: var(--rise-hi); }
-.verdict.worse { color: var(--fall-hi); }
-.verdict.none { color: var(--ink-3); }
+.verdict { @apply justify-self-center text-[11px] leading-none; }
+.verdict.better { @apply text-rise-hi; }
+.verdict.worse { @apply text-fall-hi; }
+.verdict.none { @apply text-ink-3; }
 
 @media (max-width: 900px) {
-  .t-row { gap: 0 10px; }
+  .t-row { @apply gap-x-2.5; }
   .t-name .main { -webkit-line-clamp: 2; }
 }
 
 @media (max-width: 760px) {
-  .page-full { position: static; overflow: visible; padding: 0; }
-  .page-head { top: 0; position: relative; }
-  .page-readouts { gap: 18px 24px; }
-  .page-readouts .num-28 { font-size: 22px; }
+  .page-full { @apply static overflow-visible p-0; }
+  .page-head { @apply relative top-0; }
+  .page-readouts { @apply gap-x-6 gap-y-4.5; }
+  .page-readouts .num-28 { @apply text-[22px]; }
 }
