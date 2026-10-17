@@ -3,6 +3,7 @@ import { Fragment, useLayoutEffect, useRef, useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router";
 import { useVersion, useWithSearch } from "../state/version";
 import { Dock } from "./Dock";
+import { DotPool, type PoolMode } from "./DotPool";
 import { Centered, ErrorNote, Loading } from "./Loading";
 import { LoginDialog } from "./LoginDialog";
 import { Logo } from "./Logo";
@@ -39,6 +40,11 @@ const inSection = (pathname: string, t: Tab) =>
 // versions, so the timeline would do nothing there and is left out.
 const VERSIONED = new Set(["/", "/space", "/questions", "/compare", "/compare/config"]);
 
+// The dot pool behind each page: full on the overview pages, calm where you read (Questions) and under Space,
+// whose chunks rise out of it.
+const fieldFor = (pathname: string): PoolMode =>
+  pathname === "/questions" || pathname === "/space" ? "calm" : "overview";
+
 /** The fixed corner instruments around a full-bleed page. */
 export function Hud() {
   const withSearch = useWithSearch();
@@ -62,7 +68,11 @@ export function Hud() {
   }, [pathname]);
 
   return (
-    <div className={`hud ${versioned ? "" : "no-timeline"} ${section?.subs ? "has-subs" : ""}`}>
+    <div
+      className={`hud ${versioned ? "" : "no-timeline"} ${section?.subs ? "has-subs" : ""}`}
+      data-sky={fieldFor(pathname)}
+    >
+      <DotPool mode={fieldFor(pathname)} />
       <main className="stage" id="main">
         {error ? (
           <Centered>
@@ -96,6 +106,7 @@ export function Hud() {
         <div className="nav-tabs" ref={tabsRef}>
           {TABS.map((t) => (
             <NavLink
+              viewTransition
               key={t.path}
               to={withSearch(t.path)}
               end={t.path === "/"}
@@ -125,6 +136,7 @@ export function Hud() {
                     </span>
                   ) : null}
                   <NavLink
+                    viewTransition
                     to={withSearch(sub.path)}
                     end
                     className="nav-sub"
@@ -141,6 +153,7 @@ export function Hud() {
 
       <div className="top-right">
         <NavLink
+          viewTransition
           to={withSearch("/providers")}
           className="nav-link"
           aria-label="Providers"
@@ -149,6 +162,7 @@ export function Hud() {
           <Cpu /> <span className="pill-text">Providers</span>
         </NavLink>
         <NavLink
+          viewTransition
           to={withSearch("/log")}
           className="nav-link"
           aria-label="Log"

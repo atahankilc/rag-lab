@@ -308,7 +308,11 @@ export function QueueRunForm({ onClose, onQueued }: { onClose: () => void; onQue
           </InspectorSection>
 
           <div className="qf-submit">
-            <button type="submit" className="pill" disabled={!experimentId || invalid.length > 0 || queue.isPending}>
+            <button
+              type="submit"
+              className="pill primary"
+              disabled={!experimentId || invalid.length > 0 || queue.isPending}
+            >
               {queue.isPending ? "Queueing…" : "Queue run"}
             </button>
             {queue.error ? <span className="run-error">{(queue.error as Error).message}</span> : null}

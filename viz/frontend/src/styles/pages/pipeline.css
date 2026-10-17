@@ -35,18 +35,20 @@
 }
 
 .headline {
+  @apply relative veil;
   @apply flex flex-wrap justify-center gap-10;
 }
 
 /* two groups: the library (fixed shape, built once) | the version's own steps, in order */
 .flow-groups {
-  @apply flex w-full max-w-[1640px] items-stretch gap-5.5;
+  /* as wide as its steps, so its veil hugs them instead of blacking out a band of the pool */
+  @apply relative flex w-fit max-w-full items-stretch gap-5.5 veil;
 }
 .flow-group {
   @apply grid min-w-0 flex-[1_1_0] content-start gap-3;
 }
 .flow-group.library {
-  @apply flex-[0_1_auto] border-r border-hair pr-5.5;
+  @apply flex-[0_1_auto] pr-9;
 }
 .flow-group.library .flow > li:not(.flow-arrow) {
   @apply flex-[0_1_150px];
@@ -143,10 +145,13 @@
 /* ---------- bottom centre: rise / fall ---------- */
 
 .bottom-center {
-  @apply fixed right-[calc(var(--edge)+var(--corner-w)+40px)] bottom-(--edge)
-    left-[calc(var(--edge)+var(--corner-w)+40px)] z-10 flex justify-center;
+  /* just above the bottom bar */
+  /* bottom centre, between the dock and the timeline */
+  @apply fixed right-[calc(var(--timeline-w)+2*var(--edge))] bottom-(--edge) left-[calc(var(--corner-w)+2*var(--edge))] z-10
+    flex justify-center;
 }
 .risefall-pair {
+  @apply relative veil;
   @apply flex w-full flex-wrap items-end justify-center gap-4;
 }
 .risefall-pair .risefall {

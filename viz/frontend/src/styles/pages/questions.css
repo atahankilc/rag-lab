@@ -1,21 +1,277 @@
-/* Questions: the eval set as a table, and the question inspector. */
+/* Questions: the eval set as a table; with a question open, the page splits into the list (left) and the
+   question's detail (right). Flat and calm: hairlines and type, one accent. */
 
 .q-text {
   @apply line-clamp-1;
 }
 
-/* ---------- inspector ---------- */
+/* ---------- the split ---------- */
 
-.q-answer {
-  @apply text-body leading-[1.5] text-ink;
+.q-page.split {
+  /* the list and the detail end above the bottom corners (dock, timeline), which float on the dots below */
+  @apply grid grid-cols-[minmax(360px,34%)_minmax(0,1fr)] gap-0 overflow-hidden pr-0 pb-[calc(var(--bar-h)+8px)];
 }
-.q-gold,
-.q-judge {
-  @apply text-row leading-[1.5] text-ink-2;
+.q-list {
+  view-transition-name: q-list;
 }
-.q-gold .label,
-.q-judge .label {
-  @apply mr-1.5;
+.q-page.split .q-list {
+  @apply max-w-none overflow-y-auto pr-8 pb-6;
+}
+.q-page.split .page-readouts {
+  @apply hidden;
+}
+.q-page.split .page-title {
+  @apply text-[22px];
+}
+.q-page.split .q-text {
+  @apply line-clamp-2;
+}
+.q-page.split .t-row {
+  @apply gap-x-3;
+}
+.q-page.split .t-row[aria-current="true"]::before {
+  @apply -left-0.5;
+}
+.q-page.split .t-row[aria-current="true"] {
+  @apply pl-1.5;
+}
+
+/* ---------- the detail pane ---------- */
+
+/* flat: the detail is the page's right half, divided from the list by one hairline. No box, no shadow. */
+.q-detail {
+  /* not clipped, so its veil can fade out past its edges; the inner scroll area does the scrolling */
+  @apply relative flex min-h-0 flex-col veil;
+  view-transition-name: q-detail;
+}
+/* a new question: its sections rise in one after another */
+.q-detail-scroll > * {
+  animation: rise 560ms var(--ease) both;
+}
+.q-detail-scroll > :nth-child(2) {
+  animation-delay: 70ms;
+}
+.q-detail-scroll > :nth-child(3) {
+  animation-delay: 140ms;
+}
+.q-detail-scroll > :nth-child(4) {
+  animation-delay: 210ms;
+}
+.q-detail-scroll > :nth-child(n + 5) {
+  animation-delay: 280ms;
+}
+.q-detail-bar {
+  @apply flex h-12 flex-none items-center justify-between gap-4 pr-1 pl-8;
+}
+.q-detail-id {
+  @apply flex items-center gap-2.5 text-label font-semibold tracking-[0.04em] text-ink-2;
+}
+.q-type {
+  @apply rounded-pill border border-hair px-2 py-px text-micro font-medium tracking-[0.02em] text-ink-3;
+}
+.q-detail-nav {
+  @apply flex items-center gap-0.5;
+}
+.q-detail-nav .key-hint {
+  @apply mr-2;
+}
+.q-detail-scroll {
+  @apply min-h-0 flex-1 overflow-y-auto px-8 pt-7 pb-10;
+  scroll-padding-top: 16px;
+}
+
+/* the question, then one big score: the first thing read */
+.q-hero {
+  @apply grid gap-6 pb-7;
+}
+.q-question {
+  @apply max-w-[68ch] text-[21px] leading-[1.38] font-normal tracking-[-0.005em] text-balance text-ink;
+}
+.q-score {
+  @apply flex flex-wrap items-end gap-x-12 gap-y-4;
+}
+.q-score-num {
+  @apply grid gap-1;
+}
+.q-score-num .num {
+  @apply text-[68px] font-light text-ink;
+}
+.q-score-num.is-right .num {
+  @apply text-gold-hi;
+}
+.q-score-num .delta {
+  @apply mt-1;
+}
+.q-score-rest {
+  @apply m-0 flex flex-wrap gap-x-9 gap-y-3 pb-2;
+}
+.q-score-rest div {
+  @apply grid gap-1.5;
+}
+.q-score-rest dd {
+  @apply m-0 text-[26px] text-ink-2;
+}
+.q-score-rest small {
+  @apply ml-1 text-label text-ink-3;
+}
+
+/* ---------- sections ---------- */
+
+.q-section {
+  @apply grid gap-4 pt-10 pb-2;
+}
+.q-section > .section-head {
+  @apply flex items-baseline;
+}
+
+/* two hard halves, A | B, divided by one hairline */
+.halves {
+  @apply grid grid-cols-2;
+}
+.half {
+  @apply grid min-w-0 content-start gap-3 pr-7;
+}
+.half + .half {
+  @apply pr-0 pl-9;
+}
+.half-head {
+  @apply flex items-baseline justify-between gap-3;
+}
+.half.gold .half-head .axis {
+  @apply text-gold-hi;
+}
+
+.half.gold .md {
+  @apply text-ink;
+}
+.half-sub {
+  @apply mt-2;
+}
+.facts {
+  @apply grid gap-2;
+}
+.facts li {
+  @apply relative pl-4 text-row leading-[1.5] text-ink-2;
+}
+.facts li::before {
+  @apply absolute top-[0.62em] left-0 size-[5px] rotate-45 bg-gold content-[''];
+}
+.half-judge {
+  @apply text-label leading-[1.5] text-ink-3;
+}
+
+/* the judge's reason: plain text after a small mark, accent when it matched the gold answer, clay when not */
+.judge {
+  @apply mt-1 grid grid-cols-[14px_1fr] gap-x-2 gap-y-1 text-row leading-[1.55] text-ink-2;
+}
+.judge::before {
+  @apply mt-[7px] size-[7px] rounded-full bg-ink-3 content-[''];
+}
+.judge.is-right::before {
+  @apply bg-gold;
+}
+.judge.is-wrong::before {
+  @apply bg-lost;
+}
+.judge > * {
+  @apply col-start-2;
+}
+.judge-word {
+  @apply text-label font-semibold tracking-[0.02em] text-ink;
+}
+.judge.is-right .judge-word {
+  @apply text-gold-hi;
+}
+.judge.is-wrong .judge-word {
+  @apply text-lost;
+}
+.judge p {
+  @apply max-w-[80ch];
+}
+
+/* ---------- long text: first lines, then "Show all" ---------- */
+
+/* a hard cut, never a fade over the text: "Show all" says there is more */
+.clamp {
+  @apply overflow-hidden;
+  max-height: calc(var(--lines) * 1.6em);
+}
+.clamp.open {
+  max-height: none;
+}
+.clamp-toggle {
+  @apply mt-2 text-label;
+}
+
+/* ---------- Markdown (model answers) ---------- */
+
+.md {
+  @apply grid gap-2.5 text-body leading-[1.6] text-ink-2;
+}
+.md p,
+.md ul,
+.md ol,
+.md pre,
+.md blockquote {
+  @apply m-0 max-w-[72ch];
+}
+.md .md-h {
+  @apply mt-1 font-semibold text-ink;
+}
+.md ul,
+.md ol {
+  @apply grid gap-1 pl-5;
+}
+.md ul {
+  @apply list-disc;
+}
+.md ol {
+  @apply list-decimal;
+}
+.md li::marker {
+  @apply text-ink-3;
+}
+.md strong {
+  @apply font-semibold text-ink;
+}
+.md code {
+  @apply rounded-[5px] bg-tint-2 px-1 py-px font-mono text-[0.88em] text-ink;
+}
+.md pre {
+  @apply overflow-x-auto rounded-[10px] border border-hair bg-tint-1 px-3.5 py-3 text-label leading-[1.55];
+}
+.md pre code {
+  @apply bg-transparent p-0;
+}
+.md blockquote {
+  @apply pl-3 text-ink-3 italic;
+}
+
+/* ---------- evidence ---------- */
+
+.evidence {
+  @apply grid grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] gap-9;
+}
+.ev-col {
+  @apply grid min-w-0 content-start gap-3;
+}
+.ev-list {
+  @apply grid gap-3;
+}
+.ev-list li {
+  @apply grid grid-cols-[16px_1fr] items-start gap-2.5;
+}
+.ev-list .mark {
+  @apply mt-[5px];
+}
+.ev-list li.found .mark.held {
+  @apply bg-gold;
+}
+.ev-title {
+  @apply text-row leading-[1.4] font-medium text-ink;
+}
+.ev-list li.missed .t-meta {
+  @apply text-lost;
 }
 
 .cite {
@@ -29,25 +285,16 @@ button.cite:hover {
 }
 
 .ctx-list {
-  @apply mt-1.5 grid gap-1;
+  @apply grid gap-3;
 }
 .ctx {
-  @apply rounded-md transition-[background] duration-240 ease-instrument;
-}
-.ctx.flash {
-  @apply bg-sweep-wash;
-}
-.ctx-btn {
-  @apply grid w-full grid-cols-[22px_1fr] gap-2 rounded-md px-1 py-1.5 text-left;
-}
-.ctx-btn:hover {
-  @apply bg-tint-1;
+  @apply grid grid-cols-[22px_1fr] gap-2;
 }
 .ctx-rank {
-  @apply pt-px text-[16px] text-ink-2;
+  @apply pt-px text-[16px] text-ink-3;
 }
 .ctx-body {
-  @apply grid min-w-0 gap-[5px];
+  @apply grid min-w-0 gap-1;
 }
 .ctx-head {
   @apply flex min-w-0 items-center gap-[7px] text-label;
@@ -62,55 +309,35 @@ button.cite:hover {
   @apply ml-auto text-micro text-ink-3;
 }
 .ctx-text {
-  @apply line-clamp-3 text-label leading-[1.45] text-ink-2;
-}
-/* opened: all lines, still clipped at the box (line-clamp-none would also drop overflow: hidden) */
-.ctx-text.open {
-  -webkit-line-clamp: unset;
-  @apply block whitespace-pre-line;
+  @apply line-clamp-3 text-label leading-[1.5] text-ink-2;
 }
 
-.q-evidence {
-  @apply grid grid-cols-[14px_1fr] gap-2;
+/* ---------- compare ---------- */
+
+.compare-pick {
+  @apply flex items-center gap-2.5;
 }
-.q-ev-mark {
-  @apply pt-[5px];
-}
-.q-ev-mark .mark {
-  @apply size-[7px];
-}
-.q-ev-mark .mark.lost {
-  @apply size-[9px];
-}
-.q-ev-text {
-  @apply text-row leading-[1.45] text-ink-2;
+.compare-pick .select {
+  @apply min-w-[240px];
 }
 
-.kv-row .v .was.rise {
+/* ---------- steps ---------- */
+
+.steps-table {
+  @apply grid text-row;
+}
+.steps-row {
+  @apply grid grid-cols-[minmax(120px,1.4fr)_repeat(4,minmax(80px,1fr))] items-baseline gap-4 py-2 tabular-nums;
+}
+.steps-row > span:not(:first-child) {
+  @apply text-right text-ink-2;
+}
+.steps-head {
+  @apply pt-0 text-micro text-ink-3;
+}
+.steps-head > span:not(:first-child) {
   @apply text-ink-3;
 }
-.kv-row .v .was.fall {
-  @apply text-ink-3;
-}
-
-.q-side {
-  @apply grid grid-cols-2 gap-4;
-}
-.q-side-col {
-  @apply grid min-w-0 content-start gap-2;
-}
-.q-side-answer {
-  @apply line-clamp-4 text-label leading-[1.45] text-ink-2;
-}
-.q-side-ctx {
-  @apply grid gap-[3px];
-}
-.q-side-ctx li {
-  @apply flex min-w-0 items-center gap-1.5 text-micro;
-}
-.q-side-ctx .mark {
-  @apply size-1.5;
-}
-.q-side-ctx .ctx-doc {
-  @apply font-normal text-ink-2;
+.steps-name {
+  @apply font-semibold tracking-[0.04em] text-ink;
 }

@@ -132,7 +132,10 @@ export interface QuestionResult {
   citations: { marker: string; chunk_id: number; rank: number }[];
   metrics: Metrics;
   latency_ms: Record<string, number>;
-  tokens: Record<string, number>;
+  /** per step id: {"in": n, "out": n}; runs stored before that kept one flat {"prompt", "completion"} */
+  tokens: Record<string, number | { in?: number; out?: number }>;
+  /** per step id, in USD */
+  cost: Record<string, number>;
   cost_usd: number | null;
   judge_rationale: string | null;
   latency_total_ms: number | null;

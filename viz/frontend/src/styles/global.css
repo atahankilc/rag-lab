@@ -33,24 +33,37 @@
 :root {
   color-scheme: dark;
 
-  /* ground */
-  --void: #000000; /* page background */
-  --hair: rgba(255, 255, 255, 0.09); /* default hairline / border */
-  --hair-2: rgba(255, 255, 255, 0.16); /* hover / active border, rails */
-  --field: rgba(0, 0, 0, 0.86); /* feathered field fill (+ blur 10px) */
+  /* black and white, nothing else. The ground is true black; the dot pool (components/DotPool.tsx) lives in it */
+  --void: #000000;
+  --veil: rgba(0, 0, 0, 0.96); /* behind text: the dots blur and fade away under anything you read */
+  --veil-spread: 64px; /* how far past a section its veil fades out */
+  --hair: rgba(255, 255, 255, 0.1);
+  --hair-2: rgba(255, 255, 255, 0.18);
+  --field: rgba(0, 0, 0, 0.86);
 
-  /* ink */
-  --ink: #f2f4f7; /* primary text, numerals */
-  --ink-2: #b4bac4; /* secondary text, chip text */
-  --ink-3: #868d99; /* labels, captions (≥ 4.5:1 on black) */
+  --ink: #f4f4f4; /* primary text, numerals */
+  --ink-2: #b9b9b9; /* secondary text */
+  --ink-3: #8a8a8a; /* labels, captions (6:1 on black) */
 
-  /* signal */
-  --sweep: #1c69d4; /* the one accent */
-  --sweep-hi: #4d94ff; /* links, focus ring, active dot */
-  --sweep-wash: rgba(28, 105, 212, 0.18); /* halo around the active dot */
-  --lost: #f5a524; /* amber: attention / weakened / warning */
+  /* blue marks what is live: a run in progress, a changed setting, the active version, links. What you point
+     at (selection, the primary action, the open tab) is white, the brightest thing on screen */
+  --sweep: #3d8bff;
+  --sweep-hi: #5aa0ff;
+  --sweep-wash: rgba(77, 148, 255, 0.18);
+  --aurora-1: #6b6b6b; /* the logo's line, grey to white */
+  --aurora-2: #bdbdbd;
+  --aurora-3: #ffffff;
+  --aurora-ink: #000000; /* text on the white fill */
 
-  /* comparison vs reference (ONLY for better/worse, never data hues) */
+  /* gold evidence (the benchmark's "gold"): white, like the selection; the label says "gold" */
+  --gold: #ffffff;
+  --gold-hi: #ffffff;
+  --gold-line: rgba(255, 255, 255, 0.55);
+  --gold-wash: rgba(255, 255, 255, 0.05);
+
+  --lost: #f5a524; /* missed / attention: amber, with its own mark (×) */
+
+  /* better / worse than the reference: green and red, only for that */
   --rise: #2fbf71;
   --rise-hi: #5ee69a;
   --rise-glow: rgba(47, 191, 113, 0.26);
@@ -58,7 +71,7 @@
   --fall-hi: #ff6961;
   --fall-glow: rgba(255, 59, 48, 0.34);
 
-  /* categorical data palette, for data types inside visualisations only */
+  /* categorical data palette, for data types inside visualisations only (validated on black) */
   --cat-1: #3987e5;
   --cat-2: #d95926;
   --cat-3: #199e70;
@@ -68,36 +81,34 @@
   --cat-7: #9b6ce0;
   --cat-8: #e0a33b;
 
-  /* surfaces */
-  --row-divider: rgba(255, 255, 255, 0.05);
-  --fill: rgba(0, 0, 0, 0.6); /* pill, chip and segmented fill */
-  --tint-1: rgba(255, 255, 255, 0.025); /* row hover */
-  --tint-2: rgba(255, 255, 255, 0.06); /* icon button hover */
-  --tint-3: rgba(255, 255, 255, 0.07); /* active pill */
-  --tint-4: rgba(255, 255, 255, 0.09); /* active segment */
-  --sel-row: rgba(77, 148, 255, 0.06); /* selected row */
-  --sel-border: rgba(77, 148, 255, 0.55); /* pressed chip, set filter, changed value */
-  --sel-text: rgba(77, 148, 255, 0.4); /* text selection */
-  --glow: rgba(77, 148, 255, 0.6); /* the underline's glow */
+  --row-divider: rgba(255, 255, 255, 0.06);
+  --fill: transparent;
+  --tint-1: rgba(255, 255, 255, 0.035);
+  --tint-2: rgba(255, 255, 255, 0.07);
+  --tint-3: rgba(255, 255, 255, 0.08);
+  --tint-4: rgba(255, 255, 255, 0.12);
+  --sel-row: rgba(255, 255, 255, 0.06);
+  --sel-border: rgba(255, 255, 255, 0.6);
+  --sel-text: rgba(255, 255, 255, 0.28);
+  --glow: rgba(255, 255, 255, 0.4);
   --rise-wash: rgba(47, 191, 113, 0.08);
   --fall-wash: rgba(255, 59, 48, 0.08);
-  --knob-on: #000; /* toggle knob when on */
-  --option-bg: #0e1014; /* native <option> lists */
+  --knob-on: #000000;
+  --option-bg: #0a0a0a;
 
-  /* glass: everything that rises above the page (inspector, popovers, dialogs, dock panel, hover cards) */
-  --glass-bg: rgba(16, 18, 23, 0.62);
-  --glass-solid: #0d0f13; /* the same surface where blur would hurt reading (phone sheets) */
-  --glass-border: rgba(255, 255, 255, 0.09);
-  --glass-shine: inset 0 1px 0 rgba(255, 255, 255, 0.07);
-  --glass-shadow: 0 24px 60px -16px rgba(0, 0, 0, 0.75), 0 2px 10px rgba(0, 0, 0, 0.45);
-  --glass-blur: blur(22px) saturate(150%);
-  --backdrop: rgba(0, 0, 0, 0.5); /* behind a dialog */
+  /* nothing has a box: what opens over the page (sheets, popovers, the dialog) only veils what's behind it */
+  --glass-bg: transparent;
+  --glass-solid: #000000;
+  --glass-border: transparent;
+  --glass-shine: none;
+  --glass-shadow: none;
+  --glass-blur: none;
+  --backdrop: rgba(0, 0, 0, 0.6);
 
   /* the Space canvas */
-  --none: #3a3f47; /* a point without a value */
-  --tag-bg: rgba(0, 0, 0, 0.7); /* behind numerals drawn in the scene */
-  --hit-line: rgba(77, 148, 255, 0.45); /* query -> retrieved chunk */
-  /* numbers and dates: violet, low values recede into the ground, high ones stand out */
+  --none: #3a3a3a;
+  --tag-bg: rgba(0, 0, 0, 0.8);
+  --hit-line: rgba(90, 160, 255, 0.45);
   --ramp-1: #4a3b80;
   --ramp-2: #6450ad;
   --ramp-3: #8169d4;
@@ -118,29 +129,42 @@
   --sweep-ms: 2400ms; /* timeline transition */
 
   /* HUD geometry */
-  --corner-w: 300px; /* dock and timeline width */
+  --corner-w: 300px; /* dock panel width */
   --nav-top: 10px; /* the menu, utilities and readout sit this close to the top */
   --top-bar-h: 46px; /* the inspector starts at --nav-top + this */
   --inspector-w: 440px;
+  --bar-h: 144px; /* what the bottom corners (dock, timeline) take: scroll areas keep this much free */
+  --timeline-w: 400px;
 }
 
-/* The light theme: "Instrument on white". Same rules, ground and ink swapped. */
+/* The light theme: the same world on porcelain. Aurora deepens, gold darkens to stay readable as text. */
 :root[data-theme="light"] {
   color-scheme: light;
 
-  --void: #f6f7f9; /* a hair off white, so white glass stands out from it */
-  --hair: rgba(15, 20, 30, 0.1);
-  --hair-2: rgba(15, 20, 30, 0.2);
-  --field: rgba(246, 247, 249, 0.88);
+  --void: #ffffff;
+  --veil: rgba(255, 255, 255, 0.94);
+  --hair: rgba(0, 0, 0, 0.1);
+  --hair-2: rgba(0, 0, 0, 0.2);
+  --field: rgba(255, 255, 255, 0.88);
 
-  --ink: #0d1014;
-  --ink-2: #3c434e;
-  --ink-3: #5c6370; /* ≥ 4.5:1 on the ground */
+  --ink: #0a0a0a;
+  --ink-2: #444444;
+  --ink-3: #6b6b6b; /* 5.3:1 on white */
 
   --sweep: #1c69d4;
   --sweep-hi: #1a5fc8;
   --sweep-wash: rgba(28, 105, 212, 0.14);
-  --lost: #a85a00; /* 4.75:1 on the ground: it is used as text */
+  --aurora-1: #9a9a9a;
+  --aurora-2: #4a4a4a;
+  --aurora-3: #000000;
+  --aurora-ink: #ffffff;
+
+  --gold: #000000;
+  --gold-hi: #000000;
+  --gold-line: rgba(0, 0, 0, 0.55);
+  --gold-wash: rgba(0, 0, 0, 0.04);
+
+  --lost: #a85a00;
 
   --rise: #1f9d5a;
   --rise-hi: #137c45;
@@ -149,39 +173,41 @@
   --fall-hi: #c2271e;
   --fall-glow: rgba(229, 53, 43, 0.22);
 
-  /* the same hues; the three that were too pale on white are a step darker (all ≥ 3:1 on the ground).
-     --cat-8 also turns yellower: darkened, it would match --cat-4's amber */
+  --cat-1: #3987e5;
+  --cat-2: #d95926;
+  --cat-3: #199e70;
   --cat-4: #b37600;
+  --cat-5: #d55181;
   --cat-6: #1a97a6;
+  --cat-7: #9b6ce0;
   --cat-8: #9a8410;
 
-  --row-divider: rgba(15, 20, 30, 0.06);
-  --fill: rgba(255, 255, 255, 0.75);
-  --tint-1: rgba(15, 20, 30, 0.025);
-  --tint-2: rgba(15, 20, 30, 0.05);
-  --tint-3: rgba(15, 20, 30, 0.06);
-  --tint-4: rgba(255, 255, 255, 1); /* the active segment is a raised white chip */
-  --sel-row: rgba(26, 95, 200, 0.07);
-  --sel-border: rgba(26, 95, 200, 0.55);
-  --sel-text: rgba(26, 95, 200, 0.22);
-  --glow: rgba(26, 95, 200, 0.35);
+  --row-divider: rgba(0, 0, 0, 0.06);
+  --fill: transparent;
+  --tint-1: rgba(0, 0, 0, 0.03);
+  --tint-2: rgba(0, 0, 0, 0.05);
+  --tint-3: rgba(0, 0, 0, 0.06);
+  --tint-4: rgba(0, 0, 0, 0.09);
+  --sel-row: rgba(0, 0, 0, 0.05);
+  --sel-border: rgba(0, 0, 0, 0.6);
+  --sel-text: rgba(0, 0, 0, 0.18);
+  --glow: rgba(0, 0, 0, 0.3);
   --rise-wash: rgba(31, 157, 90, 0.08);
   --fall-wash: rgba(229, 53, 43, 0.07);
   --knob-on: #ffffff;
   --option-bg: #ffffff;
 
-  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-bg: transparent;
   --glass-solid: #ffffff;
-  --glass-border: rgba(15, 20, 30, 0.08);
-  --glass-shine: inset 0 1px 0 rgba(255, 255, 255, 0.9);
-  --glass-shadow: 0 24px 56px -18px rgba(16, 24, 40, 0.24), 0 2px 8px rgba(16, 24, 40, 0.07);
-  --glass-blur: blur(22px) saturate(160%);
-  --backdrop: rgba(226, 229, 234, 0.45);
+  --glass-border: transparent;
+  --glass-shine: none;
+  --glass-shadow: none;
+  --glass-blur: none;
+  --backdrop: rgba(255, 255, 255, 0.6);
 
-  --none: #c9cdd3;
+  --none: #cccccc;
   --tag-bg: rgba(255, 255, 255, 0.85);
   --hit-line: rgba(26, 95, 200, 0.4);
-  /* the ramp flips: low values are pale (they recede into the ground), high ones dark */
   --ramp-1: #cfc3f5;
   --ramp-2: #a28be8;
   --ramp-3: #8169d4;
@@ -246,7 +272,13 @@
   --color-glass: var(--glass-bg);
   --color-glass-solid: var(--glass-solid);
   --color-glass-border: var(--glass-border);
+  --color-gold: var(--gold);
+  --color-gold-hi: var(--gold-hi);
+  --color-gold-line: var(--gold-line);
+  --color-gold-wash: var(--gold-wash);
+  --color-aurora-ink: var(--aurora-ink);
   --color-backdrop: var(--backdrop);
+  --color-veil: var(--veil);
 
   --font-sans: var(--font);
 
@@ -288,6 +320,126 @@
   }
 }
 
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+@keyframes pane-in {
+  from {
+    opacity: 0;
+    transform: translateX(48px) scale(0.985);
+    filter: blur(10px);
+  }
+}
+@keyframes pane-out {
+  to {
+    opacity: 0;
+    transform: translateX(48px) scale(0.985);
+    filter: blur(10px);
+  }
+}
+@keyframes page-out {
+  to {
+    opacity: 0;
+    filter: blur(6px);
+    transform: scale(0.992);
+  }
+}
+@keyframes page-in {
+  from {
+    opacity: 0;
+    filter: blur(6px);
+    transform: scale(1.008);
+  }
+}
+
+/* ---------- view transitions: the page morphs instead of jumping ----------
+   Switching pages crossfades through a short blur. On Questions, opening a question resizes the list
+   (q-list) and brings in the detail (q-detail); the snapshots keep their size (object-fit: none) so text never
+   stretches while the boxes move. */
+::view-transition-group(*) {
+  animation-duration: 520ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+::view-transition-old(root) {
+  animation: 220ms cubic-bezier(0.4, 0, 1, 1) both page-out;
+}
+::view-transition-new(root) {
+  animation: 420ms cubic-bezier(0.16, 1, 0.3, 1) 80ms both page-in;
+}
+::view-transition-group(q-list) {
+  overflow: clip;
+}
+::view-transition-old(q-list),
+::view-transition-new(q-list) {
+  width: 100%;
+  height: 100%;
+  object-fit: none;
+  object-position: 0 0;
+}
+::view-transition-old(q-list) {
+  animation: 260ms ease-out both page-out;
+}
+::view-transition-new(q-list) {
+  animation: 460ms cubic-bezier(0.16, 1, 0.3, 1) 60ms both page-in;
+}
+::view-transition-new(q-detail):only-child {
+  animation: 560ms cubic-bezier(0.16, 1, 0.3, 1) both pane-in;
+}
+::view-transition-old(q-detail):only-child {
+  animation: 300ms cubic-bezier(0.4, 0, 1, 1) both pane-out;
+}
+
+/* ---------- the veil ----------
+   Nothing on the page has a box. Instead, every section that holds text veils the dot pool behind it: a layer
+   one step behind the section, black and blurred across the section itself, and past its edges the black and
+   the blur both fade out over --veil-spread, so the dots come back gradually around it and never sit under a
+   word. The text itself is never faded. The element must be positioned (relative, fixed, ...): the layer
+   hangs from it. */
+@utility veil {
+  isolation: isolate;
+  &::before {
+    content: "";
+    position: absolute;
+    inset: calc(-1 * var(--veil-spread));
+    z-index: -1;
+    pointer-events: none;
+    background: var(--veil);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    --veil-x: linear-gradient(
+      to right,
+      transparent,
+      #000 var(--veil-spread),
+      #000 calc(100% - var(--veil-spread)),
+      transparent
+    );
+    --veil-y: linear-gradient(
+      to bottom,
+      transparent,
+      #000 var(--veil-spread),
+      #000 calc(100% - var(--veil-spread)),
+      transparent
+    );
+    -webkit-mask-image: var(--veil-x), var(--veil-y);
+    -webkit-mask-composite: source-in;
+    mask-image: var(--veil-x), var(--veil-y);
+    mask-composite: intersect;
+  }
+}
+/* scroll areas clip anything outside them, so they veil only themselves (the fade is then on their edges) */
+@utility veil-inset {
+  background: var(--veil);
+}
+
 /* ---------- 3. base ---------- */
 
 @layer base {
@@ -304,7 +456,27 @@
   }
 
   ::selection {
-    @apply bg-sel-text;
+    @apply bg-sel-text text-ink;
+  }
+  ::-webkit-scrollbar {
+    width: 9px;
+    height: 9px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--hair-2);
+    border: 3px solid transparent;
+    border-radius: 99px;
+    background-clip: padding-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: var(--ink-3);
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  input,
+  textarea {
+    caret-color: var(--sweep-hi);
   }
 
   :focus-visible {
@@ -329,15 +501,20 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 1ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 1ms !important;
-  }
-  .loading .spin-ring {
-    animation: spin 1.4s linear infinite !important;
-  }
+/* Motion off (the system asks to reduce motion and the Motion setting follows it, or it is set to Off):
+   nothing slides, fades or morphs. state/motion.ts sets data-motion. */
+:root[data-motion="off"]::view-transition-group(*),
+:root[data-motion="off"]::view-transition-old(*),
+:root[data-motion="off"]::view-transition-new(*) {
+  animation: none !important;
+}
+:root[data-motion="off"] *,
+:root[data-motion="off"] *::before,
+:root[data-motion="off"] *::after {
+  animation-duration: 1ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 1ms !important;
+}
+:root[data-motion="off"] .loading .spin-ring {
+  animation: spin 1.4s linear infinite !important;
 }

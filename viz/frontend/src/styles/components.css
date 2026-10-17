@@ -71,8 +71,9 @@
 /* Glass: what rises above the page (inspector, popovers, dialogs, the dock panel, hover cards).
    Frosted, with a hairline edge, a faint top shine and a soft shadow, so it reads apart from
    whatever is behind it in both themes. */
+/* what opens over the page has no box: it veils what is behind it */
 .glass {
-  @apply rounded-panel border border-glass-border bg-glass;
+  @apply veil rounded-[6px];
   -webkit-backdrop-filter: var(--glass-blur);
   backdrop-filter: var(--glass-blur);
   box-shadow: var(--glass-shine), var(--glass-shadow);
@@ -80,23 +81,33 @@
 
 /* ----- pills ----- */
 .pill {
-  @apply inline-flex h-8 items-center gap-1.5 rounded-pill border border-hair bg-fill px-[15px]
+  @apply inline-flex h-8 items-center gap-1.5 rounded-pill border border-transparent bg-tint-2 px-[15px]
     text-row font-semibold tracking-[0.04em] whitespace-nowrap text-ink-3
     transition-[color,border-color,background-color] duration-160 ease-instrument;
 }
 .pill:hover {
-  @apply border-hair-2 text-ink;
+  @apply bg-tint-3 text-ink;
 }
 .pill[aria-pressed="true"],
 .pill[aria-current="page"],
 .pill.active {
-  @apply border-hair-2 bg-tint-3 text-ink;
+  @apply bg-tint-4 text-ink;
 }
 .pill:disabled {
   @apply cursor-not-allowed opacity-42;
 }
 .pill svg {
   @apply size-3.5 flex-none stroke-[1.75];
+}
+/* the primary action: flat gold, dark ink on it */
+.pill.primary {
+  @apply border-transparent bg-ink font-semibold text-void;
+}
+.pill.primary:hover {
+  @apply border-transparent bg-ink-2 text-void;
+}
+.pill.primary[aria-pressed="true"] {
+  @apply border-transparent bg-ink-2 text-void;
 }
 .pill.small {
   @apply h-7 px-3 text-label;
@@ -118,23 +129,23 @@
 
 /* ----- chips ----- */
 .chip {
-  @apply inline-flex h-6.5 items-center gap-1.5 rounded-pill border border-hair bg-fill px-2.5
+  @apply inline-flex h-6.5 items-center gap-1.5 rounded-pill border border-transparent bg-tint-1 px-2.5
     text-label whitespace-nowrap text-ink-2 transition-[color,border-color] duration-160 ease-instrument;
 }
 button.chip:hover {
-  @apply border-hair-2 text-ink;
+  @apply bg-tint-2 text-ink;
 }
 .chip .count {
   @apply text-ink-3;
 }
 .chip[aria-pressed="true"] {
-  @apply border-sel-border text-ink;
+  @apply bg-tint-4 text-ink;
 }
 .chip.filter-chip {
   @apply h-7;
 }
 .chip.filter-chip.set {
-  @apply border-sel-border text-ink;
+  @apply bg-tint-4 text-ink;
 }
 .chip .glyph {
   @apply size-[7px] flex-none rounded-full;
@@ -145,14 +156,14 @@ button.chip:hover {
 
 /* a config value on a stage: key in ink-3, value in ink-2 */
 .kv-chip {
-  @apply inline-flex h-5.5 items-baseline gap-[5px] rounded-pill border border-hair px-2 text-micro
+  @apply inline-flex h-5.5 items-baseline gap-[5px] rounded-pill bg-tint-1 px-2 text-micro
     leading-5 whitespace-nowrap text-ink-2;
 }
 .kv-chip .k {
   @apply text-ink-3;
 }
 .kv-chip.changed {
-  @apply border-sel-border text-ink;
+  @apply bg-tint-4 text-ink;
 }
 
 /* local / cloud badge: cloud dashed, local solid, so they differ without colour */
@@ -166,7 +177,7 @@ button.chip:hover {
 
 /* ----- segmented control ----- */
 .seg {
-  @apply inline-flex h-7.5 items-center gap-0.5 rounded-pill border border-hair bg-fill p-0.5;
+  @apply inline-flex h-7.5 items-center gap-0.5 rounded-pill bg-tint-1 p-0.5;
 }
 .seg .seg-label {
   @apply pr-1.5 pl-2 text-micro text-ink-3;
@@ -251,6 +262,10 @@ button.chip:hover {
 .mark.fall {
   @apply bg-fall;
 }
+/* gold: a gold document or fact that was found (gold only for gold-standard things) */
+.mark.gold {
+  @apply bg-gold;
+}
 .mark.amber-ring {
   @apply border-[1.5px] border-lost;
 }
@@ -263,13 +278,7 @@ button.chip:hover {
 
 /* ----- rise / fall callouts ----- */
 .risefall {
-  @apply border-l-2 border-hair-2 px-3 py-2;
-}
-.risefall.rise {
-  @apply border-rise bg-linear-to-r from-rise-wash to-transparent to-80%;
-}
-.risefall.fall {
-  @apply border-fall bg-linear-to-r from-fall-wash to-transparent to-80%;
+  @apply px-0 py-2;
 }
 .risefall .head {
   @apply text-label font-semibold;
@@ -284,12 +293,16 @@ button.chip:hover {
 /* ----- inputs: single-line fields are pills, like the buttons beside them ----- */
 .input,
 .select {
-  @apply h-7.5 rounded-pill border border-hair bg-fill px-3.5 text-row text-ink
+  @apply h-7.5 rounded-pill border border-transparent bg-tint-2 px-3.5 text-row text-ink
     transition-colors duration-160 ease-instrument;
 }
 .input:hover,
 .select:hover {
-  @apply border-hair-2;
+  @apply bg-tint-3;
+}
+.input:focus,
+.select:focus {
+  @apply bg-tint-4;
 }
 .input::placeholder {
   @apply text-ink-3;
@@ -318,11 +331,11 @@ textarea.input {
   @apply cursor-not-allowed opacity-42;
 }
 button.chip:disabled:hover {
-  @apply border-hair text-ink-2;
+  @apply bg-tint-1 text-ink-2;
 }
 .input:disabled:hover,
 .select:disabled:hover {
-  @apply border-hair;
+  @apply bg-tint-2;
 }
 .seg button:disabled:hover {
   @apply text-ink-3;
