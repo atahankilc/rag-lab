@@ -109,7 +109,7 @@ export function Runs() {
                 <h1 className="page-title">Runs</h1>
                 <button
                   type="button"
-                  className="pill"
+                  className="pill primary"
                   aria-pressed={queueing}
                   disabled={!canWrite}
                   title={canWrite ? undefined : LOCKED_HINT}

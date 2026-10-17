@@ -3,8 +3,16 @@
 .space-wrap {
   @apply absolute inset-0;
 }
+/* two stacked layers: three.js underneath (particles, shells, floor), crisp 2D marks on top */
+.space-gl,
 .space-canvas {
-  @apply block cursor-crosshair touch-none;
+  @apply absolute top-0 left-0 block;
+}
+.space-gl {
+  @apply pointer-events-none;
+}
+.space-canvas {
+  @apply cursor-crosshair touch-none;
 }
 .space-canvas.orbit {
   @apply cursor-grab;
@@ -32,7 +40,7 @@
 /* The controls: a label column and a control column, so many options still read as one aligned form.
    A hairline separates them from the numbers above; details (step switch, legend) sit under their control. */
 .space-controls {
-  @apply grid grid-cols-[64px_minmax(0,1fr)] items-center gap-x-3 gap-y-2.5 border-t border-hair pt-3.5;
+  @apply grid grid-cols-[64px_minmax(0,1fr)] items-center gap-x-3 gap-y-2.5 pt-5;
 }
 .ctl-label {
   @apply text-micro tracking-[0.02em] text-ink-3;
@@ -190,8 +198,10 @@
 /* ---------- bottom centre: view controls ---------- */
 
 .space-view {
-  @apply fixed bottom-(--edge) left-1/2 z-15 grid max-w-[calc(100vw-2*var(--corner-w)-4*var(--edge))]
-    justify-items-center gap-2;
+  /* just above the bottom bar, centred */
+  /* bottom centre, between the dock and the timeline */
+  @apply fixed bottom-(--edge) left-1/2 z-15 grid max-w-[calc(100vw-2*var(--timeline-w)-4*var(--edge))]
+    justify-items-center gap-2 veil;
   transform: translateX(-50%);
 }
 .space-view-row {
@@ -216,7 +226,7 @@
 }
 .nb-row,
 .served-row {
-  @apply grid w-full items-start gap-2.5 border-b border-row-divider px-0 py-[5px] text-left text-label;
+  @apply grid w-full items-start gap-2.5 px-0 py-[6px] text-left text-label;
 }
 .nb-row {
   @apply grid-cols-[18px_minmax(0,1fr)_auto];
@@ -260,7 +270,7 @@
   @apply grid;
 }
 .field-block {
-  @apply border-b border-row-divider;
+  @apply pb-1;
 }
 .field-block.is-hidden .field-head {
   @apply opacity-42;
@@ -285,7 +295,7 @@
     text-sweep-hi uppercase;
 }
 .field-edit {
-  @apply mb-2.5 grid gap-3.5 border-l border-hair-2 pt-1 pr-0 pb-4 pl-3;
+  @apply mb-2.5 grid gap-3.5 pt-1 pr-0 pb-4 pl-3;
 }
 .field-row {
   @apply grid justify-items-start gap-1.5;

@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router";
 import { useMetricDefs, useQuestionResults } from "../api/hooks";
 import type { MetricDef, QuestionResult, Verdict } from "../api/types";
 import { Centered, ErrorNote, Loading } from "../components/Loading";
@@ -7,7 +8,7 @@ import { Segmented } from "../components/Segmented";
 import { defFor, direction, formatDelta, formatValue } from "../lib/format";
 import { useMedia } from "../lib/useMedia";
 import { useVersion } from "../state/version";
-import { QuestionInspector } from "./QuestionInspector";
+import { QuestionDetail } from "./QuestionDetail";
 
 type VerdictFilter = "all" | Verdict;
 type SortKey = "id" | "latency" | "delta" | string; // string = a metric name
@@ -19,7 +20,24 @@ export function Questions() {
   const [verdict, setVerdict] = useState<VerdictFilter>("all");
   const [tags, setTags] = useState<Set<string>>(new Set());
   const [sort, setSort] = useState<{ key: SortKey; desc: boolean }>({ key: "id", desc: false });
-  const [selectedId, setSelectedId] = useState<number | null>(null);
+  // the open question lives in the URL (?q=qst_0007), so a link or the back button reopens it
+  const [params, setParams] = useSearchParams();
+  const openId = params.get("q");
+  const setOpenId = useCallback(
+    (id: string | null) =>
+      setParams(
+        (p) => {
+          const next = new URLSearchParams(p);
+          if (id) next.set("q", id);
+          else next.delete("q");
+          return next;
+        },
+        // the browser morphs the old layout into the new one (styles/pages/questions.css), so opening a
+        // question slides the list aside instead of jumping
+        { replace: true, viewTransition: true },
+      ),
+    [setParams],
+  );
 
   const xl = useMedia("(min-width: 1400px)");
   const lg = useMedia("(min-width: 1100px)");
@@ -39,7 +57,9 @@ export function Questions() {
       .filter((d) => d.grp !== "ops")
       .sort((a, b) => Number(b.is_primary) - Number(a.is_primary) || a.sort - b.sort || a.name.localeCompare(b.name));
   }, [rows, defs.data]);
-  const shownCols = md ? metricCols.slice(0, xl ? 8 : lg ? 5 : 3) : [];
+  const split = openId != null && md;
+  // with a question open, the list keeps only what tells rows apart: id, question, the primary score
+  const shownCols = !md ? [] : split ? metricCols.slice(0, 1) : metricCols.slice(0, xl ? 8 : lg ? 5 : 3);
 
   const tagCounts = useMemo(() => {
     const m = new Map<string, number>();
@@ -71,22 +91,34 @@ export function Questions() {
     });
   }, [rows, verdict, tags, sort, refMode]);
 
-  const selected = visible.find((r) => r.question_id === selectedId) ?? rows.find((r) => r.question_id === selectedId);
+  const selected = rows.find((r) => r.external_id === openId);
+  const selIndex = selected ? visible.findIndex((r) => r.question_id === selected.question_id) : -1;
+  const stepBy = useCallback(
+    (by: number) => {
+      const next = visible[Math.min(visible.length - 1, Math.max(0, selIndex + by))];
+      if (next) setOpenId(next.external_id);
+    },
+    [visible, selIndex, setOpenId],
+  );
 
-  // ↑ ↓ move through the visible rows while one is open
+  // ↑ ↓ move through the visible rows while one is open; Esc closes it
   useEffect(() => {
-    if (selectedId == null) return;
+    if (openId == null) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
       if ((e.target as HTMLElement).closest("input, textarea, select")) return;
+      if (e.key === "Escape" && !document.querySelector("dialog[open]")) setOpenId(null);
+      if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
       e.preventDefault();
-      const i = visible.findIndex((r) => r.question_id === selectedId);
-      const next = visible[Math.min(visible.length - 1, Math.max(0, i + (e.key === "ArrowDown" ? 1 : -1)))];
-      if (next) setSelectedId(next.question_id);
+      stepBy(e.key === "ArrowDown" ? 1 : -1);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [selectedId, visible]);
+  }, [openId, stepBy, setOpenId]);
+
+  // keep the open row in view when ↑ ↓ move past the edge of the list
+  useEffect(() => {
+    if (openId) document.getElementById(`q-${openId}`)?.scrollIntoView({ block: "nearest" });
+  }, [openId]);
 
   if (!current) return null;
   if (results.error)
@@ -118,9 +150,11 @@ export function Questions() {
     .filter((x): x is number => x != null)
     .sort((a, b) => a - b);
   const p50 = lat.length ? lat[Math.floor((lat.length - 1) / 2)] : null;
-  const cols = md
-    ? `44px minmax(220px, 1fr) ${shownCols.map(() => "72px").join(" ")} 28px 76px`
-    : "34px minmax(0, 1fr) 20px 48px";
+  const cols = !md
+    ? "34px minmax(0, 1fr) 20px 48px"
+    : split
+      ? `64px minmax(0, 1fr) ${shownCols.map(() => "52px").join(" ")} 20px`
+      : `72px minmax(220px, 1fr) ${shownCols.map(() => "72px").join(" ")} 28px 76px`;
 
   const toggleTag = (t: string) =>
     setTags((cur) => {
@@ -133,8 +167,8 @@ export function Questions() {
     setSort((cur) => (cur.key === key ? { key, desc: !cur.desc } : { key, desc: key !== "id" && key !== "latency" }));
 
   return (
-    <div className="page-full">
-      <div className="page-col">
+    <div className={`page-full q-page ${split ? "split" : ""}`}>
+      <div className="page-col q-list">
         <header className="page-head">
           <div className="page-head-row">
             <div>
@@ -214,7 +248,7 @@ export function Questions() {
               onSort={sortBy}
               title={`Change in ${primary.label.toLowerCase()} vs the reference`}
             />
-            {md ? (
+            {split ? null : md ? (
               <SortHead label="Latency" k="latency" sort={sort} onSort={sortBy} num />
             ) : (
               <SortHead label={primary.label.slice(0, 5)} k={primary.name} sort={sort} onSort={sortBy} num />
@@ -231,19 +265,26 @@ export function Questions() {
               cols={cols}
               metricCols={shownCols}
               md={md}
+              split={split}
               primary={primary}
               verdict={verdictOf(r)}
               refMetrics={refMetricsOf(r)}
               hasRef={!!reference}
-              selected={r.question_id === selectedId}
-              onOpen={() => setSelectedId(r.question_id)}
+              selected={r.external_id === openId}
+              onOpen={() => setOpenId(r.external_id)}
             />
           ))}
         </div>
       </div>
 
       {selected ? (
-        <QuestionInspector r={selected} onClose={() => setSelectedId(null)} verdict={verdictOf(selected)} />
+        <QuestionDetail
+          r={selected}
+          verdict={verdictOf(selected)}
+          position={{ index: Math.max(0, selIndex), total: visible.length }}
+          onClose={() => setOpenId(null)}
+          onStep={stepBy}
+        />
       ) : null}
     </div>
   );
@@ -311,6 +352,7 @@ function QuestionRow({
   cols,
   metricCols,
   md,
+  split,
   primary,
   verdict,
   refMetrics,
@@ -322,6 +364,7 @@ function QuestionRow({
   cols: string;
   metricCols: MetricDef[];
   md: boolean;
+  split: boolean;
   primary: MetricDef;
   verdict: Verdict | null;
   refMetrics: Record<string, number> | null;
@@ -336,6 +379,7 @@ function QuestionRow({
   return (
     <button
       type="button"
+      id={`q-${r.external_id}`}
       className="t-row q-row"
       style={{ ["--cols" as string]: cols }}
       aria-current={selected}
@@ -368,7 +412,7 @@ function QuestionRow({
         );
       })}
       <VerdictMark v={hasRef ? verdict : null} />
-      {md ? (
+      {split ? null : md ? (
         <span className="t-num">
           <span className="t-val">{formatValue(r.latency_total_ms, "ms").value}</span>
           <span className="t-meta">{formatValue(r.latency_total_ms, "ms").unit}</span>

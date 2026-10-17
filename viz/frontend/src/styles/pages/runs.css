@@ -139,7 +139,7 @@
 
 /* queue form: one block per step, in order */
 .qf-step {
-  @apply grid gap-1.5 border-b border-row-divider pt-2 pb-2.5;
+  @apply grid gap-1.5 pt-2 pb-2.5;
 }
 .qf-step.off .qf-step-name,
 .qf-step.off .qf-step-kind {

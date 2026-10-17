@@ -84,7 +84,7 @@ export function LoginDialog() {
         ) : null}
 
         <div className="login-actions">
-          <button type="submit" className="pill" disabled={busy || !username.trim() || !password}>
+          <button type="submit" className="pill primary" disabled={busy || !username.trim() || !password}>
             {busy ? "Logging in…" : "Log in"}
           </button>
           <button type="button" className="link" onClick={dismiss}>

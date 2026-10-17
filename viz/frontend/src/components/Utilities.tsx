@@ -2,6 +2,7 @@ import { LogIn, LogOut, Moon, Sun, UserRound } from "lucide-react";
 import { useRef, useState } from "react";
 import { shortDate } from "../lib/format";
 import { useAuth } from "../state/auth";
+import { type MotionPref, setMotionPref, useMotion } from "../state/motion";
 import { setThemePref, type ThemePref, useTheme } from "../state/theme";
 import { Popover } from "./Popover";
 import { Segmented } from "./Segmented";
@@ -12,9 +13,16 @@ const THEMES: { value: ThemePref; label: string }[] = [
   { value: "dark", label: "Dark" },
 ];
 
-/** Top right: light or dark, picked from a small popover. */
+const MOTIONS: { value: MotionPref; label: string }[] = [
+  { value: "on", label: "On" },
+  { value: "off", label: "Off" },
+  { value: "system", label: "System" },
+];
+
+/** Top right: light or dark, and motion on or off, picked from a small popover. */
 export function ThemeMenu() {
   const { pref, theme } = useTheme();
+  const motion = useMotion();
   const [open, setOpen] = useState(false);
   const anchor = useRef<HTMLButtonElement>(null);
   return (
@@ -34,6 +42,13 @@ export function ThemeMenu() {
         <p className="section-head">Theme</p>
         <Segmented ariaLabel="Theme" value={pref} options={THEMES} onChange={setThemePref} />
         <p className="label">{pref === "system" ? `Follows the system: ${theme} now.` : "Kept in this browser."}</p>
+        <p className="section-head mt-2">Motion</p>
+        <Segmented ariaLabel="Motion" value={motion.pref} options={MOTIONS} onChange={setMotionPref} />
+        <p className="label">
+          {motion.pref === "system"
+            ? `Follows the system: ${motion.motion === "on" ? "on" : "off, because it asks to reduce motion"}.`
+            : "Kept in this browser."}
+        </p>
       </Popover>
     </span>
   );

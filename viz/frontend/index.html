@@ -14,6 +14,13 @@
         var light = pref === "light" || (pref !== "dark" && matchMedia("(prefers-color-scheme: light)").matches);
         document.documentElement.dataset.theme = light ? "light" : "dark";
         document.documentElement.style.colorScheme = light ? "light" : "dark";
+        var motion = null;
+        try {
+          motion = localStorage.getItem("rag-lab.motion");
+        } catch (e) {}
+        // on unless set to off, or set to follow a system that asks to reduce motion (state/motion.ts)
+        var off = motion === "off" || (motion === "system" && matchMedia("(prefers-reduced-motion: reduce)").matches);
+        document.documentElement.dataset.motion = off ? "off" : "on";
       })();
     </script>
     <title>RAG Lab</title>
